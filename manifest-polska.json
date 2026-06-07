@@ -1,0 +1,26 @@
+{
+  "name": "Atrakcje Polski",
+  "short_name": "Polska",
+  "description": "Osobista lista atrakcji Polski – zamki, góry, jaskinie, parki i więcej.",
+  "start_url": "/atrakcje-polska/polska-atrakcje.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1b2a",
+  "theme_color": "#0d1b2a",
+  "lang": "pl",
+  "icons": [
+    {
+      "src": "icon-polska-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-polska-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["travel", "lifestyle"]
+}

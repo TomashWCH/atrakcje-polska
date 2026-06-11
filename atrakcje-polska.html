@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>Atrakcje Polski</title>
+<link rel="manifest" href="manifest-polska.json">
+<meta name="theme-color" content="#1e2d40">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Atrakcje Polski">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Odkryj Polskę – zamki, szczyty, muzea, parki narodowe i setki innych atrakcji.">
+<link rel="apple-touch-icon" href="icon-polska-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-polska-192.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1e2d40;--paper:#f5edd6;--parchment:#ede5c8;--accent:#e8753a;--moss:#4a6741;--sky:#4a7fa5;--muted:#7a8a99;--checked-bg:#eaf5ea;--tab-h:52px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:'Lato',sans-serif;min-height:100vh;padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom));}
+header{background:var(--ink);color:var(--paper);padding:0;text-align:center;position:relative;overflow:hidden;}
+.header-bg{position:absolute;inset:0;width:100%;height:100%;}
+.header-content{position:relative;z-index:1;padding:1.6rem 1.5rem 1.2rem;}
+h1{font-family:'Playfair Display',serif;font-size:clamp(1.5rem,5vw,2.6rem);font-weight:900;}
+h1 span{color:var(--accent);}
+.subtitle{font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(245,237,214,.45);margin-top:.25rem;font-weight:300;}
+.progress-bar{height:3px;background:rgba(255,255,255,.12);}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--moss),var(--accent));transition:width .4s ease;}
+.tab-bar{position:fixed;bottom:0;left:0;right:0;height:calc(var(--tab-h) + env(safe-area-inset-bottom));background:var(--ink);display:flex;z-index:50;border-top:1px solid rgba(255,255,255,.1);}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding-bottom:env(safe-area-inset-bottom);cursor:pointer;border:none;background:transparent;color:rgba(245,237,214,.4);font-family:'Lato',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;transition:color .2s;position:relative;}
+.tab-btn.active{color:var(--accent);}
+.tab-icon{font-size:1.2rem;line-height:1;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+.controls{display:flex;flex-direction:column;gap:.3rem;padding:.5rem .8rem;background:var(--parchment);border-bottom:1px solid rgba(0,0,0,.08);position:sticky;top:0;z-index:20;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.controls-row{display:flex;flex-wrap:wrap;gap:.3rem;align-items:center;}
+.stats-line{font-family:'Playfair Display',serif;font-size:.9rem;color:var(--muted);}
+.stats-line strong{color:var(--moss);font-size:1.05rem;}
+.region-chips{display:flex;gap:.3rem;overflow-x:auto;padding-bottom:.1rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.region-chips::-webkit-scrollbar{display:none;}
+.rchip{font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.28rem .65rem;border:1.5px solid rgba(0,0,0,.2);background:transparent;color:var(--muted);cursor:pointer;border-radius:20px;transition:all .15s;white-space:nowrap;font-family:'Lato',sans-serif;}
+.rchip.active{background:var(--ink);border-color:var(--ink);color:var(--paper);}
+select,input[type=text]{font-family:'Lato',sans-serif;font-size:.78rem;color:var(--ink);background:var(--paper);border:1.5px solid rgba(0,0,0,.2);border-radius:3px;padding:.38rem .6rem;}
+select:focus,input:focus{outline:none;border-color:var(--accent);}
+#search-input{flex:1;min-width:140px;}
+button{font-family:'Lato',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.38rem .85rem;border:1.5px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer;transition:all .18s;border-radius:2px;}
+button:hover{background:var(--ink);color:var(--paper);}
+button.active{background:var(--ink);color:var(--paper);}
+button.danger{border-color:#c0392b;color:#c0392b;}
+button.danger:hover{background:#c0392b;color:white;}
+.category-section{margin:0;}
+.category-header{display:flex;align-items:center;gap:.6rem;padding:.8rem 1.1rem .35rem;cursor:pointer;user-select:none;}
+.category-header h2{font-family:'Playfair Display',serif;font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);flex:1;}
+.cat-count{font-size:.7rem;color:var(--muted);font-weight:300;}
+.cat-toggle{font-size:.7rem;color:var(--muted);transition:transform .2s;}
+.category-section.collapsed .cat-toggle{transform:rotate(-90deg);}
+.category-section.collapsed .items-list{display:none!important;}
+.items-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:0;padding:0 .7rem .7rem;}
+.item{display:flex;align-items:flex-start;gap:.55rem;padding:.55rem .65rem;cursor:default;border-radius:4px;transition:background .15s;user-select:none;}
+.item:hover{background:rgba(0,0,0,.04);}
+.item.checked{background:var(--checked-bg);}
+.item.checked .item-name{text-decoration:line-through;color:var(--moss);opacity:.75;}
+.item.checked .item-short{opacity:.5;}
+.checkbox{width:16px;height:16px;min-width:16px;border:2px solid rgba(0,0,0,.22);border-radius:3px;display:flex;align-items:center;justify-content:center;margin-top:2px;transition:all .15s;font-size:.62rem;color:white;background:transparent;flex-shrink:0;cursor:pointer;}
+.item.checked .checkbox{background:var(--moss);border-color:var(--moss);}
+.item-idx{font-size:.6rem;font-weight:700;color:var(--muted);min-width:20px;text-align:right;margin-top:3px;flex-shrink:0;}
+.item-body{flex:1;min-width:0;}
+.item-name{font-weight:700;font-size:.83rem;color:var(--ink);line-height:1.3;cursor:pointer;}
+.item-short{font-size:.68rem;color:var(--muted);font-weight:300;margin-top:.08rem;line-height:1.35;}
+.item-meta{display:flex;gap:.4rem;margin-top:.2rem;flex-wrap:wrap;align-items:center;}
+.badge{font-size:.58rem;font-weight:700;letter-spacing:.06em;padding:.12rem .38rem;border-radius:2px;text-transform:uppercase;}
+.badge-woj{background:rgba(232,117,58,.1);color:#a04010;}
+.badge-dist{background:rgba(74,127,165,.12);color:var(--sky);}
+.badge-kgp{background:rgba(232,117,58,.2);color:#7a2a00;border:1px solid rgba(232,117,58,.3);}
+.badge-kids{background:rgba(74,127,165,.12);color:#2a5a7a;}
+.info-btn{font-size:.58rem;font-weight:700;letter-spacing:.06em;padding:.12rem .42rem;border-radius:2px;background:rgba(232,117,58,.13);color:#8b3500;border:none;cursor:pointer;white-space:nowrap;transition:background .15s;font-family:'Lato',sans-serif;text-transform:uppercase;}
+.info-btn:hover{background:rgba(232,117,58,.3);}
+.add-to-plan-btn{font-size:.58rem;font-weight:700;letter-spacing:.06em;padding:.12rem .42rem;border-radius:2px;background:rgba(74,103,65,.1);color:var(--moss);border:1.5px solid rgba(74,103,65,.25);cursor:pointer;transition:all .15s;white-space:nowrap;font-family:'Lato',sans-serif;text-transform:uppercase;}
+.add-to-plan-btn:hover,.add-to-plan-btn.in-plan{background:var(--moss);color:white;border-color:var(--moss);}
+.item-stars{font-size:.75rem;color:#f0b429;margin-top:.08rem;letter-spacing:1px;}
+.item-note-badge{font-size:.65rem;color:var(--moss);margin-top:.08rem;}
+.divider{height:1px;background:rgba(0,0,0,.05);margin:0 1.1rem;}
+.hidden{display:none!important;}
+.no-results{padding:3rem 1rem;text-align:center;color:var(--muted);font-style:italic;}
+.modal-overlay{position:fixed;inset:0;background:rgba(10,15,25,.72);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-wrapper{position:relative;width:100%;max-width:540px;}
+.modal{background:var(--paper);width:100%;max-height:88vh;border-radius:14px 14px 0 0;overflow:hidden;display:flex;flex-direction:column;transform:translateY(40px);transition:transform .28s ease;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-img{width:100%;height:210px;object-fit:cover;flex-shrink:0;}
+.modal-img-placeholder{width:100%;height:200px;background:var(--parchment);display:flex;align-items:center;justify-content:center;font-size:3.5rem;flex-shrink:0;}
+.modal-body{padding:1.2rem 1.4rem 1.8rem;overflow-y:auto;}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--ink);line-height:1.2;}
+.modal-badges{display:flex;gap:.45rem;margin:.55rem 0 .85rem;flex-wrap:wrap;}
+.modal-badge{font-size:.66rem;font-weight:700;padding:.18rem .52rem;border-radius:3px;letter-spacing:.07em;text-transform:uppercase;}
+.modal-btn-row{display:flex;gap:.5rem;margin:.4rem 0 .7rem;flex-wrap:wrap;}
+.modal-nav-btn{display:inline-block;padding:.48rem 1.1rem;background:var(--moss);color:white;text-decoration:none;border-radius:4px;font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.modal-desc{font-size:.87rem;line-height:1.72;color:var(--ink);}
+.modal-close{position:absolute;top:.75rem;right:.85rem;width:2rem;height:2rem;border-radius:50%;background:rgba(0,0,0,.4);color:white;border:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;z-index:201;}
+.modal-user-section{margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(0,0,0,.1);}
+.modal-section-label{font-size:.63rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:.32rem;}
+.star-row{display:flex;gap:4px;}
+.star{font-size:1.5rem;color:#ccc;cursor:pointer;transition:color .12s;line-height:1;user-select:none;}
+.star.active{color:#f0b429;}
+.modal-input{width:100%;padding:.42rem .65rem;border:1.5px solid rgba(0,0,0,.15);background:var(--parchment);font-family:'Lato',sans-serif;font-size:.82rem;color:var(--ink);border-radius:2px;margin-top:.2rem;}
+.modal-textarea{min-height:65px;resize:vertical;line-height:1.5;}
+.modal-input:focus{outline:none;border-color:var(--accent);}
+#map-panel{padding:.5rem;}
+#leaflet-map{height:calc(100vh - 190px);min-height:350px;border-radius:8px;overflow:hidden;}
+.map-ctrl-btn{font-size:.68rem;padding:.3rem .7rem;}
+.map-ctrl-btn.active{background:var(--ink);color:var(--paper);}
+#planner-panel{padding:.8rem 1rem;}
+.planner-empty{color:var(--muted);font-size:.87rem;font-style:italic;padding:1rem 0;}
+.planner-route-item{display:flex;align-items:center;gap:.55rem;padding:.48rem .6rem;background:var(--parchment);border:1px solid rgba(0,0,0,.08);border-radius:3px;margin-bottom:.35rem;font-size:.8rem;}
+.planner-route-step{font-size:.65rem;font-weight:900;color:var(--moss);min-width:22px;flex-shrink:0;}
+.planner-route-name{flex:1;font-weight:700;}
+.planner-route-dist{font-size:.68rem;color:var(--muted);flex-shrink:0;}
+.planner-remove-btn{font-size:.7rem;color:#c0392b;cursor:pointer;border:none;background:none;padding:0 .3rem;flex-shrink:0;}
+.planner-summary{background:var(--parchment);border:1px solid rgba(0,0,0,.1);padding:.75rem 1rem;border-radius:3px;margin:.7rem 0;display:flex;gap:1.5rem;flex-wrap:wrap;}
+.planner-sum-item{font-size:.78rem;color:var(--ink);}
+.planner-sum-item strong{color:var(--moss);font-size:1rem;font-family:'Playfair Display',serif;}
+.planner-actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.7rem;}
+.planner-gmaps-btn{font-family:'Lato',sans-serif;font-size:.76rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.48rem 1.1rem;background:var(--moss);color:white;border:none;cursor:pointer;border-radius:3px;text-decoration:none;display:inline-block;}
+.planner-count-badge{display:inline-block;background:var(--accent);color:white;border-radius:50%;width:15px;height:15px;font-size:.58rem;font-weight:900;text-align:center;line-height:15px;position:absolute;top:6px;right:14px;}
+#stats-panel{padding:.8rem 1rem 2rem;}
+.stats-title{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:var(--ink);margin-bottom:1rem;}
+.stats-section{margin-bottom:1.4rem;}
+.stats-section-title{font-size:.63rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.65rem;}
+.stats-overall{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:.7rem;}
+.stat-card{background:var(--parchment);border:1px solid rgba(0,0,0,.08);padding:.7rem .9rem;text-align:center;border-radius:3px;}
+.stat-card-num{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:900;color:var(--moss);line-height:1;}
+.stat-card-label{font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:.25rem;}
+.cat-bar-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;}
+.cat-bar-icon{font-size:.95rem;width:22px;text-align:center;flex-shrink:0;}
+.cat-bar-name{font-size:.72rem;color:var(--ink);width:155px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cat-bar-track{flex:1;height:9px;background:rgba(0,0,0,.07);border-radius:5px;overflow:hidden;}
+.cat-bar-fill{height:100%;border-radius:5px;transition:width .6s ease;}
+.cat-bar-count{font-size:.7rem;color:var(--muted);width:36px;text-align:right;flex-shrink:0;}
+.badges-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:.65rem;}
+.badge-card{padding:.75rem;background:var(--parchment);border:1.5px solid rgba(0,0,0,.1);border-radius:3px;text-align:center;}
+.badge-card.earned{border-color:var(--accent);background:rgba(232,117,58,.06);}
+.badge-card.locked{opacity:.4;filter:grayscale(1);}
+.badge-icon{font-size:1.7rem;margin-bottom:.25rem;}
+.badge-name{font-size:.7rem;font-weight:700;color:var(--ink);margin-bottom:.12rem;}
+.badge-desc{font-size:.6rem;color:var(--muted);line-height:1.3;}
+body.dark{--paper:#151f2b;--parchment:#1c2a38;--ink:#f5edd6;--muted:#8a9aaa;--checked-bg:#1a2e1a;}
+body.dark .controls{background:#1c2a38;}
+body.dark select,body.dark input,body.dark textarea{background:#1c2a38;color:#f5edd6;border-color:rgba(255,255,255,.2);}
+body.dark .rchip{color:rgba(245,237,214,.5);border-color:rgba(255,255,255,.2);}
+body.dark .rchip.active{background:var(--accent);border-color:var(--accent);color:white;}
+body.dark button{border-color:rgba(255,255,255,.3);color:#f5edd6;}
+body.dark button:hover,body.dark button.active{background:rgba(255,255,255,.15);}
+body.dark .item:hover{background:rgba(255,255,255,.04);}
+body.dark .modal{background:#1c2a38;}
+body.dark .modal-title,body.dark .modal-desc{color:#f5edd6;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,.2);border-radius:2px;}
+footer{text-align:center;padding:1.2rem;font-size:.7rem;color:var(--muted);border-top:1px solid rgba(0,0,0,.07);margin-top:.5rem;}
+@media(min-width:600px){.modal-overlay{align-items:center;}.modal{border-radius:14px;max-height:82vh;}.modal-img,.modal-img-placeholder{height:250px;}}
+@media(max-width:400px){.items-list{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<header>
+<svg class="header-bg" viewBox="0 0 400 110" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="110" fill="#1e2d40"/>
+  <circle cx="200" cy="-5" r="75" fill="#e8753a" opacity="0.22"/>
+  <circle cx="200" cy="8" r="50" fill="#e8753a" opacity="0.15"/>
+  <polygon points="80,110 155,32 230,110" fill="#253545"/>
+  <polygon points="140,110 210,16 280,110" fill="#1e2d40"/>
+  <polygon points="200,110 265,36 330,110" fill="#253545"/>
+  <polygon points="245,110 308,52 370,110" fill="#1a2535"/>
+  <polygon points="28,110 98,56 168,110" fill="#1a2535"/>
+  <polygon points="155,32 174,60 136,60" fill="#f5edd6" opacity="0.72"/>
+  <polygon points="210,16 228,48 192,48" fill="#f5edd6" opacity="0.78"/>
+  <polygon points="265,36 281,58 249,58" fill="#f5edd6" opacity="0.62"/>
+</svg>
+<div class="header-content">
+  <h1>Atrakcje <span>Polski</span></h1>
+  <div class="subtitle" id="header-subtitle">odkryj kraj</div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+</header>
+
+<div id="tab-lista" class="tab-panel active">
+<div class="controls">
+  <div class="controls-row" style="justify-content:space-between;">
+    <div class="stats-line" id="stats-line">Ładowanie…</div>
+    <div style="display:flex;gap:.3rem;flex-wrap:wrap;">
+      <button id="filter-all" class="active" onclick="setFilter('all',this)">Wszystkie</button>
+      <button id="filter-todo" onclick="setFilter('todo',this)">Do zrobienia</button>
+      <button id="filter-done" onclick="setFilter('done',this)">Zaliczone</button>
+    </div>
+  </div>
+  <div class="region-chips">
+    <button class="rchip active" data-region="all" onclick="setRegion('all',this)">🇵🇱 Cała Polska</button>
+    <button class="rchip" data-region="poludnie" onclick="setRegion('poludnie',this)">🏔️ Południe</button>
+    <button class="rchip" data-region="zachod" onclick="setRegion('zachod',this)">🌿 Zachód</button>
+    <button class="rchip" data-region="centrum" onclick="setRegion('centrum',this)">🏛️ Centrum</button>
+    <button class="rchip" data-region="wschod" onclick="setRegion('wschod',this)">🌻 Wschód</button>
+    <button class="rchip" data-region="polnoc" onclick="setRegion('polnoc',this)">⚓ Północ</button>
+  </div>
+  <div class="controls-row">
+    <select id="woj-filter" onchange="setWoj(this.value)">
+      <option value="">Wszystkie województwa</option>
+      <option value="dolnoslaskie">Dolnośląskie</option>
+      <option value="kujawsko-pomorskie">Kujawsko-Pomorskie</option>
+      <option value="lubelskie">Lubelskie</option>
+      <option value="lubuskie">Lubuskie</option>
+      <option value="lodzkie">Łódzkie</option>
+      <option value="malopolskie">Małopolskie</option>
+      <option value="mazowieckie">Mazowieckie</option>
+      <option value="opolskie">Opolskie</option>
+      <option value="podkarpackie">Podkarpackie</option>
+      <option value="podlaskie">Podlaskie</option>
+      <option value="pomorskie">Pomorskie</option>
+      <option value="slaskie">Śląskie</option>
+      <option value="swietokrzyskie">Świętokrzyskie</option>
+      <option value="warminsko-mazurskie">Warmińsko-Mazurskie</option>
+      <option value="wielkopolskie">Wielkopolskie</option>
+      <option value="zachodniopomorskie">Zachodniopomorskie</option>
+    </select>
+    <select id="sort-filter" onchange="setSort(this.value)">
+      <option value="default">Kolejność domyślna</option>
+      <option value="az">A–Z</option>
+      <option value="dist-asc">Odległość ↑</option>
+      <option value="dist-desc">Odległość ↓</option>
+      <option value="rating">Ocena ↓</option>
+    </select>
+    <button onclick="toggleKids(this)" id="kids-btn">👶 Rodzinne</button>
+  </div>
+  <div class="controls-row">
+    <input type="text" id="search-input" placeholder="🔍 szukaj atrakcji…" oninput="setSearch(this.value)">
+    <button onclick="toggleDark()">🌙</button>
+    <button class="danger" onclick="confirmReset()">↺</button>
+  </div>
+</div>
+<div id="app"></div>
+<footer>Atrakcje Polski · dane lokalne w przeglądarce · start: Wrocław</footer>
+</div>
+
+<div id="tab-mapa" class="tab-panel">
+<div class="controls">
+  <div class="controls-row" style="justify-content:space-between;">
+    <span class="stats-line">Mapa atrakcji</span>
+    <div style="display:flex;gap:.3rem;">
+      <button class="map-ctrl-btn active" onclick="mapFilter('all',this)">Wszystkie</button>
+      <button class="map-ctrl-btn" onclick="mapFilter('done',this)">Zaliczone</button>
+      <button class="map-ctrl-btn" onclick="mapFilter('todo',this)">Do zrobienia</button>
+    </div>
+  </div>
+</div>
+<div id="map-panel">
+  <div id="leaflet-map"></div>
+  <div id="map-legend" style="display:flex;flex-wrap:wrap;gap:.35rem;padding:.55rem .3rem;font-size:.67rem;"></div>
+</div>
+</div>
+
+<div id="tab-planer" class="tab-panel">
+<div class="controls">
+  <div class="controls-row" style="justify-content:space-between;">
+    <span class="stats-line">Planer wycieczki</span>
+    <span style="font-size:.72rem;color:var(--muted);">start/meta: Wrocław</span>
+  </div>
+</div>
+<div id="planner-panel">
+  <p style="font-size:.78rem;color:var(--muted);margin-bottom:.8rem;line-height:1.55;">Dodaj atrakcje przez „+ Plan" na liście — algorytm TSP ułoży optymalną trasę (maks. 8 miejsc).</p>
+  <div id="planner-content"></div>
+</div>
+</div>
+
+<div id="tab-statystyki" class="tab-panel">
+<div id="stats-panel">
+  <div class="stats-title">Twoje statystyki</div>
+  <div id="stats-content"></div>
+</div>
+</div>
+
+<nav class="tab-bar">
+  <button class="tab-btn active" id="tbtn-lista" onclick="switchTab('lista')"><span class="tab-icon">📋</span>Lista</button>
+  <button class="tab-btn" id="tbtn-mapa" onclick="switchTab('mapa')"><span class="tab-icon">🗺️</span>Mapa</button>
+  <button class="tab-btn" id="tbtn-planer" onclick="switchTab('planer')"><span class="tab-icon">🧭</span>Planer<span class="planner-count-badge" id="planner-badge" style="display:none;">0</span></button>
+  <button class="tab-btn" id="tbtn-statystyki" onclick="switchTab('statystyki')"><span class="tab-icon">📊</span>Stats</button>
+</nav>
+
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOverlay(event)">
+<div class="modal-wrapper">
+  <button class="modal-close" onclick="closeModal()">✕</button>
+  <div class="modal">
+    <div id="modal-img-wrap"></div>
+    <div class="modal-body">
+      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-badges" id="modal-badges"></div>
+      <div class="modal-btn-row" id="modal-btn-row"></div>
+      <div class="modal-desc" id="modal-desc"></div>
+      <div class="modal-user-section">
+        <div class="modal-section-label">Twoja ocena</div>
+        <div class="star-row" id="modal-stars"></div>
+        <div class="modal-section-label" style="margin-top:.7rem;">Data wizyty</div>
+        <input type="date" class="modal-input" id="modal-date" onchange="saveUD()">
+        <div class="modal-section-label" style="margin-top:.7rem;">Notatka</div>
+        <textarea class="modal-input modal-textarea" id="modal-note" placeholder="Własne wspomnienia…" onchange="saveUD()"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ═══════════════════════════════════════════
+// DANE — placeholder (wypełniane dalej)
+// ═══════════════════════════════════════════
+const DATA = [
+  { cat:"👑 Korona Gór Polski PTTK", color:"#e8753a", items:[
+    {name:"Rysy (2499 m)",woj:"malopolskie",region:"poludnie",short:"Najwyższy szczyt Polski, Tatry Wysokie",km:360,lat:49.1797,lng:20.0881,kgp:true,desc:"Rysy to najwyższy szczyt Polski na polsko-słowackiej granicy. Wejście od Morskiego Oka z łańcuchami i eksponowanymi graniami zajmuje 5–7 h. Widok obejmuje całe Tatry i przy dobrej pogodzie Beskidy. Marzenie każdego polskiego turysty górskiego."},
+    {name:"Babia Góra (1725 m)",woj:"malopolskie",region:"poludnie",short:"Królowa Beskidów, Babiogórski PN",km:290,lat:49.5731,lng:19.5292,kgp:true,desc:"Babia Góra zwana Królową Beskidów słynie z kapryśnej pogody — mgły i burze pojawiają się nagle. Wejście z Przełęczy Krowiarki przez Perć Akademicką ok. 3–4 h. Ze szczytu widać Tatry i Małą Fatrę."},
+    {name:"Śnieżka (1603 m)",woj:"dolnoslaskie",region:"zachod",short:"Najwyższy szczyt Sudetów, Karkonosze",km:150,lat:50.7361,lng:15.7394,kgp:true,desc:"Śnieżka to najwyższy szczyt Karkonoszy i całych Sudetów. Charakterystyczna stacja meteorologiczna. Wejście z Karpacza ok. 3 h. Przy dobrej pogodzie widać Tatry i góry Czech."},
+    {name:"Śnieżnik (1425 m)",woj:"dolnoslaskie",region:"zachod",short:"Masyw Śnieżnika, panorama 360°, trzy morza",km:155,lat:50.2039,lng:16.8472,kgp:true,desc:"Śnieżnik to jedyny wierzchołek powyżej górnej granicy lasu w Sudetach Wschodnich — panorama 360°. Z jego stoków wody spływają do Bałtyku, Morza Czarnego i Północnego. W pobliżu Jaskinia Niedźwiedzia."},
+    {name:"Tarnica (1346 m)",woj:"podkarpackie",region:"wschod",short:"Najwyższy szczyt polskich Bieszczad",km:380,lat:49.0833,lng:22.7167,kgp:true,desc:"Tarnica z Wołosatego szlakiem żółtym ok. 3 h. Na szczycie metalowy krzyż, panorama połonin bieszczadzkich. Symbol dzikości Bieszczad i bezkresnych łąk górskich bez drzew."},
+    {name:"Turbacz (1310 m)",woj:"malopolskie",region:"poludnie",short:"Najwyższy szczyt Gorców, schronisko PTTK",km:310,lat:49.5589,lng:20.1117,kgp:true,desc:"Turbacz z pięknie położonym schroniskiem PTTK. Panorama Tatr i Beskidów. Gorce to park narodowy z rozległymi halami i buczynami."},
+    {name:"Radziejowa (1266 m)",woj:"malopolskie",region:"poludnie",short:"Najwyższy szczyt Beskidu Sądeckiego, wieża",km:320,lat:49.4667,lng:20.6167,kgp:true,desc:"Radziejowa z wieżą widokową i panoramą Tatr, Pienin i Beskidu Niskiego. Wejście z Rytra ok. 2–3 h. Lasy bukowe jesienią robią ogromne wrażenie."},
+    {name:"Skrzyczne (1257 m)",woj:"slaskie",region:"poludnie",short:"Najwyższy szczyt Beskidu Śląskiego, Szczyrk",km:265,lat:49.7083,lng:19.0167,kgp:true,desc:"Skrzyczne to najwyższy szczyt Beskidu Śląskiego, popularne wejście z Szczyrku. Na szczycie wieża telewizyjna. Widoki na Tatry i Beskid Żywiecki."},
+    {name:"Mogielica (1171 m)",woj:"malopolskie",region:"poludnie",short:"Najwyższy szczyt Beskidu Wyspowego, wieża",km:295,lat:49.7167,lng:20.1667,kgp:true,desc:"Mogielica z wieżą widokową i panoramą Tatr. Beskid Wyspowy z izolowanymi wierzchołkami wystającymi z kotlin jak wyspy."},
+    {name:"Wysoka Kopa (1126 m)",woj:"dolnoslaskie",region:"zachod",short:"Najwyższy szczyt Gór Izerskich, torfowiska",km:165,lat:50.8167,lng:15.4167,kgp:true,desc:"Wysoka Kopa na polsko-czeskiej granicy. Góry Izerskie słyną z rozległych torfowisk — rezerwatów przyrody o unikalnym charakterze."},
+    {name:"Rudawiec (1106 m)",woj:"dolnoslaskie",region:"zachod",short:"Najwyższy szczyt Gór Bialskich",km:145,lat:50.3500,lng:16.6167,kgp:true,desc:"Rudawiec z rozległymi łąkami subalpejskimi i spokojem. Wejście z Lądka-Zdroju. Raj dla szukających ciszy w górach."},
+    {name:"Orlica (1084 m)",woj:"dolnoslaskie",region:"zachod",short:"Najwyższy szczyt Gór Orlickich, granica PL-CZ",km:175,lat:50.3167,lng:16.3667,kgp:true,desc:"Orlica na granicy polsko-czeskiej. Masyw mało odwiedzany — atrakcyjny dla szukających spokoju. Panoramy Kotliny Kłodzkiej."},
+    {name:"Wysoka (1050 m)",woj:"malopolskie",region:"poludnie",short:"Najwyższy szczyt Pienin, panorama Tatr",km:305,lat:49.4167,lng:20.4667,kgp:true,desc:"Wysoka to najwyższy szczyt Pienin z panoramą na Tatry i przełom Dunajca. Mniej popularna niż Trzy Korony — spokojniejsza i piękna."},
+    {name:"Wielka Sowa (1015 m)",woj:"dolnoslaskie",region:"zachod",short:"Najwyższy szczyt Gór Sowich, wieża widokowa",km:85,lat:50.6961,lng:16.4897,kgp:true,desc:"Wielka Sowa z metalową wieżą widokową. Panorama obejmuje Karkonosze i przy dobrej pogodzie Wrocław. W pobliżu podziemia projektu Riese z II WŚ."},
+    {name:"Lackowa (997 m)",woj:"malopolskie",region:"poludnie",short:"Najwyższy szczyt Beskidu Niskiego, dzikość",km:345,lat:49.5000,lng:21.1833,kgp:true,desc:"Lackowa zwana Beskidzkim Giewontem. Beskid Niski to dziki obszar lasów i łemkowskich wsi. Niezwykła pustkowie i unikalna kultura."},
+    {name:"Kowadło (989 m)",woj:"dolnoslaskie",region:"zachod",short:"Najwyższy szczyt Gór Złotych, skałki",km:130,lat:50.3167,lng:16.8333,kgp:true,desc:"Kowadło z malowniczymi skałkami na szczycie. W pobliżu Kopalnia Złota w Złotym Stoku i Jaskinia Radochowska."},
+    {name:"Jagodna (977 m)",woj:"dolnoslaskie",region:"zachod",short:"Najwyższy szczyt Gór Bystrzyckich",km:160,lat:50.3500,lng:16.6667,kgp:true,desc:"Jagodna z widokami na Kotlinę Kłodzką i Góry Stołowe. Szlak z Polanicy-Zdrój lub Dusznik-Zdrój."},
+    {name:"Skalnik (945 m)",woj:"dolnoslaskie",region:"zachod",short:"Rudawy Janowickie, Kolorowe Jeziorka",km:125,lat:50.8333,lng:15.9667,kgp:true,desc:"Skalnik z widokiem na Karkonosze. Tuż obok Kolorowe Jeziorka — turkusowe zbiorniki po kopalni uranu."},
+    {name:"Waligóra (936 m)",woj:"dolnoslaskie",region:"zachod",short:"Najwyższy szczyt Gór Kamiennych, wieża",km:95,lat:50.6667,lng:16.2833,kgp:true,desc:"Waligóra z wieżą widokową i panoramą Sudetów Środkowych. Niedaleko od Wałbrzycha, łatwo dostępna."},
+    {name:"Czupel (933 m)",woj:"slaskie",region:"poludnie",short:"Najwyższy szczyt Beskidu Małego",km:270,lat:49.7500,lng:19.2167,kgp:true,desc:"Czupel — łatwy dostęp z Andrychowa. Widoki na Tatry i Beskidy. Spokojny, mało tłumny region."},
+    {name:"Lubomir (904 m)",woj:"malopolskie",region:"poludnie",short:"Beskid Makowski, obserwatorium astronomiczne",km:280,lat:49.8667,lng:19.9833,kgp:true,desc:"Lubomir z obserwatorium astronomicznym. Szlak z Harbutowic lub Myślenic. Widoki przy dobrej pogodzie sięgają Tatr."},
+    {name:"Biskupia Kopa (889 m)",woj:"opolskie",region:"poludnie",short:"Najwyższy szczyt Gór Opawskich, wieża (CZ)",km:205,lat:50.1167,lng:17.7333,kgp:true,desc:"Biskupia Kopa na granicy polsko-czeskiej. Wieża widokowa po stronie czeskiej. Malownicze lasy bukowe."},
+    {name:"Szczeliniec Wielki (919 m)",woj:"dolnoslaskie",region:"zachod",short:"Góry Stołowe, skalny labirynt, schronisko",km:115,lat:50.4833,lng:16.3333,kgp:true,desc:"Szczeliniec Wielki z schroniskiem i tarasem widokowym. Płaski wierzchołek z labiryntem piaskowcowych skał. Jeden z najbardziej spektakularnych punktów widokowych w Polsce."},
+    {name:"Kłodzka Góra (757 m)",woj:"dolnoslaskie",region:"zachod",short:"Najwyższy szczyt Gór Bardzkich, wieża",km:105,lat:50.4833,lng:16.7500,kgp:true,desc:"Kłodzka Góra z nową wieżą widokową. Panorama Kotliny Kłodzkiej i Gór Sowich."},
+    {name:"Skopiec (724 m)",woj:"dolnoslaskie",region:"zachod",short:"Góry Kaczawskie, agaty i ametysty",km:100,lat:51.1167,lng:16.0000,kgp:true,desc:"Skopiec z drewnianą wieżą widokową. Góry Kaczawskie to geologiczny raj — można znaleźć agaty, ametysty i kamienie półszlachetne."},
+    {name:"Ślęża (718 m)",woj:"dolnoslaskie",region:"zachod",short:"Święta góra Słowian, romański kościółek",km:55,lat:50.8672,lng:16.7058,kgp:true,desc:"Ślęża — izolowany masyw przez wieki uważany za świętą górę Słowian. Na szczycie romański kościółek z XII w. Panorama 360° na Nizinę Śląską i Sudety."},
+    {name:"Łysica (614 m)",woj:"swietokrzyskie",region:"centrum",short:"Najwyższy szczyt Gór Świętokrzyskich",km:240,lat:50.8833,lng:20.9167,kgp:true,desc:"Łysica — najwyższy szczyt Wyżyny Małopolskiej. Gołoborze (pole kamienne) to unikalny element. Obok rezerwat Świętego Krzyża z klasztorem na Łyścu."},
+  ]},
+  { cat:"🗻 Korona Sudetów PTTK", color:"#4a7fa5", items:[
+    {name:"Śnieżka (1603 m)",woj:"dolnoslaskie",region:"zachod",short:"Karkonosze, stacja meteorologiczna",km:150,lat:50.7361,lng:15.7394,desc:"Najwyższy szczyt Sudetów. Stacja meteorologiczna w kształcie spodka latającego talerza. Wejście z Karpacza ok. 3 h."},
+    {name:"Śnieżnik (1425 m)",woj:"dolnoslaskie",region:"zachod",short:"Masyw Śnieżnika, panorama 360°",km:155,lat:50.2039,lng:16.8472,desc:"Najwyższy szczyt Sudetów Wschodnich z panoramą 360°. W pobliżu Jaskinia Niedźwiedzia."},
+    {name:"Wysoka Kopa (1126 m)",woj:"dolnoslaskie",region:"zachod",short:"Góry Izerskie, torfowiska",km:165,lat:50.8167,lng:15.4167,desc:"Najwyższy szczyt Gór Izerskich. Rozległe torfowiska subalpejskie."},
+    {name:"Szczeliniec Wielki (919 m)",woj:"dolnoslaskie",region:"zachod",short:"Góry Stołowe, labirynt skalny",km:115,lat:50.4833,lng:16.3333,desc:"Najwyższy szczyt Gór Stołowych. Skalny labirynt piaskowców, schronisko, tarasy widokowe."},
+    {name:"Skalnik (945 m)",woj:"dolnoslaskie",region:"zachod",short:"Rudawy Janowickie, Kolorowe Jeziorka",km:125,lat:50.8333,lng:15.9667,desc:"Najwyższy szczyt Rudaw Janowickich. W pobliżu turkusowe Kolorowe Jeziorka."},
+    {name:"Wielka Sowa (1015 m)",woj:"dolnoslaskie",region:"zachod",short:"Góry Sowie, wieża widokowa",km:85,lat:50.6961,lng:16.4897,desc:"Najwyższy szczyt Gór Sowich z wieżą widokową."},
+    {name:"Waligóra (936 m)",woj:"dolnoslaskie",region:"zachod",short:"Góry Kamienne, wieża",km:95,lat:50.6667,lng:16.2833,desc:"Najwyższy szczyt Gór Kamiennych z wieżą widokową."},
+    {name:"Ostrzyca (501 m)",woj:"dolnoslaskie",region:"zachod",short:"Śląski Matterhorn, stożek bazaltowy",km:105,lat:51.0833,lng:15.9167,desc:"Bazaltowy stożek wulkaniczny — Śląski Matterhorn. Najwyższy punkt Pogórza Kaczawskiego."},
+    {name:"Ślęża (718 m)",woj:"dolnoslaskie",region:"zachod",short:"Święta góra Słowian",km:55,lat:50.8672,lng:16.7058,desc:"Izolowany masyw, centrum kultu słowiańskiego."},
+    {name:"Rudawiec (1106 m)",woj:"dolnoslaskie",region:"zachod",short:"Góry Bialskie, łąki subalpejskie",km:145,lat:50.3500,lng:16.6167,desc:"Najwyższy szczyt Gór Bialskich."},
+    {name:"Kowadło (989 m)",woj:"dolnoslaskie",region:"zachod",short:"Góry Złote, skałki",km:130,lat:50.3167,lng:16.8333,desc:"Najwyższy szczyt Gór Złotych."},
+    {name:"Skopiec (724 m)",woj:"dolnoslaskie",region:"zachod",short:"Góry Kaczawskie, geologia",km:100,lat:51.1167,lng:16.0000,desc:"Najwyższy szczyt Gór Kaczawskich."},
+    {name:"Kłodzka Góra (757 m)",woj:"dolnoslaskie",region:"zachod",short:"Góry Bardzkie, wieża widokowa",km:105,lat:50.4833,lng:16.7500,desc:"Najwyższy szczyt Gór Bardzkich."},
+    {name:"Jagodna (977 m)",woj:"dolnoslaskie",region:"zachod",short:"Góry Bystrzyckie, Kotlina Kłodzka",km:160,lat:50.3500,lng:16.6667,desc:"Najwyższy szczyt Gór Bystrzyckich."},
+    {name:"Orlica (1084 m)",woj:"dolnoslaskie",region:"zachod",short:"Góry Orlickie, granica PL-CZ",km:175,lat:50.3167,lng:16.3667,desc:"Najwyższy szczyt Gór Orlickich na granicy z Czechami."},
+  ]},
+  { cat:"🗼 Wieże widokowe", color:"#c9a84c", items:[
+    {name:"Wieżyca (329 m) — Kaszuby",woj:"pomorskie",region:"polnoc",short:"Najwyższy punkt Niżu Polskiego, wieża",km:360,lat:54.1833,lng:18.0667,desc:"Wieżyca to najwyższy punkt Pojezierza Kaszubskiego i Niżu Polskiego. Wieża widokowa z panoramą jezior Kaszub i Trójmiasta. Jeden z punktów Korony Polski PTTK."},
+    {name:"Wieża na Wielka Sowie",woj:"dolnoslaskie",region:"zachod",short:"Góry Sowie, panorama Sudetów",km:85,lat:50.6961,lng:16.4897,desc:"Metalowa wieża widokowa na Wielkiej Sowie (1015 m). Panorama Karkonoszy, Kotliny Kłodzkiej i przy dobrej pogodzie Wrocławia."},
+    {name:"Wieża na Mogielicy",woj:"malopolskie",region:"poludnie",short:"Beskid Wyspowy, panorama Tatr",km:295,lat:49.7167,lng:20.1667,desc:"Wieża widokowa na Mogielicy (1171 m). Jedna z piękniejszych panoram Tatr z Beskidów."},
+    {name:"Wieża na Turbaczu",woj:"malopolskie",region:"poludnie",short:"Gorce, schronisko PTTK, Tatry",km:310,lat:49.5589,lng:20.1117,desc:"Wieża widokowa przy schronisku na Turbaczu (1310 m). Panorama Tatr, Pienin i Beskidów."},
+    {name:"Wieża na Radziejowej",woj:"malopolskie",region:"poludnie",short:"Beskid Sądecki, Tatry i Pieniny",km:320,lat:49.4667,lng:20.6167,desc:"Stalowa wieża widokowa na Radziejowej (1266 m). Panorama Tatr, Pienin i Beskidu Niskiego."},
+    {name:"Wieża Bismarcka — Góra Parkowa",woj:"malopolskie",region:"poludnie",short:"Krynica-Zdrój, zabytkowa wieża z 1899 r.",km:330,lat:49.4167,lng:20.9667,desc:"Historyczna wieża Bismarcka z 1899 r. na Górze Parkowej w Krynicy. Widok na Beskid Sądecki i uzdrowisko."},
+    {name:"Góra Świętej Anny — wieża",woj:"opolskie",region:"poludnie",short:"Pielgrzymkowa góra, klasztor, Śląsk",km:190,lat:50.4667,lng:18.1667,desc:"Góra Świętej Anny (400 m) z barokowym klasztorem franciszkanów i wieżą widokową. Panorama Śląska. Miejsca walk z III Powstania Śląskiego (1921)."},
+    {name:"Góra Gradowa — Gdańsk",woj:"pomorskie",region:"polnoc",short:"Panorama Gdańska i stoczni",km:375,lat:54.3500,lng:18.6333,desc:"Góra Gradowa w centrum Gdańska z fortyfikacjami i panoramą starego miasta oraz stoczni."},
+    {name:"Góra Chełmska — Koszalin",woj:"zachodniopomorskie",region:"polnoc",short:"Najstarsza kaplica w Polsce, widok Bałtyku",km:340,lat:54.2000,lng:16.1500,desc:"Góra Chełmska (137 m) z najstarszą kaplicą w Polsce (VII w.) i wieżą widokową z widokiem na Bałtyk."},
+    {name:"Łysica — wieża widokowa",woj:"swietokrzyskie",region:"centrum",short:"Góry Świętokrzyskie, centrum Polski",km:240,lat:50.8833,lng:20.9167,desc:"Wieża widokowa na Łysicy (614 m) — panorama Polski środkowej. Przy wyjątkowej przejrzystości widać Tatry."},
+    {name:"Góra Zamkowa — Sandomierz",woj:"swietokrzyskie",region:"centrum",short:"Zamek gotycki, panorama Wisły",km:245,lat:50.6833,lng:21.7500,desc:"Wzgórze zamkowe w Sandomierzu z gotyckim zamkiem XIV w. i widokiem na Wisłę."},
+    {name:"Wieża Kopernika — Frombork",woj:"warminsko-mazurskie",region:"polnoc",short:"Miejsce pracy Kopernika, Zalew Wiślany",km:395,lat:54.3583,lng:19.6833,desc:"Wieża Radziejowskiego we Fromborku, gdzie pracował Kopernik. Widok na Zalew Wiślany."},
+    {name:"Latarnia Morska Hel",woj:"pomorskie",region:"polnoc",short:"Zatoka Gdańska, Bałtyk, 360° widok",km:400,lat:54.6025,lng:18.7972,desc:"Latarnia morska na Helu (41 m) z panoramą Zatoki Gdańskiej. Czynna jako muzeum."},
+    {name:"Wieża Babel — Paczków",woj:"opolskie",region:"zachod",short:"Gotycka wieża obronna, mury miejskie",km:130,lat:50.4694,lng:17.0122,desc:"Paczków zwany Polskim Carcassonne z zachowanymi murami miejskimi i wieżami. Wieża widokowa w obrębie fortyfikacji."},
+    {name:"Góra Parkowa — Rabka",woj:"malopolskie",region:"poludnie",short:"Kolejka linowa, panorama Gorców i Tatr",km:315,lat:49.6167,lng:19.9667,desc:"Góra Parkowa nad Rabką z kolejką linową i panoramą Gorców, Tatr i Beskidów. Popularne miejsce rodzinne."},
+  ]},
+  { cat:"🏰 Zamki i twierdze", color:"#8b2c2c", items:[
+    {name:"Zamek Malbork",woj:"pomorskie",region:"polnoc",short:"UNESCO, największy gotycki zamek świata",km:370,lat:54.0361,lng:19.0306,kids:true,desc:"Zamek krzyżacki w Malborku (XIV w.) to największy gotycki zamek na świecie — UNESCO. Siedziba Wielkich Mistrzów. Trzy obwody murów, kolekcja bursztynu i broni. Obowiązkowy punkt dla każdego Polaka."},
+    {name:"Wawel — Zamek Królewski",woj:"malopolskie",region:"poludnie",short:"Siedziba królów polskich, UNESCO Kraków",km:275,lat:50.0544,lng:19.9356,desc:"Wawel — centrum polskiej państwowości przez wieki. Komnaty królewskie, krypta z sarkofagami królów, smocza jama."},
+    {name:"Zamek Książ",woj:"dolnoslaskie",region:"zachod",short:"Trzeci największy zamek w Polsce, Hochbergowie",km:70,lat:50.8443,lng:16.2934,desc:"Zamek Książ k. Wałbrzycha — renesansowo-barokowa rezydencja Hochbergów. Pod zamkiem tunele z II WŚ (Riese). Imponujące komnaty i tarasy."},
+    {name:"Zamek Czocha",woj:"dolnoslaskie",region:"zachod",short:"Bajkowy zamek nad jeziorem",km:165,lat:51.0833,lng:15.2667,desc:"Zamek Czocha nad Jeziorem Leśniańskim — jeden z najpiękniejszych w Polsce. Bogato wyposażone komnaty, lochy i legendy o skarbach."},
+    {name:"Zamek w Ogrodzieńcu",woj:"slaskie",region:"poludnie",short:"Ruiny na Jurze, Szlak Orlich Gniazd",km:230,lat:50.4567,lng:19.5333,desc:"Ruiny zamku XIV w. na wapiennym wzgórzu Jury. Nocne zwiedzanie z latarniami w sezonie. Jeden z najokazalszych na Szlaku Orlich Gniazd."},
+    {name:"Zamek Pieskowa Skała",woj:"malopolskie",region:"poludnie",short:"Renesans na skale, Maczuga Herkulesa",km:280,lat:50.2019,lng:19.8200,kids:true,desc:"Renesansowy zamek na skale nad Prądnikiem — muzeum sztuki europejskiej. Obok Maczuga Herkulesa. Część Ojcowskiego PN."},
+    {name:"Zamek Nidzica",woj:"warminsko-mazurskie",region:"polnoc",short:"Gotycki zamek krzyżacki, Warmia",km:320,lat:53.3611,lng:20.4333,desc:"Gotycki zamek krzyżacki (XIV w.) w dobrym stanie. Muzeum regionalne z wystawami o kulturze Mazur."},
+    {name:"Zamek Lidzbark Warmiński",woj:"warminsko-mazurskie",region:"polnoc",short:"Rezydencja biskupów, Kopernik",km:350,lat:54.1181,lng:20.5917,desc:"XIV-wieczna rezydencja biskupów warmińskich, gdzie mieszkał Kopernik. Gotyckie krużganki, kolekcja sztuki."},
+    {name:"Zamek Chojnik",woj:"dolnoslaskie",region:"zachod",short:"Ruiny w Karkonoszach, 627 m",km:135,lat:50.8419,lng:15.6839,desc:"Zamek Chojnik (XIV w.) na grzbiecie Karkonoszy 627 m. Okrągła wieża z panoramą Kotliny Jeleniogórskiej."},
+    {name:"Twierdza Srebrna Góra",woj:"dolnoslaskie",region:"zachod",short:"XVIII w., nigdy nie zdobyta, Fryderyk Wielki",km:90,lat:50.5833,lng:16.6333,desc:"Twierdza Srebrna Góra — jeden z najlepiej zachowanych kompleksów fortyfikacyjnych w Europie. Zbudowana przez Fryderyka Wielkiego, nigdy nie zdobyta."},
+    {name:"Zamek Grodziec",woj:"dolnoslaskie",region:"zachod",short:"XV w. na bazaltowym wzgórzu",km:115,lat:51.1667,lng:15.8333,desc:"Zamek Grodziec na bazaltowym wzgórzu. Cylindryczne wieże, pokazy walk rycerskich."},
+    {name:"Zamek Bolków",woj:"dolnoslaskie",region:"zachod",short:"Gotycka twierdza piastowska, XIII w.",km:95,lat:50.9264,lng:16.0936,desc:"Zamek Bolków — gotycka twierdza piastowska z XIII w. na wzgórzu z widokiem na Pogórze Sudeckie."},
+    {name:"Zamek Bytów",woj:"pomorskie",region:"polnoc",short:"Zamek krzyżacki, muzeum kaszubskie",km:380,lat:54.1708,lng:17.4939,desc:"Zamek krzyżacki w Bytowie (XIV w.) z muzeum regionalnym kaszubskim. Jeden z nielicznych krzyżackich w dobrym stanie."},
+    {name:"Zamek Gniew",woj:"pomorskie",region:"polnoc",short:"Zamek krzyżacki nad Wisłą",km:360,lat:53.8333,lng:18.8167,desc:"Zamek krzyżacki w Gniewie (XIV w.) z wieżą nad Wisłą. Pokazy historyczne i eventy rycerskie."},
+    {name:"Zamek Królewski w Warszawie",woj:"mazowieckie",region:"centrum",short:"Odbudowany po II WŚ, symbol Polski",km:345,lat:52.2478,lng:21.0136,kids:true,desc:"Zamek Królewski — zburzony przez Niemców 1944 r., odbudowany przez Polaków. Symbol patriotyzmu. Komnaty królewskie, galeria Canaletta."},
+    {name:"Zamek w Łańcucie",woj:"podkarpackie",region:"wschod",short:"Magnacka rezydencja, kolekcja powozów",km:310,lat:50.0667,lng:22.2333,desc:"Rezydencja Lubomirskich i Potockich z XVII w. Bogata kolekcja sztuki, słynne stajnie z powozami."},
+    {name:"Zamek Rabsztyn",woj:"malopolskie",region:"poludnie",short:"Ruiny na Jurze, strefa ciemnego nieba",km:240,lat:50.3833,lng:19.7333,desc:"Ruiny zamku Rabsztyn na Jurze z panoramą okolicy. Okolice Olkusza to strefa ciemnego nieba — doskonała do obserwacji gwiazd."},
+    {name:"Zamek Krzyżtopór — Ujazd",woj:"swietokrzyskie",region:"centrum",short:"Ruiny barokowe, XVII w., legenda o złocie",km:250,lat:50.6167,lng:21.2333,desc:"Ruiny pałacu Krzyżtopór z XVII w. — w chwili budowy jedna z największych rezydencji w Europie. Legenda o skarbach zatopionych w studni przez Osssolińskich."},
+  ]},
+  { cat:"🏛️ Muzea i historia", color:"#5a4a8a", items:[
+    {name:"Auschwitz-Birkenau",woj:"malopolskie",region:"poludnie",short:"UNESCO, Muzeum i Miejsce Pamięci",km:250,lat:50.0342,lng:19.2042,desc:"Były obóz zagłady — Muzeum i Miejsce Pamięci wpisane na UNESCO. Najważniejsze świadectwo Holokaustu. Odwiedzenie obowiązkowe."},
+    {name:"Muzeum Powstania Warszawskiego",woj:"mazowieckie",region:"centrum",short:"Najnowocześniejsze muzeum historyczne PL",km:345,lat:52.2325,lng:20.9811,desc:"Muzeum Powstania Warszawskiego 1944 — jedno z najbardziej poruszających w Europie. Multimedialne ekspozycje, replika samolotu."},
+    {name:"Muzeum II Wojny Światowej — Gdańsk",woj:"pomorskie",region:"polnoc",short:"Panoramiczne muzeum, 1939–1945",km:375,lat:54.3547,lng:18.6536,desc:"Jedno z największych muzeów historycznych na świecie z ekspozycją o dziejach 1939–1945 z perspektywy wielu narodów."},
+    {name:"Muzeum Narodowe — Kraków",woj:"malopolskie",region:"poludnie",short:"Dama z łasiczką, największe muzeum PL",km:275,lat:50.0640,lng:19.9183,desc:"Dama z łasiczką Leonarda da Vinci, Hołd pruski Matejki, kolekcja zbroi. Największe muzeum w Polsce."},
+    {name:"Łazienki Królewskie — Warszawa",woj:"mazowieckie",region:"centrum",short:"Pałac na Wodzie, Chopin, park",km:345,lat:52.2153,lng:21.0358,kids:true,desc:"Pałac na Wodzie, teatr na wyspie, pomnik Chopina. Letnia rezydencja królewska. Niedzielne koncerty chopinowskie."},
+    {name:"Fabryka Schindlera — Kraków",woj:"malopolskie",region:"poludnie",short:"Muzeum Krakowa pod okupacją",km:275,lat:50.0467,lng:20.0000,desc:"Muzeum Krakowa pod okupacją 1939–1945 w fabryce Oskara Schindlera. Poruszające, multimedialne ekspozycje."},
+    {name:"Muzeum POLIN — Warszawa",woj:"mazowieckie",region:"centrum",short:"1000 lat Żydów polskich, nagroda UNESCO",km:345,lat:52.2497,lng:20.9939,desc:"Muzeum POLIN na terenie dawnego getta — nagroda UNESCO. Tysiąc lat historii Żydów polskich. Jedno z najlepszych muzeów na świecie."},
+    {name:"Muzeum Chopina — Warszawa",woj:"mazowieckie",region:"centrum",short:"Interaktywne muzeum, dziedzictwo Chopina",km:345,lat:52.2394,lng:21.0203,kids:true,desc:"Interaktywna ekspozycja w pałacu Ostrogskich. Rękopisy, instrumenty, pamiątki Chopina."},
+    {name:"Centrum Nauki Kopernik — Warszawa",woj:"mazowieckie",region:"centrum",short:"Interaktywne centrum nauki, planetarium",km:345,lat:52.2417,lng:21.0275,kids:true,desc:"Jedne z najlepszych interaktywnych centrów nauki w Europie. Setki eksperymentów dla dzieci i dorosłych. Planetarium. Obowiązkowo z dziećmi."},
+    {name:"Zamek i muzeum — Malbork",woj:"pomorskie",region:"polnoc",short:"Największa kolekcja bursztynu, UNESCO",km:370,lat:54.0361,lng:19.0306,desc:"Muzeum w Zamku Malbork — największa kolekcja bursztynu na świecie, broń, zbroje, rzeźba gotycka."},
+    {name:"Muzeum Wsi Mazowieckiej — Sierpc",woj:"mazowieckie",region:"centrum",short:"Skansen, tradycyjna architektura Mazowsza",km:310,lat:52.8542,lng:19.6617,kids:true,desc:"Jeden z największych skansenów w Polsce — zagrody, kościoły i wiatraki z mazowieckich wsi. Żywa historia."},
+    {name:"Muzeum Zamkowe — Pszczyna",woj:"slaskie",region:"poludnie",short:"Pałac Hochbergów, myśliwskie tradycje",km:230,lat:49.9833,lng:18.9500,desc:"Pałac Hochbergów w Pszczynie z bogatymi wnętrzami i muzeum. Park zamkowy z żubrami."},
+    {name:"Muzeum Śląskie — Katowice",woj:"slaskie",region:"poludnie",short:"Nowoczesne muzeum w podziemiach kopalni",km:215,lat:50.2570,lng:18.9949,desc:"Muzeum Śląskie w dawnej kopalni Katowice — nowoczesna ekspozycja o historii i kulturze Śląska. Architektura wkomponowana w poprzemysłowy pejzaż."},
+    {name:"Stutthof — Muzeum Obóz",woj:"pomorskie",region:"polnoc",short:"Pierwszy nazistowski obóz poza Niemcami",km:380,lat:54.3167,lng:19.1833,desc:"Muzeum-Miejsce Pamięci Stutthof — pierwszy obóz koncentracyjny założony poza Niemcami (1939). Ważne świadectwo historii Pomorza w czasie II WŚ."},
+    {name:"Muzeum Historyczne — Wrocław",woj:"dolnoslaskie",region:"zachod",short:"Panorama Racławicka, MHKW",km:0,lat:51.1079,lng:17.0385,desc:"Muzeum Historyczne w Ratuszu i Panorama Racławicka — cykliczna rotunda z gigantycznym malowidłem bitwy 1794. Ikoniczny obiekt kultury Wrocławia."},
+  ]},
+  { cat:"🕌 Kościoły i klasztory", color:"#7a5520", items:[
+    {name:"Jasna Góra — Częstochowa",woj:"slaskie",region:"poludnie",short:"Najważniejsze sanktuarium Polski",km:200,lat:50.8139,lng:19.0942,desc:"Jasna Góra z Cudownym Obrazem Matki Boskiej Częstochowskiej. Centrum pielgrzymkowe Polski i świata. Klasztor paulinów z XV w."},
+    {name:"Kościoły Pokoju — Świdnica i Jawor",woj:"dolnoslaskie",region:"zachod",short:"UNESCO, drewniane kościoły protestanckie",km:65,lat:50.8489,lng:16.4878,kids:true,desc:"Największe drewniane kościoły protestanckie w Europie — UNESCO. Zbudowane z drewna, gliny i słomy (1651). Wnętrza zachwycają bogactwem polichromii."},
+    {name:"Klasztor Święty Krzyż",woj:"swietokrzyskie",region:"centrum",short:"Najstarszy klasztor w Polsce, XI w.",km:245,lat:50.8681,lng:21.0314,desc:"Klasztor benedyktyński na Łyścu (595 m) — jeden z najstarszych kościołów w Polsce (XI w.). Relikwie Drzewa Krzyża Świętego."},
+    {name:"Kalwaria Zebrzydowska",woj:"malopolskie",region:"poludnie",short:"UNESCO, sanktuarium maryjne, XVII w.",km:285,lat:49.8731,lng:19.6861,desc:"Sanktuarium maryjne i manierystyczny kompleks klasztorny — UNESCO. 40 kaplic na wzgórzach, paulini, cudowny obraz, Pasje wielkanocne."},
+    {name:"Katedra Wawelska",woj:"malopolskie",region:"poludnie",short:"Krypta królów i wieszczów polskich",km:275,lat:50.0539,lng:19.9356,desc:"Nekropolia królów polskich — Sobieski, Kościuszko, Piłsudski. Dzwon Zygmunta. Symbol polskiej tożsamości."},
+    {name:"Kościół Mariacki — Kraków",woj:"malopolskie",region:"poludnie",short:"Hejnał, ołtarz Wita Stwosza",km:275,lat:50.0617,lng:19.9394,kids:true,desc:"Kościół Mariacki z hejnałem co godzinę. Ołtarz Wita Stwosza (XV w.) — arcydzieło późnogotyckiej rzeźby."},
+    {name:"Klasztor cystersów — Henryków",woj:"dolnoslaskie",region:"zachod",short:"Najstarsza polska zdanie zapisana po polsku",km:80,lat:50.5833,lng:16.9833,desc:"Klasztor cystersów (XIII w.) — tu w Księdze Henrykowskiej zapisano najstarsze zdanie po polsku (ok. 1270): 'Daj ać ja pobruszę a ty poczywaj'."},
+    {name:"Bazylika w Licheniu",woj:"wielkopolskie",region:"centrum",short:"Największy kościół w Polsce",km:290,lat:52.3167,lng:18.2500,desc:"Bazylika w Licheniu — największy kościół w Polsce, jedno z największych na świecie. Wnętrze imponuje skalą."},
+    {name:"Katedra w Gnieźnie",woj:"wielkopolskie",region:"centrum",short:"Pierwsza katedra Polski, Drzwi Gnieźnieńskie",km:295,lat:52.5344,lng:17.5872,desc:"Katedra gnieźnieńska — pierwsza historyczna katedra Polski. Słynne Drzwi Gnieźnieńskie (XII w.) z 18 płaskorzeźbami."},
+    {name:"Klasztor benedyktynów — Tyniec",woj:"malopolskie",region:"poludnie",short:"Opactwo na skale nad Wisłą, XI w.",km:278,lat:50.0133,lng:19.8033,desc:"Opactwo benedyktynów w Tyńcu — romańsko-gotycki kompleks z XI w. na wapiennej skale nad Wisłą."},
+    {name:"Kościół Pokoju — Jawor",woj:"dolnoslaskie",region:"zachod",short:"UNESCO, najwspanialsze wnętrze drewniane",km:80,lat:51.0500,lng:16.2000,desc:"Kościół Pokoju w Jaworze — bliźniaczy z Kościołem w Świdnicy. Jedno z dwóch wpisanych na UNESCO. Imponujące drewniane wnętrze."},
+    {name:"Bazylika Bożego Ciała — Kraków",woj:"malopolskie",region:"poludnie",short:"Kazimierz, gotyk, najstarsza parafia",km:275,lat:50.0527,lng:19.9450,desc:"Bazylika Bożego Ciała na Kazimierzu — XIV-wieczny gotyk, jedna z najstarszych parafii Krakowa. Piękne wnętrze z polichromiami."},
+  ]},
+  { cat:"⛏️ Podziemia i jaskinie", color:"#3a5a6a", items:[
+    {name:"Kopalnia Soli Wieliczka",woj:"malopolskie",region:"poludnie",short:"UNESCO, kaplica w soli, 700 lat historii",km:285,lat:49.9836,lng:20.0547,kids:true,desc:"Kopalnia soli (XIII w.) — UNESCO. 9 poziomów, kaplice wykute w soli, podziemne jezioro. 700 lat nieprzerwanego wydobycia. Jedno z najchętniej odwiedzanych miejsc w Polsce."},
+    {name:"Jaskinia Raj",woj:"swietokrzyskie",region:"centrum",short:"Najpiękniejsza jaskinia Polski, stalaktyty",km:240,lat:50.8792,lng:20.7939,kids:true,desc:"Jaskinia Raj k. Kielc — wspaniałe stalaktyty i stalagmity, prehistoryczne malowidła. Trasa 180 m, temperatura 9°C."},
+    {name:"Jaskinia Niedźwiedzia — Kletno",woj:"dolnoslaskie",region:"zachod",short:"Kości niedźwiedzia jaskiniowego, stalaktyty",km:150,lat:50.2333,lng:16.8833,kids:true,desc:"Najcenniejsza jaskinia Sudetów — stalaktyty i kości niedźwiedzia jaskiniowego. Trasa turystyczna 800 m."},
+    {name:"Smocza Jama — Kraków",woj:"malopolskie",region:"poludnie",short:"Jaskinia pod Wawelem, smok Wawelski",km:275,lat:50.0542,lng:19.9353,kids:true,desc:"Naturalna jaskinia pod Wawelem z legendą o smoku. Krótka trasa, wyjście nad Wisłą z metalowym smokiem ziającym ogniem. Obowiązkowo z dziećmi."},
+    {name:"Jaskinia Wierzchowska Górna",woj:"malopolskie",region:"poludnie",short:"Ojcowski PN, długa trasa, 980 m",km:280,lat:50.2067,lng:19.8400,desc:"Ojcowski PN — jedna z dłuższych tras jaskiniowych (980 m). Piękne nacieki, komory z dużymi przestrzeniami."},
+    {name:"Podziemia Osówka — Riese",woj:"dolnoslaskie",region:"zachod",short:"Tajemnicze tunele z II WŚ, Góry Sowie",km:90,lat:50.6833,lng:16.4833,desc:"Podziemia Osówka — część projektu Riese z II WŚ. Tunele wykute przez więźniów obozu. Jedna z największych budowli podziemnych Europy."},
+    {name:"Kopalnia Srebra — Tarnowskie Góry",woj:"slaskie",region:"poludnie",short:"UNESCO, spływ łódką pod ziemią",km:220,lat:50.4444,lng:18.8617,kids:true,desc:"Zabytkowa Kopalnia Srebra — UNESCO 2017. Spływ łódką po podziemnych kanałach i zwiedzanie XVI-wiecznych sztolni."},
+    {name:"Jaskinia Ciemna — Ojców",woj:"malopolskie",region:"poludnie",short:"Zamieszkana od 120 000 lat, neandertalczycy",km:280,lat:50.2100,lng:19.8367,desc:"Najdłużej zamieszkana jaskinia w Polsce. Ząbek neandertalczyka i szczątki mamutów. Stanowisko paleolityczne klasy światowej."},
+    {name:"Kopalnia Złota — Złoty Stok",woj:"dolnoslaskie",region:"zachod",short:"Jedyna kopalnia złota w Polsce",km:125,lat:50.4333,lng:16.8833,kids:true,desc:"Jedyna kopalnia złota w Polsce, czynna od XIII do XX w. Podziemne trasy, wodospad pod ziemią."},
+    {name:"Jaskinia Raj — trasa paleolityczna",woj:"swietokrzyskie",region:"centrum",short:"Slady człowieka sprzed 50 000 lat",km:240,lat:50.8792,lng:20.7939,desc:"W Jaskini Raj obok szlaku turystycznego odkryto ślady człowieka sprzed 50 000 lat. Muzeum przy jaskini prezentuje znaleziska."},
+    {name:"Solec Kujawski — podziemia solankowe",woj:"kujawsko-pomorskie",region:"centrum",short:"Solankowe uzdrowisko, tężnie",km:305,lat:53.0833,lng:18.2333,desc:"Solec Kujawski z tężniami solnymi — naturalne inhalatorium. Atrakcja dla alergików i szukających wypoczynku."},
+  ]},
+  { cat:"🏞️ Parki narodowe", color:"#3a7a3a", items:[
+    {name:"Tatrzański Park Narodowy",woj:"malopolskie",region:"poludnie",short:"Tatry, Morskie Oko, Rysy, kozice",km:350,lat:49.2725,lng:19.9817,kids:true,desc:"Tatrzański PN — perła polskich gór. Morskie Oko, Dolina Pięciu Stawów, Rysy. Kozice i świstaki. Rezerwuj parking w Palenicy z wyprzedzeniem!"},
+    {name:"Białowieski Park Narodowy",woj:"podlaskie",region:"wschod",short:"UNESCO, ostatnia puszcza w Europie, żubry",km:360,lat:52.7022,lng:23.8597,desc:"Ostatni naturalny las nizinny w Europie — UNESCO. Dom żubra europejskiego. Ścisły rezerwat z przewodnikiem."},
+    {name:"Karkonoski Park Narodowy",woj:"dolnoslaskie",region:"zachod",short:"Śnieżka, Śnieżne Kotły, Wodospad",km:150,lat:50.7500,lng:15.6833,desc:"KPN z Śnieżką, Śnieżnymi Kotłami i Wodospadem Kamieńczyka. Torfowiska wysokogórskie."},
+    {name:"Bieszczadzki Park Narodowy",woj:"podkarpackie",region:"wschod",short:"Połoniny, wilki, rysie, niedźwiedzie",km:380,lat:49.1000,lng:22.6000,desc:"Największy park górski w Polsce. Połoniny, dzikie zwierzęta: wilki, rysie, żbiki, niedźwiedzie. Raj dla szukających dzikości."},
+    {name:"Wigierski Park Narodowy",woj:"podlaskie",region:"wschod",short:"Jezioro Wigry, klasztor, bobry",km:340,lat:54.0500,lng:23.0167,kids:true,desc:"PN z jeziorem Wigry i klasztorem kamedułów. Bobry, wydry, bieliki. Spływy Czarną Hańczą."},
+    {name:"Słowiński Park Narodowy",woj:"pomorskie",region:"polnoc",short:"UNESCO, ruchome wydmy, Łeba",km:395,lat:54.7167,lng:17.4667,desc:"UNESCO — ruchome wydmy k. Łeby. Unikatowa pustynia nad Bałtykiem. Wydmy przesuwają się kilkanaście metrów rocznie."},
+    {name:"Ojcowski Park Narodowy",woj:"malopolskie",region:"poludnie",short:"Jura, skałki, zamek Pieskowa Skała",km:280,lat:50.2056,lng:19.8400,kids:true,desc:"Najmniejszy PN Polski, jeden z najpiękniejszych. Dolina Prądnika z Maczugą Herkulesa, jaskinie, zamek Pieskowa Skała."},
+    {name:"Pieniński Park Narodowy",woj:"malopolskie",region:"poludnie",short:"Dunajec, spływ tratwą, Trzy Korony",km:305,lat:49.4000,lng:20.3833,kids:true,desc:"Spływ tratwą przez przełom Dunajca — must-do. Trzy Korony (982 m). Ruiny zamku Czorsztyn."},
+    {name:"Roztoczański Park Narodowy",woj:"lubelskie",region:"wschod",short:"Koniki polskie, buczyny, Zwierzyniec",km:280,lat:50.5833,lng:23.0500,kids:true,desc:"Jedyna dzika populacja koników polskich (tarpanów). Buczyny, strumyki. Stawy Echo."},
+    {name:"Kampinoski Park Narodowy",woj:"mazowieckie",region:"centrum",short:"Puszcza za Warszawą, łosie, wydmy",km:350,lat:52.3500,lng:20.6000,desc:"KPN za Warszawą — łosie, wilki i wydmy śródlądowe. Cmentarz w Palmirach (II WŚ)."},
+    {name:"Gorczański Park Narodowy",woj:"malopolskie",region:"poludnie",short:"Turbacz, hale, prastare lasy",km:310,lat:49.5500,lng:20.1500,desc:"GPN z Turbaczem i największymi w Karpatach Zachodnich połaciami starodrzewia."},
+    {name:"Drawieński Park Narodowy",woj:"zachodniopomorskie",region:"polnoc",short:"Rzeka Drawa, spływy kajakowe",km:300,lat:53.2333,lng:15.8167,desc:"Meandrująca Drawa z bobrami, wydrami i zimorodkami. Spływy kajakowe — klasyk zachodniopomorski."},
+    {name:"Woliński Park Narodowy",woj:"zachodniopomorskie",region:"polnoc",short:"Klify Bałtyku, żubry, Świnoujście",km:320,lat:53.9167,lng:14.4667,kids:true,desc:"WPN na wyspie Wolin z klifami sięgającymi 95 m, żubrami i bogatą przyrodą morską. Niedaleko Świnoujścia."},
+    {name:"Biebrzański Park Narodowy",woj:"podlaskie",region:"wschod",short:"Największe torfowiska, ptaki, łosie",km:325,lat:53.5000,lng:22.8000,desc:"Największy PN w Polsce — rozległe torfowiska z łosiami, batalionami i czaplami. Raj dla ornitologów."},
+    {name:"Magurski Park Narodowy",woj:"podkarpackie",region:"wschod",short:"Beskid Niski, dzikie lasy, orliki",km:350,lat:49.5833,lng:21.5333,desc:"Magurski PN — dzikie lasy Beskidu Niskiego z orlami krzykliwymi i wilkami. Mało odwiedzany, prawdziwa dzikość."},
+  ]},
+  { cat:"🏖️ Wybrzeże i morze", color:"#4a7fa5", items:[
+    {name:"Półwysep Helski",woj:"pomorskie",region:"polnoc",short:"Mierzeja z plażami po obu stronach",km:400,lat:54.6025,lng:18.7972,kids:true,desc:"35 km mierzeja z plażami Bałtyku i Zatoki. Hel — miasteczko rybackie z latarnią. Fokarium i stacja badań morskich."},
+    {name:"Klify Orłowskie — Gdynia",woj:"pomorskie",region:"polnoc",short:"Najwyższe klify polskiego wybrzeża",km:375,lat:54.4667,lng:18.5667,desc:"Klify Orłowskie w Gdyni — najwyższe naturalne klify polskiego wybrzeża (30 m). Spacer wzdłuż klifu z widokiem na Bałtyk."},
+    {name:"Łeba i ruchome wydmy",woj:"pomorskie",region:"polnoc",short:"Wydmy Słowińskie, Bałtyk",km:400,lat:54.7542,lng:17.5333,desc:"Łeba — kąpielisko z dostępem do Słowińskiego PN. Wydma Łącka (42 m) przesuwa się w kierunku lasu. Unikalny widok."},
+    {name:"Kołobrzeg — uzdrowisko i plaża",woj:"zachodniopomorskie",region:"polnoc",short:"Molo, katedra gotycka, twierdza",km:335,lat:54.1764,lng:15.5767,desc:"Kołobrzeg — uzdrowisko z plażą, słynnym molem, katedrą gotycką i twierdzą z XVIII w. Zabiegi solankowe."},
+    {name:"Mierzeja Wiślana",woj:"pomorskie",region:"polnoc",short:"Wąska mierzeja, Krynica Morska",km:360,lat:54.3500,lng:19.4667,desc:"Mierzeja Wiślana oddzielająca Bałtyk od Zalewu Wiślanego. Kanał przez Mierzeję (2022). Plaże, lasy, Krynica Morska."},
+    {name:"Szczecin — Wały Chrobrego",woj:"zachodniopomorskie",region:"polnoc",short:"Taras nad Odrą, nowoczesna filharmonia",km:295,lat:53.4285,lng:14.5528,desc:"Wały Chrobrego z imponującymi gmachami i widokiem na port. Nagradzana architekturą Filharmonia Szczecińska."},
+    {name:"Darłowo — zamek i plaże",woj:"zachodniopomorskie",region:"polnoc",short:"Zamek króla Eryka, plaże pomorskie",km:345,lat:54.4222,lng:16.4167,desc:"Darłowo z XIV-wiecznym zamkiem książąt pomorskich i muzeum króla Eryka Skandynawskiego. Piękne plaże i port rybacki."},
+    {name:"Świnoujście — plaże i latarnia",woj:"zachodniopomorskie",region:"polnoc",short:"Najszersza plaża w Polsce",km:320,lat:53.9100,lng:14.2500,kids:true,desc:"Świnoujście z najszerszą plażą w Polsce (ok. 500 m), latarnią morską i połączeniem promowym. Nadmorskie uzdrowisko."},
+    {name:"Ustka — port i bursztyn",woj:"pomorskie",region:"polnoc",short:"Klimatyczny port, plaże, bursztyn",km:360,lat:54.5806,lng:16.8603,desc:"Ustka — klimatyczny port rybacki z plażami i tradycją bursztyniarską. Muzeum Bursztynu. Latarnia morska."},
+    {name:"Trójmiejski Park Krajobrazowy",woj:"pomorskie",region:"polnoc",short:"Lasy nad Zatoką, klify, Trójmiasto",km:380,lat:54.4333,lng:18.4833,desc:"TPK z lasami, klifami i ścieżkami nadmorskimi ponad Zatoką Gdańską. Widoki na Gdańsk, Gdynię i Sopot."},
+  ]},
+  { cat:"🌊 Jeziora i Mazury", color:"#3a6f95", items:[
+    {name:"Wielkie Jeziora Mazurskie",woj:"warminsko-mazurskie",region:"polnoc",short:"Żeglarstwo, tysiąc jezior",km:340,lat:53.8833,lng:21.7000,kids:true,desc:"Największy kompleks jezior Polski połączonych kanałami. Mikołajki, Giżycko, Węgorzewo. Żeglarstwo, kajakarstwo."},
+    {name:"Jezioro Śniardwy",woj:"warminsko-mazurskie",region:"polnoc",short:"Największe jezioro w Polsce, 113 km²",km:345,lat:53.7667,lng:21.6333,desc:"Śniardwy — największe jezioro w Polsce. Żeglarstwo wymaga doświadczenia ze względu na zmienne warunki."},
+    {name:"Jezioro Wigry",woj:"podlaskie",region:"wschod",short:"Wigierski PN, klasztor kamedułów",km:340,lat:54.0500,lng:23.0167,desc:"Jezioro Wigry — jedno z najczystszych (73 m głębokości). Klasztor kamedułów na półwyspie. Bobry i wydry."},
+    {name:"Kanał Elbląski — pochylnie",woj:"warminsko-mazurskie",region:"polnoc",short:"Statki jadą po szynach — unikat w Europie",km:380,lat:53.9667,lng:19.9500,desc:"Kanał Elbląski z 5 pochylniami lądowymi — jedyne takie w Europie. Statki przesuwane na wózkach po torach. Rejs 11 h."},
+    {name:"Jezioro Hańcza",woj:"podlaskie",region:"wschod",short:"Najgłębsze jezioro w Polsce, 108 m",km:340,lat:54.2167,lng:22.8167,desc:"Hańcza — najgłębsze jezioro w Polsce i Niżu Europejskim (108 m). Widoczność do 9 m. Raj dla nurków."},
+    {name:"Jezioro Gopło — Kruszwica",woj:"kujawsko-pomorskie",region:"centrum",short:"Mysia Wieża, legenda Piasta i Popiela",km:310,lat:52.5833,lng:18.3333,desc:"Gopło z Mysią Wieżą w Kruszwicy i legendą o Piaście i Popielu. Rezerwat z czaplią kolonią."},
+    {name:"Mazury — Giżycko i Twierdza Boyen",woj:"warminsko-mazurskie",region:"polnoc",short:"Most obrotowy 1889 r., twierdza pruska",km:350,lat:54.0375,lng:21.7656,desc:"Giżycko z unikalnym mostem obrotowym z 1889 r. i pruską Twierdzą Boyen. Centrum żeglarskie Mazur."},
+    {name:"Jezioro Łebsko — Słowiński PN",woj:"pomorskie",region:"polnoc",short:"Drugie co do wielkości jezioro przybrzeżne",km:400,lat:54.7167,lng:17.4667,desc:"Łebsko to drugie największe jezioro przybrzeżne w Polsce, otoczone Słowińskim PN. Raj dla ptaków i wędkarzy."},
+    {name:"Stawy Milickie — rezerwat ptaków",woj:"dolnoslaskie",region:"zachod",short:"Największy kompleks stawów hodowlanych w PL",km:80,lat:51.5667,lng:17.4167,desc:"Stawy Milickie — największy kompleks stawów hodowlanych w Polsce. Rezerwat ptaków z tysiącami czapli, kaczek i żurawi."},
+  ]},
+  { cat:"🌆 Miasta — must see", color:"#5a3a8a", items:[
+    {name:"Kraków — Stare Miasto",woj:"malopolskie",region:"poludnie",short:"UNESCO, Rynek, Wawel, Kazimierz",km:275,lat:50.0614,lng:19.9372,kids:true,desc:"Dawna stolica, Stare Miasto UNESCO. Rynek Główny, Kościół Mariacki, Wawel, Kazimierz. Fabryka Schindlera. Najpiękniejsze miasto Polski."},
+    {name:"Gdańsk — Stare Miasto",woj:"pomorskie",region:"polnoc",short:"Hanza, Złota Brama, Długi Targ",km:375,lat:54.3483,lng:18.6483,desc:"Hanzeatycki Gdańsk z Długim Targiem, Żurawiem nad Motławą. Westerplatte — miejsce wybuchu II WŚ. Muzeum II WŚ."},
+    {name:"Wrocław — Stare Miasto",woj:"dolnoslaskie",region:"zachod",short:"Rynek, Ostrów Tumski, krasnale",km:0,lat:51.1079,lng:17.0385,kids:true,desc:"Kolorowy Rynek, Wyspa Katedralna, setki krasnoludków po mieście. Hala Stulecia UNESCO. Centrum kultury europejskiej."},
+    {name:"Warszawa — centrum",woj:"mazowieckie",region:"centrum",short:"Stolica odbudowana, UNESCO, muzea",km:345,lat:52.2501,lng:21.0122,desc:"Stolica odbudowana z gruzów. Stare Miasto UNESCO, Zamek Królewski, Łazienki, muzeum POLIN i Powstania."},
+    {name:"Poznań — Stare Miasto",woj:"wielkopolskie",region:"centrum",short:"Koziołki na ratuszu, Ostrów Tumski",km:300,lat:52.4082,lng:16.9335,desc:"Poznań z Rynkiem Staromiejskim i koziołkami trykającymi się na ratuszu (codziennie w południe). Ostrów Tumski — chrzciny Polski."},
+    {name:"Toruń — Stare Miasto",woj:"kujawsko-pomorskie",region:"centrum",short:"UNESCO, Kopernik, pierniki",km:310,lat:53.0138,lng:18.5981,kids:true,desc:"Gotyckie stare miasto UNESCO nad Wisłą. Rodzinne miasto Kopernika. Słynne pierniki z 13 gatunkami przypraw."},
+    {name:"Zamość — Stare Miasto",woj:"lubelskie",region:"wschod",short:"UNESCO, idealne miasto renesansowe",km:260,lat:50.7233,lng:23.2519,desc:"Renesansowy Zamość UNESCO z XVI w. Kamienice ormiańskie, ratusz, fortyfikacje bastionowe — kompletny układ urbanistyczny."},
+    {name:"Lublin — Stare Miasto",woj:"lubelskie",region:"wschod",short:"Brama Krakowska, zamek, wielokulturowość",km:260,lat:51.2465,lng:22.5684,desc:"Lublin z gotycko-renesansowym Starym Miastem i zamkiem. Kaplica Trójcy Świętej z malarstwem bizantyjskim i gotyckim."},
+    {name:"Gdynia — modernizm lat 30.",woj:"pomorskie",region:"polnoc",short:"Modernistyczna architektura, Muzeum Marynarki",km:375,lat:54.5189,lng:18.5306,desc:"Gdynia zbudowana od podstaw w latach 20–30 z fascynującą architekturą modernistyczną. Okręty-muzea, Bulwar Nadmorski."},
+    {name:"Białystok — Pałac Branickich",woj:"podlaskie",region:"wschod",short:"Wersal Podlasia, wielokulturowość",km:315,lat:53.1325,lng:23.1444,desc:"Pałac Branickich — Wersal Podlasia. Wielokulturowe miasto polsko-białorusko-żydowskie."},
+    {name:"Kazimierz Dolny",woj:"lubelskie",region:"wschod",short:"Miasto artystów nad Wisłą",km:260,lat:51.3189,lng:21.9517,kids:true,desc:"Kazimierz Dolny — miasteczko malarzy i artystów nad Wisłą. Renesansowe kamienice, ruiny zamku i zbóż spichlerzy. Zimorodki na urwistych brzegach rzeki."},
+    {name:"Sandomierz — perła Wisły",woj:"swietokrzyskie",region:"centrum",short:"Gotyckie miasto nad Wisłą, krypty",km:245,lat:50.6833,lng:21.7500,desc:"Sandomierz z gotyckimi kościołami, zamkiem i klasztorami. Podziemna trasa turystyczna przez krypty. Widok z zamku na Wisłę i Wyżynę Sandomierską."},
+    {name:"Jelenia Góra i Cieplice",woj:"dolnoslaskie",region:"zachod",short:"Perła Karkonoszy, uzdrowisko, rynek",km:140,lat:50.9044,lng:15.7197,desc:"Jelenia Góra z pięknym rynkiem i barokowymi kamienicami. Dzielnica Cieplice-Zdrój z najstarszym uzdrowiskiem w Polsce (XII w.)."},
+  ]},
+  { cat:"🎭 Dziedzictwo UNESCO", color:"#8a3a6a", items:[
+    {name:"Historyczne centrum Krakowa",woj:"malopolskie",region:"poludnie",short:"Pierwsze polskie UNESCO (1978)",km:275,lat:50.0614,lng:19.9372,desc:"Historyczne centrum Krakowa — pierwsze polskie miejsce na Liście UNESCO (1978). Wawel, Rynek Główny, Kazimierz. Najlepiej zachowane historyczne miasto Polski."},
+    {name:"Kopalnia Soli Wieliczka i Bochnia",woj:"malopolskie",region:"poludnie",short:"Średniowieczne kopalnie soli, UNESCO",km:285,lat:49.9836,lng:20.0547,desc:"Wieliczka i Bochnia UNESCO — najdłużej działające kopalnie soli w Polsce. Wieliczka od XIII w., Bochnia od XII w."},
+    {name:"Zamek w Malborku",woj:"pomorskie",region:"polnoc",short:"UNESCO, największy gotycki zamek świata",km:370,lat:54.0361,lng:19.0306,desc:"Zamek Malbork UNESCO 1997 — największy gotycki zamek na świecie."},
+    {name:"Stare Miasto Warszawa",woj:"mazowieckie",region:"centrum",short:"UNESCO za odbudowę — wyjątek",km:345,lat:52.2501,lng:21.0122,desc:"Stare Miasto Warszawy UNESCO 1980 — unikalne wpisanie za przykładową rekonstrukcję centrum zniszczonego w 99%."},
+    {name:"Stare Miasto Zamość",woj:"lubelskie",region:"wschod",short:"UNESCO, idealne miasto renesansowe",km:260,lat:50.7233,lng:23.2519,desc:"Zamość UNESCO 1992 — idealnie zachowane miasto renesansowe XVI w."},
+    {name:"Stare Miasto Toruń",woj:"kujawsko-pomorskie",region:"centrum",short:"UNESCO, Kopernik, gotyk",km:310,lat:53.0138,lng:18.5981,desc:"Toruń UNESCO 1997 — gotycki układ urbanistyczny. Dom Kopernika, zamek krzyżacki."},
+    {name:"Hala Stulecia — Wrocław",woj:"dolnoslaskie",region:"zachod",short:"UNESCO, modernizm, 1913",km:0,lat:51.1072,lng:17.0772,desc:"Hala Stulecia UNESCO 2006 — arcydzieło Maksa Berga z 1913 r. Jedna z pierwszych żelbetowych kopuł na świecie."},
+    {name:"Kalwaria Zebrzydowska",woj:"malopolskie",region:"poludnie",short:"UNESCO, sanktuarium, XVII w.",km:285,lat:49.8731,lng:19.6861,desc:"Kalwaria Zebrzydowska UNESCO 1999 — manierystyczny kompleks z 40 kaplicami na wzgórzach."},
+    {name:"Drewniane kościoły Małopolski",woj:"malopolskie",region:"poludnie",short:"UNESCO, gotyckie kościoły drewniane",km:280,lat:49.8500,lng:20.3000,desc:"UNESCO 2003 — gotyckie drewniane kościoły XV–XVI w.: Binarowa, Blizne, Haczów, Lipnica Murowana i inne."},
+    {name:"Kopalnia Srebra Tarnowskie Góry",woj:"slaskie",region:"poludnie",short:"UNESCO 2017, spływ łódką",km:220,lat:50.4444,lng:18.8617,desc:"Tarnowskie Góry UNESCO 2017 — XVI-wieczne górnictwo kruszcowe. Spływ łódką po podziemnych kanałach."},
+    {name:"Kościoły Pokoju — Świdnica i Jawor",woj:"dolnoslaskie",region:"zachod",short:"UNESCO, drewno i glina",km:65,lat:50.8489,lng:16.4878,desc:"Kościoły Pokoju UNESCO 2001 — największe drewniane kościoły protestanckie Europy (1651)."},
+    {name:"Puszcza Białowieska",woj:"podlaskie",region:"wschod",short:"UNESCO, ostatnia puszcza Europy",km:360,lat:52.7022,lng:23.8597,desc:"Puszcza Białowieska UNESCO — Rezerwat Biosfery i Pomnik Światowego Dziedzictwa. Ostatni naturalny las nizinny Europy."},
+    {name:"Park Mużakowski — Łęknica",woj:"lubuskie",region:"zachod",short:"UNESCO, park krajobrazowy, polsko-niemiecki",km:190,lat:51.5667,lng:14.7333,desc:"Park Mużakowski UNESCO — transgraniczny park krajobrazowy (PL-DE) z XIX w. Unikalne połączenie architektury parkowej z krajobrazem doliny Nysy."},
+  ]},
+  { cat:"🪨 Skały i formacje", color:"#7a6a40", items:[
+    {name:"Jura Krakowsko-Częstochowska",woj:"malopolskie",region:"poludnie",short:"Szlak Orlich Gniazd, wapienne skałki",km:220,lat:50.4500,lng:19.6000,desc:"Jura z Szlakiem Orlich Gniazd — 25 zamków na wapiennych wzgórzach. Białe skałki z jaskiniami. Wspinaczka i spacery."},
+    {name:"Błędne Skały — Góry Stołowe",woj:"dolnoslaskie",region:"zachod",short:"Skalny labirynt piaskowców",km:120,lat:50.4833,lng:16.3000,kids:true,desc:"Labirynt piaskowcowych bloków z ciasymi przejściami i drabinkami. Jeden z najciekawszych szlaków Gór Stołowych."},
+    {name:"Maczuga Herkulesa — Ojców",woj:"malopolskie",region:"poludnie",short:"Wapienno skałka 25 m, symbol Jury",km:280,lat:50.2119,lng:19.8278,desc:"Maczuga Herkulesa — wapienno ostańcowa skałka 25 m, symbol Jury. Obok zamek Pieskowa Skała."},
+    {name:"Organy Wielisławskie",woj:"dolnoslaskie",region:"zachod",short:"Bazaltowe kolumny jak piszczałki organów",km:105,lat:51.0500,lng:15.9333,desc:"Spektakularne bazaltowe kolumny sześciokątne — jak gigantyczne piszczałki organowe. Rezerwat geologii wulkanicznej."},
+    {name:"Sokoliki — Rudawy Janowickie",woj:"dolnoslaskie",region:"zachod",short:"Granitowe igły, widok na Karkonosze",km:120,lat:50.8667,lng:15.9667,desc:"Granitowe igły skalne z widokiem na Karkonosze. Popularne miejsce wspinaczkowe w Rudawach Janowickich."},
+    {name:"Kolorowe Jeziorka — Rudawy",woj:"dolnoslaskie",region:"zachod",short:"Turkusowe jeziorka po kopalni uranu",km:125,lat:50.8500,lng:15.9000,desc:"Turkusowe, zielone i błękitne zbiorniki po kopalni uranu. Fotogeniczne — kąpiel zabroniona."},
+    {name:"Skałki wulkaniczne — Góry Kaczawskie",woj:"dolnoslaskie",region:"zachod",short:"Agaty, ametysty, geologia wulkaniczna",km:110,lat:51.0500,lng:15.9000,desc:"Góry Kaczawskie — raj geologiczny. Na polach można znaleźć agaty, ametysty i inne kamienie półszlachetne."},
+    {name:"Przełom Dunajca — Pieniny",woj:"malopolskie",region:"poludnie",short:"Wapienne klify, spływ tratwą",km:305,lat:49.4167,lng:20.3667,kids:true,desc:"Przełom Dunajca przez Pieniny — spływ tratwą w wapiennych klifach to jedna z najpiękniejszych tras wodnych w Polsce."},
+    {name:"Diabelskie Mosty — Łuk Mużakowa",woj:"lubuskie",region:"zachod",short:"Łukowe skalne mosty, formacje piaskowca",km:195,lat:51.5000,lng:14.8000,desc:"Łuk Mużakowa z Diabelskimi Mostami — naturalne arkady z piaskowca. UNESCO za wyjątkową rzeźbę polodowcową."},
+    {name:"Skamieniałe Miasto — Ciężkowice",woj:"malopolskie",region:"poludnie",short:"Skałki piaskowca, Beskid Niski",km:305,lat:49.7833,lng:21.0167,kids:true,desc:"Skamieniałe Miasto w Ciężkowicach — skupisko skałek piaskowcowych z nadanymi nazwami (Czarownica, Grunwald itp.). Bajkowy las."},
+  ]},
+  { cat:"🗺️ Szlaki tematyczne", color:"#6a7a3a", items:[
+    {name:"Szlak Orlich Gniazd",woj:"malopolskie",region:"poludnie",short:"25 zamków na wapiennych wzgórzach Jury",km:220,lat:50.4500,lng:19.6000,desc:"164 km przez 25 warowni na Jurze. Ogrodzieniec, Pieskowa Skała, Mirów, Bobolice. Kilka dni wędrówki."},
+    {name:"Szlak Piastowski",woj:"wielkopolskie",region:"centrum",short:"Gniezno, Poznań, Kruszwica — kolebka Polski",km:290,lat:52.5344,lng:17.5872,desc:"Przez Gniezno, Poznań i Ostrów Lednicki. Miejsca chrzcin Polski, pierwsza katedra. Kolebka polskiej państwowości."},
+    {name:"Szlak Architektury Drewnianej — Małopolska",woj:"malopolskie",region:"poludnie",short:"1500 km, 350 obiektów, kościoły UNESCO",km:280,lat:49.8500,lng:20.3000,desc:"1500 km przez 350 obiektów — kościoły gotyckie (część UNESCO), dwory, spichlerze, wiatraki."},
+    {name:"Via Regia — Droga Królewska",woj:"dolnoslaskie",region:"zachod",short:"Najstarszy szlak Europy, Wrocław–Kraków",km:0,lat:51.1079,lng:17.0385,desc:"Jeden z najstarszych szlaków handlowych Europy — przez Wrocław i Kraków. Szlak kulturowy Rady Europy."},
+    {name:"Szlak Nadmorski — Bałtyk",woj:"pomorskie",region:"polnoc",short:"620 km klifami i plażami wzdłuż Bałtyku",km:380,lat:54.4667,lng:17.0000,desc:"Szlak Nadmorski 620 km od Świnoujścia do Władysławowa. Klify Orłowskie, wydmy Słowińskie, plaże Półwyspu Helskiego."},
+    {name:"Green Velo — Wschodnia Polska",woj:"podkarpackie",region:"wschod",short:"2000 km trasa rowerowa przez 5 województw",km:320,lat:50.5000,lng:22.5000,desc:"Green Velo — najdłuższa trasa rowerowa Polski. 2000 km przez Bieszczady, Roztocze, Polesie i Puszczę Białowieską."},
+    {name:"Droga Św. Jakuba — Via Jagiellonica",woj:"malopolskie",region:"poludnie",short:"Polskie Camino de Santiago",km:270,lat:50.0614,lng:19.9372,desc:"Polska Droga Świętego Jakuba z Krakowa i Gniezna przez historyczne miasta ku Santiago de Compostela."},
+    {name:"Szlak Zamków Gotyckich — Warmia",woj:"warminsko-mazurskie",region:"polnoc",short:"Krzyżackie zamki Warmii i Mazur",km:340,lat:53.8000,lng:20.5000,desc:"Szlak przez gotyckie zamki krzyżackie: Malbork, Nidzica, Lidzbark Warmiński, Kętrzyn, Szczytno, Ostróda."},
+    {name:"Szlak Architektury Przemysłowej — Śląsk",woj:"slaskie",region:"poludnie",short:"Industrialne dziedzictwo Górnego Śląska",km:220,lat:50.2570,lng:18.9949,desc:"Szlak przez zabytkowe obiekty przemysłowe Śląska: Kopalnia Guido, Galeria Szyb Wilson, Muzeum Śląskie. Unikalne dziedzictwo postindustrialne."},
+  ]},
+  { cat:"🦉 Przyroda i fauna", color:"#3a6a3a", items:[
+    {name:"Rezerwat Żubra — Białowieża",woj:"podlaskie",region:"wschod",short:"Żubry z bliska, ostatnie stado w Europie",km:360,lat:52.7022,lng:23.8597,kids:true,desc:"Jedyne miejsce gwarantowanej obserwacji żubrów przez cały rok. Łosie, jelenie, dziki. Muzeum Przyrodniczo-Leśne."},
+    {name:"Rezerwat Ptaków — Zatoka Pucka",woj:"pomorskie",region:"polnoc",short:"Tysiące ptaków wędrownych, ornitolodzy",km:395,lat:54.6333,lng:18.5000,desc:"Zatoka Pucka — raj ornitologiczny. Łabędzie, rybołowy, kaczki. Punkt odpoczynku ptaków wędrownych."},
+    {name:"Żubry — Pszczyna",woj:"slaskie",region:"poludnie",short:"Hodowla żubrów w parku zamkowym",km:230,lat:49.9833,lng:18.9500,kids:true,desc:"Hodowla żubrów w Pszczynie od 1865 r. Park zamkowy i pałac Hochbergów z muzeum."},
+    {name:"Biebrzańskie Bagna — łosie i ptaki",woj:"podlaskie",region:"wschod",short:"Biebrzański PN, torfowiska, łosie",km:325,lat:53.5000,lng:22.8000,desc:"Biebrzański PN — rozległe mokradła z łosiami, czaplami i tysiącami bocianów. Raj ornitologiczny. Spływy Biebrzą."},
+    {name:"Kozice i świstaki — Tatry",woj:"malopolskie",region:"poludnie",short:"Tatrzańska fauna, Kasprowy, Pięć Stawów",km:350,lat:49.2725,lng:19.9817,kids:true,desc:"TPN — jedyne miejsce w Polsce z kozicami i świstakami. Kozice na Kasprowym, świstaki w Dolinie Pięciu Stawów."},
+    {name:"Bociany — Żywiec i okolice",woj:"slaskie",region:"poludnie",short:"Setki gniazd, jedna z największych kolonii",km:265,lat:49.6833,lng:19.2167,desc:"Okolice Żywca z jedną z największych kolonii bocianów białych. Idealne dla fotografii przyrodniczej maj–sierpień."},
+    {name:"Orły i bieliki — Roztocze",woj:"lubelskie",region:"wschod",short:"Bieliki, orły krzykliwe, Roztoczański PN",km:280,lat:50.5833,lng:23.0500,desc:"Roztoczański PN z bielikami i orlami krzykliwymi. Koniki polskie — jedyna dzika populacja tarpanów."},
+    {name:"Morświny — Zatoka Gdańska",woj:"pomorskie",region:"polnoc",short:"Bałtyckie morświny, obserwacje morskie",km:375,lat:54.5000,lng:18.7000,desc:"Zatoka Gdańska to jeden z ostatnich bastionów morświna bałtyckiego. Rejs obserwacyjny z Helu lub Gdyni."},
+    {name:"Nocne safari — Bieszczady",woj:"podkarpackie",region:"wschod",short:"Wilki, rysie, niedźwiedzie — wyprawy z przewodnikiem",km:380,lat:49.1000,lng:22.6000,desc:"Bieszczady — nocne wyprawy tropicielskie z przewodnikiem PTTK. Wilki, rysie, żbiki. Jeden z ostatnich bastionów dużych drapieżników."},
+    {name:"Stawy Milickie — ptaki",woj:"dolnoslaskie",region:"zachod",short:"Czaplie, żurawie, kormorany, Barycz",km:80,lat:51.5667,lng:17.4167,desc:"Stawy Milickie nad Baryczą — raj ornitologiczny. Czaple siwe, żurawie, kormorany, kaczki. Najważniejszy obszar ptaków w zachodniej Polsce."},
+  ]},
+  { cat:"🎡 Uzdrowiska i ciekawostki", color:"#6a5a9a", items:[
+    {name:"Krynica-Zdrój",woj:"malopolskie",region:"poludnie",short:"Królowa Polskich Uzdrowisk, Beskid",km:330,lat:49.4167,lng:20.9667,desc:"Krynica — Królowa Polskich Uzdrowisk. Pijalnia Wód, kolejka na Górę Parkową, Muzeum Szymanowskiego."},
+    {name:"Szklarska Poręba — wodospad",woj:"dolnoslaskie",region:"zachod",short:"Wodospad Kamieńczyka, gondola Szrenica",km:155,lat:50.8236,lng:15.5236,kids:true,desc:"Wodospad Kamieńczyka (27 m), kolejka gondolowa na Szrenicę. Klimatyczne miasto-kurort w Karkonoszach."},
+    {name:"Zakopane — stolica Tatr",woj:"malopolskie",region:"poludnie",short:"Krupówki, styl zakopiański, Tatry",km:345,lat:49.2992,lng:19.9492,kids:true,desc:"Góralska stolica Polski. Krupówki, styl zakopiański Witkiewicza, Gubałówka z panoramą Tatr. Oscypek i kapcie!"},
+    {name:"Cieplice Śląskie-Zdrój",woj:"dolnoslaskie",region:"zachod",short:"Najstarsze uzdrowisko w Polsce, termy",km:145,lat:50.8569,lng:15.7083,desc:"Najstarsze uzdrowisko w Polsce (XII w.) przy gorących źródłach. Park z norweskim pawilonem."},
+    {name:"Kopalnia Soli Bochnia",woj:"malopolskie",region:"poludnie",short:"UNESCO, kopalnia z XII w., sport pod ziemią",km:280,lat:49.9717,lng:20.4375,kids:true,desc:"Najstarsza kopalnia soli w Polsce (XII w.) — UNESCO. Siatkówka i jazda konna pod ziemią. Sanatoria solankowe."},
+    {name:"Paczków — Polskie Carcassonne",woj:"opolskie",region:"zachod",short:"Jedyne polskie miasto z kompletnymi murami",km:130,lat:50.4694,lng:17.0122,desc:"Paczków — jedyne miasto w Polsce z kompletnie zachowanymi murami obronnymi z basztami, bramami i fosą. Małe, ale wyjątkowe."},
+    {name:"Kazimierz Dolny — jarmark i sztuka",woj:"lubelskie",region:"wschod",short:"Miasto malarzy, jarmarki, koguty z ciasta",km:260,lat:51.3189,lng:21.9517,kids:true,desc:"Kazimierz Dolny — centrum artystyczne nad Wisłą. Jarmark Sztuki Ludowej, słynne 'koguty z ciasta'. Plener malarski od ponad 100 lat."},
+    {name:"Łańcut — festiwal muzyczny",woj:"podkarpackie",region:"wschod",short:"Festiwal Muzyki Kameralnej w zamku",km:310,lat:50.0667,lng:22.2333,desc:"Zamek w Łańcucie z corocznym Festiwalem Muzyki Kameralnej — jeden z najważniejszych w Polsce. Komnaty i kolekcja powozów."},
+    {name:"Tokarnia — Świętokrzyski Park Etnograficzny",woj:"swietokrzyskie",region:"centrum",short:"Skansen zagrody wiejskiej, rzemiosło",km:235,lat:50.8667,lng:20.6333,kids:true,desc:"Świętokrzyski Park Etnograficzny w Tokarni — jeden z największych skansenów w Polsce. Autentyczne zagrody z XIX w."},
+    {name:"Żelazowa Wola — urodziny Chopina",woj:"mazowieckie",region:"centrum",short:"Dom rodzinny Chopina, park, koncerty",km:340,lat:52.2000,lng:20.3167,desc:"Żelazowa Wola — dom rodzinny Fryderyka Chopina. Park z koncertami w sezonie letnim. Muzeum z pamiątkami kompozytora."},
+  ]}
+];
+
+// ════════════════════════════════════════════════════
+// KONFIGURACJA
+// ════════════════════════════════════════════════════
+const WROCLAW = {lat:51.1079, lng:17.0385};
+const REGION_WOJ = {
+  poludnie: ['malopolskie','slaskie','podkarpackie','swietokrzyskie','opolskie'],
+  zachod:   ['dolnoslaskie','lubuskie'],
+  centrum:  ['mazowieckie','lodzkie','kujawsko-pomorskie','wielkopolskie'],
+  wschod:   ['lubelskie','podlaskie','warminsko-mazurskie'],
+  polnoc:   ['pomorskie','zachodniopomorskie']
+};
+
+// ════════════════════════════════════════════════════
+// STAN
+// ════════════════════════════════════════════════════
+let checked     = JSON.parse(localStorage.getItem('pl-checked')  || '{}');
+let userData    = JSON.parse(localStorage.getItem('pl-userdata') || '{}');
+let plannerItems= JSON.parse(localStorage.getItem('pl-planner')  || '[]');
+let currentFilter='all', currentSearch='', currentRegion='all';
+let currentWoj='', currentSort='default', kidsOnly=false;
+let currentModalKey=null;
+let leafletMap=null, mapMarkers=[], mapFilterMode='all';
+let globalIdx=1;
+
+function getKey(ci,ii){return `${ci}_${ii}`;}
+function save()   {localStorage.setItem('pl-checked',  JSON.stringify(checked));}
+function saveUDL(){localStorage.setItem('pl-userdata', JSON.stringify(userData));}
+function savePl() {localStorage.setItem('pl-planner',  JSON.stringify(plannerItems));}
+
+// ════════════════════════════════════════════════════
+// ODLEGŁOŚĆ HAVERSINE
+// ════════════════════════════════════════════════════
+function haversine(lat1,lng1,lat2,lng2){
+  const R=6371,dL=(lat2-lat1)*Math.PI/180,dG=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dL/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dG/2)**2;
+  return Math.round(R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)));
+}
+function dist(item){
+  return item.lat ? haversine(WROCLAW.lat,WROCLAW.lng,item.lat,item.lng) : (item.km||0);
+}
+
+// ════════════════════════════════════════════════════
+// ZAKŁADKI
+// ════════════════════════════════════════════════════
+function switchTab(name){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('tbtn-'+name).classList.add('active');
+  if(name==='mapa')       setTimeout(initLeafletMap,100);
+  if(name==='statystyki') renderStats();
+  if(name==='planer')     renderPlanner();
+}
+
+// ════════════════════════════════════════════════════
+// FILTRY
+// ════════════════════════════════════════════════════
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('#tab-lista .controls button[id^=filter]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+function setRegion(r,btn){
+  currentRegion=r; currentWoj='';
+  document.getElementById('woj-filter').value='';
+  document.querySelectorAll('.rchip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+function setWoj(v){
+  currentWoj=v;
+  if(v){ currentRegion='all'; document.querySelectorAll('.rchip').forEach(b=>b.classList.remove('active')); document.querySelector('.rchip[data-region="all"]').classList.add('active'); }
+  applyFilters();
+}
+function setSort(v){ currentSort=v; render(); }
+function setSearch(v){ currentSearch=v.toLowerCase().trim(); applyFilters(); }
+function toggleKids(btn){ kidsOnly=!kidsOnly; btn.classList.toggle('active',kidsOnly); applyFilters(); }
+function confirmReset(){ if(confirm('Wyczyścić wszystkie zaliczenia i dane?')){ checked={}; userData={}; save(); saveUDL(); render(); } }
+function toggleDark(){ document.body.classList.toggle('dark'); }
+
+function passGeo(item){
+  if(currentWoj) return item.woj===currentWoj;
+  if(currentRegion!=='all') return (REGION_WOJ[currentRegion]||[]).includes(item.woj);
+  return true;
+}
+
+function applyFilters(){
+  let any=false;
+  document.querySelectorAll('.item').forEach(el=>{
+    const [ci,ii]=el.dataset.key.split('_').map(Number);
+    const item=DATA[ci].items[ii];
+    const done=!!checked[el.dataset.key];
+    const pf=currentFilter==='all'||(currentFilter==='done'&&done)||(currentFilter==='todo'&&!done);
+    const ps=!currentSearch||el.dataset.name.includes(currentSearch);
+    const pg=passGeo(item);
+    const pk=!kidsOnly||(item.kids===true);
+    const vis=pf&&ps&&pg&&pk;
+    el.classList.toggle('hidden',!vis);
+    if(vis)any=true;
+  });
+  document.querySelectorAll('.category-section').forEach(sec=>{
+    sec.classList.toggle('hidden',sec.querySelectorAll('.item:not(.hidden)').length===0);
+  });
+  let nr=document.getElementById('no-results');
+  if(!any){
+    if(!nr){nr=document.createElement('div');nr.id='no-results';nr.className='no-results';nr.textContent='Brak wyników — zmień filtry lub wyszukiwanie';document.getElementById('app').appendChild(nr);}
+    nr.style.display='block';
+  } else if(nr) nr.style.display='none';
+  updateStats();
+}
+
+// ════════════════════════════════════════════════════
+// BUDOWANIE ELEMENTU ATRAKCJI
+// ════════════════════════════════════════════════════
+function buildItemEl(item,ci,ii,key,done,ud,idx){
+  const inPlan=plannerItems.includes(key);
+  const el=document.createElement('div');
+  el.className='item'+(done?' checked':'');
+  el.dataset.key=key;
+  el.dataset.name=item.name.toLowerCase();
+  el.dataset.kids=item.kids?'1':'0';
+  const km=dist(item);
+  el.innerHTML=`
+    <span class="item-idx">${String(idx).padStart(3,'0')}</span>
+    <span class="checkbox">${done?'✓':''}</span>
+    <div class="item-body">
+      <div class="item-name">${item.name}</div>
+      <div class="item-short">${item.short||''}</div>
+      ${ud.rating>0?`<div class="item-stars">${'★'.repeat(ud.rating)}${'☆'.repeat(5-ud.rating)}</div>`:''}
+      ${ud.note?`<div class="item-note-badge">📝 ${ud.note.slice(0,40)}${ud.note.length>40?'…':''}</div>`:''}
+      <div class="item-meta">
+        <span class="badge badge-woj">${item.woj||''}</span>
+        ${km?`<span class="badge badge-dist">📍 ${km} km</span>`:''}
+        ${item.kgp?`<span class="badge badge-kgp">👑 KGP</span>`:''}
+        ${item.kids?`<span class="badge badge-kids">👶</span>`:''}
+        <button class="info-btn" onclick="openModal(${ci},${ii},'${key}')">📖 opis</button>
+        <button class="add-to-plan-btn${inPlan?' in-plan':''}" onclick="togglePlanItem('${key}',this)">+ Plan</button>
+      </div>
+    </div>`;
+  el.querySelector('.checkbox').addEventListener('click',e=>{e.stopPropagation();toggle(key,el);});
+  el.querySelector('.item-name').addEventListener('click',e=>{e.stopPropagation();toggle(key,el);});
+  return el;
+}
+
+// ════════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════════
+function render(){
+  globalIdx=1;
+  const app=document.getElementById('app');
+  app.innerHTML='';
+
+  if(currentSort!=='default'){
+    let all=[];
+    DATA.forEach((cat,ci)=>cat.items.forEach((item,ii)=>{
+      const key=getKey(ci,ii);
+      all.push({cat,ci,item,ii,key,done:!!checked[key],ud:userData[key]||{}});
+    }));
+    if(currentSort==='az') all.sort((a,b)=>a.item.name.localeCompare(b.item.name,'pl'));
+    else if(currentSort==='dist-asc') all.sort((a,b)=>dist(a.item)-dist(b.item));
+    else if(currentSort==='dist-desc') all.sort((a,b)=>dist(b.item)-dist(a.item));
+    else if(currentSort==='rating') all.sort((a,b)=>((b.ud.rating||0)-(a.ud.rating||0)));
+    const sec=document.createElement('div'); sec.className='category-section';
+    const hdr=document.createElement('div'); hdr.className='category-header';
+    hdr.innerHTML=`<span>↕</span><h2>Posortowane</h2><span class="cat-count">${all.length}</span><span class="cat-toggle">▾</span>`;
+    hdr.addEventListener('click',()=>sec.classList.toggle('collapsed'));
+    const list=document.createElement('div'); list.className='items-list';
+    all.forEach(({ci,item,ii,key,done,ud})=>list.appendChild(buildItemEl(item,ci,ii,key,done,ud,globalIdx++)));
+    sec.appendChild(hdr); sec.appendChild(list); app.appendChild(sec);
+    applyFilters(); return;
+  }
+
+  DATA.forEach((cat,ci)=>{
+    const sec=document.createElement('div'); sec.className='category-section';
+    const hdr=document.createElement('div'); hdr.className='category-header';
+    const icon=cat.cat.split(' ')[0];
+    const name=cat.cat.replace(/^\S+ /,'');
+    const catDone=cat.items.filter((_,ii)=>!!checked[getKey(ci,ii)]).length;
+    hdr.innerHTML=`<span style="font-size:1.1rem">${icon}</span><h2>${name}</h2><span class="cat-count">${catDone}/${cat.items.length}</span><span class="cat-toggle">▾</span>`;
+    hdr.style.borderLeft=`3px solid ${cat.color}`;
+    hdr.addEventListener('click',()=>sec.classList.toggle('collapsed'));
+    const list=document.createElement('div'); list.className='items-list';
+    cat.items.forEach((item,ii)=>{
+      const key=getKey(ci,ii);
+      list.appendChild(buildItemEl(item,ci,ii,key,!!checked[key],userData[key]||{},globalIdx++));
+    });
+    sec.appendChild(hdr); sec.appendChild(list); app.appendChild(sec);
+    app.appendChild(Object.assign(document.createElement('div'),{className:'divider'}));
+  });
+  applyFilters();
+}
+
+// ════════════════════════════════════════════════════
+// TOGGLE
+// ════════════════════════════════════════════════════
+function toggle(key,el){
+  if(checked[key]) delete checked[key]; else checked[key]=Date.now();
+  save();
+  const done=!!checked[key];
+  el.classList.toggle('checked',done);
+  el.querySelector('.checkbox').textContent=done?'✓':'';
+  updateStats();
+}
+
+// ════════════════════════════════════════════════════
+// STATYSTYKI — pasek górny
+// ════════════════════════════════════════════════════
+function updateStats(){
+  const total=DATA.reduce((s,c)=>s+c.items.length,0);
+  const done=Object.keys(checked).length;
+  document.getElementById('stats-line').innerHTML=`Zaliczone: <strong>${done}</strong> / ${total}`;
+  document.getElementById('header-subtitle').textContent=`${done} z ${total} odkrytych`;
+  document.getElementById('progress-fill').style.width=(total>0?done/total*100:0)+'%';
+}
+
+// ════════════════════════════════════════════════════
+// STATYSTYKI — panel
+// ════════════════════════════════════════════════════
+function renderStats(){
+  const total=DATA.reduce((s,c)=>s+c.items.length,0);
+  const done=Object.keys(checked).length;
+  const rated=Object.values(userData).filter(u=>u.rating>0);
+  const avg=rated.length?rated.reduce((s,u)=>s+u.rating,0)/rated.length:0;
+
+  let html=`<div class="stats-section"><div class="stats-section-title">Ogólny postęp</div>
+  <div class="stats-overall">
+    <div class="stat-card"><div class="stat-card-num">${done}</div><div class="stat-card-label">Zaliczonych</div></div>
+    <div class="stat-card"><div class="stat-card-num">${total-done}</div><div class="stat-card-label">Pozostało</div></div>
+    <div class="stat-card"><div class="stat-card-num">${Math.round(done/total*100)}%</div><div class="stat-card-label">Procent</div></div>
+    <div class="stat-card"><div class="stat-card-num">${avg.toFixed(1)}</div><div class="stat-card-label">Śr. ocena</div></div>
+  </div></div>`;
+
+  html+=`<div class="stats-section"><div class="stats-section-title">Postęp per kategoria</div>`;
+  DATA.forEach((cat,ci)=>{
+    const cd=cat.items.filter((_,ii)=>!!checked[getKey(ci,ii)]).length;
+    const pct=cat.items.length?cd/cat.items.length*100:0;
+    html+=`<div class="cat-bar-row">
+      <div class="cat-bar-icon">${cat.cat.split(' ')[0]}</div>
+      <div class="cat-bar-name">${cat.cat.replace(/^\S+ /,'')}</div>
+      <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pct}%;background:${cat.color}"></div></div>
+      <div class="cat-bar-count">${cd}/${cat.items.length}</div>
+    </div>`;
+  });
+  html+='</div>';
+
+  const BADGES=[
+    {icon:'🌱',name:'Pierwszy krok',  desc:'Zalicz 1 atrakcję',       ok:()=>done>=1},
+    {icon:'🔟',name:'Dziesiątka',     desc:'Zalicz 10 atrakcji',      ok:()=>done>=10},
+    {icon:'🥈',name:'Pięćdziesiątka',desc:'Zalicz 50 atrakcji',      ok:()=>done>=50},
+    {icon:'🥇',name:'Setka',          desc:'Zalicz 100 atrakcji',     ok:()=>done>=100},
+    {icon:'🏆',name:'Dwieście',       desc:'Zalicz 200 atrakcji',     ok:()=>done>=200},
+    {icon:'👑',name:'Korona Zdobyta', desc:'10 szczytów KGP',         ok:()=>DATA[0].items.filter((_,ii)=>!!checked[getKey(0,ii)]).length>=10},
+    {icon:'🏔️',name:'Zdobywca Korony',desc:'Wszystkie 28 KGP',       ok:()=>DATA[0].items.filter((_,ii)=>!!checked[getKey(0,ii)]).length>=DATA[0].items.length},
+    {icon:'⛰️',name:'Taternik',       desc:'Zdobądź Rysy',            ok:()=>!!checked[getKey(0,0)]},
+    {icon:'🦬',name:'Król Puszcz',    desc:'Odwiedź Białowieżę',      ok:()=>!!checked[getKey(8,1)]},
+    {icon:'🌿',name:'Parkowicz',      desc:'5 parków narodowych',      ok:()=>DATA[8].items.filter((_,ii)=>!!checked[getKey(8,ii)]).length>=5},
+    {icon:'⚓',name:'Wilk Morski',    desc:'5 miejsc nad Bałtykiem',  ok:()=>DATA[9].items.filter((_,ii)=>!!checked[getKey(9,ii)]).length>=5},
+    {icon:'🏛️',name:'UNESCO Kolekcjoner',desc:'Wszystkie miejsca UNESCO', ok:()=>DATA[12].items.filter((_,ii)=>!!checked[getKey(12,ii)]).length>=DATA[12].items.length},
+    {icon:'📜',name:'Historyk',       desc:'10 miejsc historii',       ok:()=>DATA[5].items.filter((_,ii)=>!!checked[getKey(5,ii)]).length>=10},
+    {icon:'🔭',name:'Astronom',       desc:'Odwiedź Frombork',         ok:()=>DATA[2].items.some((it,ii)=>it.name.includes('Frombork')&&!!checked[getKey(2,ii)])},
+  ];
+  html+=`<div class="stats-section"><div class="stats-section-title">Odznaki</div><div class="badges-grid">`;
+  BADGES.forEach(b=>{
+    const e=b.ok();
+    html+=`<div class="badge-card ${e?'earned':'locked'}"><div class="badge-icon">${b.icon}</div><div class="badge-name">${b.name}</div><div class="badge-desc">${b.desc}</div></div>`;
+  });
+  html+='</div></div>';
+  document.getElementById('stats-content').innerHTML=html;
+}
+
+// ════════════════════════════════════════════════════
+// MODAL
+// ════════════════════════════════════════════════════
+window.openModal=function(ci,ii,key){
+  currentModalKey=key;
+  const item=DATA[ci].items[ii];
+  document.getElementById('modal-title').textContent=item.name;
+  const wrap=document.getElementById('modal-img-wrap');
+  wrap.innerHTML=`<div class="modal-img-placeholder">${DATA[ci].cat.split(' ')[0]}</div>`;
+  const km=dist(item);
+  document.getElementById('modal-badges').innerHTML=`
+    <span class="modal-badge" style="background:rgba(232,117,58,.15);color:#8b3500;">${item.woj||''}</span>
+    ${km?`<span class="modal-badge" style="background:rgba(74,127,165,.15);color:#2a5a80;">📍 ${km} km od Wrocławia</span>`:''}
+    ${item.kgp?`<span class="modal-badge" style="background:rgba(232,117,58,.25);color:#6b2a00;">👑 KGP</span>`:''}
+    ${item.kids?`<span class="modal-badge" style="background:rgba(74,127,165,.15);color:#2a5a80;">👶 Rodzinne</span>`:''}`;
+  const btnRow=document.getElementById('modal-btn-row');
+  btnRow.innerHTML=item.lat
+    ?`<a class="modal-nav-btn" href="https://maps.google.com/?q=${item.lat},${item.lng}" target="_blank">🗺️ Google Maps</a>
+       <a class="modal-nav-btn" style="background:var(--sky);" href="https://www.openstreetmap.org/?mlat=${item.lat}&mlon=${item.lng}#map=14/${item.lat}/${item.lng}" target="_blank">📍 OSM</a>`:'';
+  document.getElementById('modal-desc').textContent=item.desc||'';
+  const ud=userData[key]||{};
+  document.getElementById('modal-date').value=ud.date||'';
+  document.getElementById('modal-note').value=ud.note||'';
+  const stEl=document.getElementById('modal-stars');
+  stEl.innerHTML=[1,2,3,4,5].map(v=>`<span class="star${(ud.rating||0)>=v?' active':''}" data-v="${v}" onclick="setRating('${key}',${v})">★</span>`).join('');
+  document.getElementById('modal-overlay').classList.add('open');
+};
+
+window.closeModal=function(){
+  document.getElementById('modal-overlay').classList.remove('open');
+  saveUD_modal();
+};
+window.closeModalOverlay=function(e){
+  if(e.target===document.getElementById('modal-overlay')) closeModal();
+};
+
+function saveUD_modal(){
+  if(!currentModalKey)return;
+  if(!userData[currentModalKey])userData[currentModalKey]={};
+  userData[currentModalKey].date=document.getElementById('modal-date').value;
+  userData[currentModalKey].note=document.getElementById('modal-note').value;
+  saveUDL();
+}
+window.saveUD=saveUD_modal;
+
+window.setRating=function(key,v){
+  if(!userData[key])userData[key]={};
+  userData[key].rating=userData[key].rating===v?0:v;
+  saveUDL();
+  document.querySelectorAll('#modal-stars .star').forEach(s=>s.classList.toggle('active',Number(s.dataset.v)<=(userData[key].rating||0)));
+  const el=document.querySelector(`.item[data-key="${key}"]`);
+  if(el){
+    let se=el.querySelector('.item-stars');
+    if(!se){se=document.createElement('div');se.className='item-stars';el.querySelector('.item-body').insertBefore(se,el.querySelector('.item-meta'));}
+    se.textContent=userData[key].rating>0?'★'.repeat(userData[key].rating)+'☆'.repeat(5-userData[key].rating):'';
+  }
+};
+
+// ════════════════════════════════════════════════════
+// PLANER — TSP
+// ════════════════════════════════════════════════════
+window.togglePlanItem=function(key,btn){
+  const idx=plannerItems.indexOf(key);
+  if(idx>=0){ plannerItems.splice(idx,1); }
+  else { if(plannerItems.length>=8){alert('Maksymalnie 8 atrakcji w trasie.');return;} plannerItems.push(key); }
+  savePl(); updatePlannerBadge();
+  document.querySelectorAll('.add-to-plan-btn').forEach(b=>{
+    const k=b.closest('.item')?.dataset.key;
+    if(k) b.classList.toggle('in-plan',plannerItems.includes(k));
+  });
+  if(document.getElementById('tab-planer').classList.contains('active')) renderPlanner();
+};
+
+function updatePlannerBadge(){
+  const b=document.getElementById('planner-badge');
+  b.textContent=plannerItems.length;
+  b.style.display=plannerItems.length>0?'block':'none';
+}
+
+function keyToItem(key){
+  const [ci,ii]=key.split('_').map(Number);
+  return DATA[ci]?.items[ii];
+}
+
+function solveTSP(stops){
+  if(stops.length<=1) return {order:stops.map((_,i)=>i),dist:0};
+  const n=stops.length;
+  let best=null,bestD=Infinity;
+  const perm=(arr,cur=[])=>{
+    if(cur.length===n){
+      let d=haversine(WROCLAW.lat,WROCLAW.lng,stops[cur[0]].item.lat,stops[cur[0]].item.lng);
+      for(let i=0;i<n-1;i++) d+=haversine(stops[cur[i]].item.lat,stops[cur[i]].item.lng,stops[cur[i+1]].item.lat,stops[cur[i+1]].item.lng);
+      d+=haversine(stops[cur[n-1]].item.lat,stops[cur[n-1]].item.lng,WROCLAW.lat,WROCLAW.lng);
+      if(d<bestD){bestD=d;best=[...cur];} return;
+    }
+    arr.forEach((v,i)=>perm([...arr.slice(0,i),...arr.slice(i+1)],[...cur,v]));
+  };
+  if(n<=7) perm([...Array(n).keys()]);
+  else { best=Array.from({length:n},(_,i)=>i); }
+  return {order:best,dist:bestD};
+}
+
+function renderPlanner(){
+  const el=document.getElementById('planner-content');
+  if(plannerItems.length===0){el.innerHTML='<div class="planner-empty">Brak atrakcji w planerze. Dodaj przez „+ Plan" na liście.</div>';return;}
+  const stops=plannerItems.map(key=>({key,item:keyToItem(key)})).filter(s=>s.item?.lat);
+  if(stops.length===0){el.innerHTML='<div class="planner-empty">Dodane atrakcje nie mają współrzędnych GPS.</div>';return;}
+  const {order}=solveTSP(stops);
+  const ord=order.map(i=>stops[i]);
+  let total=haversine(WROCLAW.lat,WROCLAW.lng,ord[0].item.lat,ord[0].item.lng);
+  let html=`<div class="planner-route"><div class="planner-route-item"><span class="planner-route-step">🏠</span><span class="planner-route-name">Wrocław (start)</span></div>`;
+  ord.forEach((s,i)=>{
+    const prev=i===0?WROCLAW:{lat:ord[i-1].item.lat,lng:ord[i-1].item.lng};
+    const d=haversine(prev.lat,prev.lng,s.item.lat,s.item.lng);
+    if(i>0)total+=d;
+    html+=`<div class="planner-route-item"><span class="planner-route-step">${i+1}</span><span class="planner-route-name">${s.item.name}</span><span class="planner-route-dist">+${d} km</span><button class="planner-remove-btn" onclick="togglePlanItem('${s.key}',this)">✕</button></div>`;
+  });
+  const back=haversine(ord[ord.length-1].item.lat,ord[ord.length-1].item.lng,WROCLAW.lat,WROCLAW.lng);
+  total+=back;
+  html+=`<div class="planner-route-item"><span class="planner-route-step">🏠</span><span class="planner-route-name">Wrocław (powrót)</span><span class="planner-route-dist">+${back} km</span></div></div>`;
+  html+=`<div class="planner-summary"><div class="planner-sum-item">Łączny dystans: <strong>${total} km</strong></div><div class="planner-sum-item">Atrakcji: <strong>${ord.length}</strong></div></div>`;
+  const coords=ord.map(s=>`${s.item.lat},${s.item.lng}`).join('/');
+  html+=`<div class="planner-actions">
+    <a class="planner-gmaps-btn" href="https://www.google.com/maps/dir/Wroclaw/${coords}/Wroclaw" target="_blank">🗺️ Google Maps</a>
+    <button style="border:1.5px solid var(--accent);color:var(--accent);background:transparent;" onclick="clearPlanner()">✕ Wyczyść trasę</button>
+  </div>`;
+  el.innerHTML=html;
+}
+
+window.clearPlanner=function(){plannerItems=[];savePl();updatePlannerBadge();renderPlanner();};
+
+// ════════════════════════════════════════════════════
+// MAPA LEAFLET
+// ════════════════════════════════════════════════════
+window.mapFilter=function(mode,btn){
+  mapFilterMode=mode;
+  document.querySelectorAll('.map-ctrl-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  updateMapMarkers();
+};
+
+function initLeafletMap(){
+  if(!window.L)return;
+  if(leafletMap){leafletMap.invalidateSize();updateMapMarkers();return;}
+  leafletMap=L.map('leaflet-map',{center:[52.0,19.5],zoom:6});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(leafletMap);
+  const leg=document.getElementById('map-legend');
+  leg.innerHTML=DATA.map(cat=>`<div style="display:flex;align-items:center;gap:4px;"><div style="width:10px;height:10px;border-radius:50%;background:${cat.color};flex-shrink:0;"></div><span>${cat.cat}</span></div>`).join('');
+  updateMapMarkers();
+}
+
+function updateMapMarkers(){
+  if(!leafletMap||!window.L)return;
+  mapMarkers.forEach(m=>m.remove()); mapMarkers=[];
+  DATA.forEach((cat,ci)=>{
+    cat.items.forEach((item,ii)=>{
+      if(!item.lat||!item.lng)return;
+      const key=getKey(ci,ii);
+      const done=!!checked[key];
+      if(mapFilterMode==='done'&&!done)return;
+      if(mapFilterMode==='todo'&&done)return;
+      const col=done?'#4a6741':cat.color;
+      const icon=L.divIcon({html:`<div style="width:12px;height:12px;border-radius:50%;background:${col};border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.4);"></div>`,className:'',iconSize:[12,12]});
+      const m=L.marker([item.lat,item.lng],{icon}).addTo(leafletMap);
+      m.bindPopup(`<strong style="font-size:13px">${item.name}</strong><br><small style="color:#666">${item.short||''}</small><br><button onclick="switchTab('lista');setTimeout(()=>openModal(${ci},${ii},'${key}'),300)" style="margin-top:5px;padding:3px 8px;font-size:11px;cursor:pointer;background:#e8753a;color:white;border:none;border-radius:3px;">📖 Szczegóły</button>`);
+      mapMarkers.push(m);
+    });
+  });
+}
+
+// ════════════════════════════════════════════════════
+// START
+// ════════════════════════════════════════════════════
+render();
+updatePlannerBadge();
+if(window.L) initLeafletMap();
+</script>
+</body>
+</html>

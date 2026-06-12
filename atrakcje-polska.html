@@ -233,8 +233,8 @@ button.danger:hover{background:#c0392b;color:white;}
 #guest-banner{display:none;position:sticky;top:0;z-index:25;background:linear-gradient(90deg,#7a4f1e,var(--gold));color:white;padding:.45rem .9rem;text-align:center;font-size:.78rem;font-weight:700;letter-spacing:.05em;}
 #guest-banner button{margin-left:.7rem;font-size:.7rem;padding:.18rem .65rem;border:1.5px solid white;background:transparent;color:white;cursor:pointer;border-radius:2px;font-family:'Lato',sans-serif;font-weight:700;}
 /* BADGE TOAST */
-#badge-toast{position:fixed;bottom:calc(var(--tab-h) + 12px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--paper);padding:.6rem 1.1rem;border-radius:8px;display:flex;align-items:center;gap:.6rem;font-size:.78rem;font-weight:700;z-index:300;transition:transform .35s ease;pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.3);}
-#badge-toast.show{transform:translateX(-50%) translateY(0);}
+#badge-toast{position:fixed;bottom:calc(var(--tab-h) + 12px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(80px);opacity:0;background:var(--ink);color:var(--paper);padding:.6rem 1.1rem;border-radius:8px;display:flex;align-items:center;gap:.6rem;font-size:.78rem;font-weight:700;z-index:300;transition:transform .35s ease,opacity .3s ease;pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.3);}
+#badge-toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
 .bt-icon{font-size:1.4rem;}
 /* DARK */
 body.dark{--paper:#151f2b;--parchment:#1c2a38;--ink:#f5edd6;--muted:#8a9aaa;--checked-bg:#1a2e1a;}
@@ -255,9 +255,105 @@ body.dark .card-view .item{border-color:rgba(255,255,255,.1);}
 body.dark .card-view .item:hover{border-color:rgba(255,255,255,.2);}
 body.dark .px-box{background:#1c2a38;}
 body.dark .px-title,body.dark .px-sub{color:#f5edd6;}
+/* ── PRIORYTETY (long press) ── */
+.item{position:relative;}
+.item.priority{border:1.5px solid var(--accent)!important;box-shadow:0 0 0 1.5px var(--accent)!important;border-radius:6px;}
+.item.priority::after{content:'⭐';position:absolute;top:50%;transform:translateY(-50%);left:2px;font-size:.65rem;line-height:1;z-index:2;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));}
+.card-view .item.priority::after{top:8px;left:8px;transform:none;font-size:.85rem;}
+.item.pressing{transform:scale(.97);transition:transform .1s;}
+#fb-priority.active{background:var(--accent)!important;color:white!important;border-color:var(--accent)!important;}
+/* ── KROPKI POGODOWE ── */
+.weather-dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0;cursor:help;border:1.5px solid rgba(255,255,255,.5);box-shadow:0 1px 3px rgba(0,0,0,.25);margin-left:auto;margin-top:4px;}
+.card-view .item .weather-dot{position:absolute;top:34px;right:9px;margin:0;z-index:2;}
+.weather-dot.sunny{background:#f7c948;}
+.weather-dot.cloudy{background:#b0bec5;}
+.weather-dot.drizzle{background:#90caf9;}
+.weather-dot.rain{background:#64b5f6;}
+.weather-dot.storm{background:#7e57c2;}
+.weather-dot.snow{background:#e3f2fd;border-color:#90caf9;}
+.weather-dot.fog{background:#cfd8dc;}
+/* ── KALKULATOR PALIWA ── */
+.fuel-bar{background:var(--parchment);padding:.5rem .8rem;border-bottom:1px solid rgba(0,0,0,.06);display:none;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.fuel-bar.visible{display:flex;}
+.fuel-label{font-size:.72rem;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.fuel-input{width:74px;padding:.3rem .5rem;border:1.5px solid rgba(0,0,0,.18);font-family:'Lato',sans-serif;font-size:.82rem;border-radius:2px;text-align:center;background:var(--paper);color:var(--ink);}
+.fuel-result{font-size:.78rem;color:var(--moss);font-weight:700;}
+.fuel-toggle{font-size:.68rem;color:var(--sky);cursor:pointer;text-decoration:underline;white-space:nowrap;}
+.item-fuel{font-size:.65rem;color:var(--moss);margin-top:.1rem;}
+.modal-fuel-info{font-size:.78rem;color:var(--moss);background:rgba(74,103,65,.08);padding:.35rem .7rem;border-radius:3px;margin:.3rem 0;display:none;}
+.modal-fuel-info.visible{display:block;}
+/* ── SHARE ── */
+.modal-share-row{display:flex;gap:.4rem;margin:.35rem 0 .55rem;flex-wrap:wrap;}
+.share-btn{font-size:.68rem;font-weight:700;letter-spacing:.06em;padding:.34rem .7rem;border-radius:3px;cursor:pointer;border:none;font-family:'Lato',sans-serif;display:flex;align-items:center;gap:.3rem;transition:all .15s;text-transform:uppercase;}
+.share-wa{background:#25D366;color:white;}
+.share-wa:hover{background:#1da851;}
+.share-copy{background:var(--parchment);color:var(--ink);border:1.5px solid rgba(0,0,0,.15);}
+.share-copy:hover{background:var(--ink);color:var(--paper);}
+.share-copied{background:var(--moss);color:white;}
+/* ── PLANER WEEKENDU ── */
+.weekend-section{background:var(--parchment);border:1px solid rgba(0,0,0,.1);border-radius:4px;padding:.8rem .9rem;margin-bottom:1rem;}
+.weekend-section-title{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;color:var(--ink);margin-bottom:.55rem;}
+.weekend-controls{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.6rem;}
+.weekend-date-input,.weekend-max-dist{padding:.4rem .55rem;border:1.5px solid rgba(0,0,0,.18);font-family:'Lato',sans-serif;font-size:.8rem;border-radius:2px;background:var(--paper);color:var(--ink);}
+.weekend-go-btn{font-family:'Lato',sans-serif;font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.45rem 1.1rem;background:var(--sky);color:white;border:none;cursor:pointer;border-radius:2px;}
+.weekend-go-btn:hover{background:#3a6f95;}
+.weekend-loading{font-size:.8rem;color:var(--muted);font-style:italic;padding:.4rem 0;}
+.weekend-suggestion{background:var(--paper);border:1px solid rgba(0,0,0,.08);border-radius:4px;padding:.75rem .85rem;margin-bottom:.5rem;display:flex;gap:.7rem;align-items:flex-start;}
+.ws-rank{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:var(--accent);min-width:30px;text-align:center;line-height:1;}
+.ws-body{flex:1;min-width:0;}
+.ws-name{font-weight:700;font-size:.85rem;color:var(--ink);}
+.ws-meta{font-size:.7rem;color:var(--muted);margin:.15rem 0;}
+.ws-weather{display:flex;gap:.4rem;margin-top:.25rem;flex-wrap:wrap;}
+.ws-day{font-size:.68rem;background:var(--parchment);padding:.22rem .45rem;border-radius:3px;border:1px solid rgba(74,127,165,.2);}
+.weekend-route-btn{font-family:'Lato',sans-serif;font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.45rem 1rem;background:var(--moss);color:white;border:none;cursor:pointer;border-radius:2px;margin-top:.5rem;}
+.weekend-route-btn:hover{background:#3a5233;}
+/* ── STATYSTYKI ROZSZERZONE ── */
+.stats-km-total{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;color:var(--accent);line-height:1;}
+.heatmap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.5rem;margin-top:.4rem;}
+.heatmap-cell{padding:.55rem .7rem;border-radius:3px;font-size:.72rem;font-weight:700;text-align:center;border:1px solid rgba(0,0,0,.08);}
+.heatmap-cell .hm-count{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;display:block;}
+.heatmap-cell .hm-name{font-size:.6rem;text-transform:uppercase;letter-spacing:.06em;opacity:.85;}
+.explorer-level{display:flex;align-items:center;gap:.8rem;padding:.8rem 1rem;background:var(--parchment);border-radius:4px;margin-bottom:.8rem;border:1px solid rgba(0,0,0,.08);}
+.explorer-badge{font-size:2rem;line-height:1;}
+.explorer-info{flex:1;}
+.explorer-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--ink);}
+.explorer-subtitle{font-size:.7rem;color:var(--muted);margin-top:.1rem;}
+.explorer-bar-wrap{height:6px;background:rgba(0,0,0,.08);border-radius:3px;margin-top:.4rem;overflow:hidden;}
+.explorer-bar{height:100%;border-radius:3px;transition:width .8s ease;}
+.explorer-next{font-size:.65rem;color:var(--muted);margin-top:.2rem;}
+.timeline{display:flex;flex-direction:column;}
+.timeline-month{margin-bottom:1.1rem;}
+.timeline-month-header{font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);padding:.3rem 0 .5rem;border-bottom:1px solid rgba(0,0,0,.08);margin-bottom:.5rem;display:flex;justify-content:space-between;align-items:center;}
+.timeline-month-count{background:var(--parchment);padding:.1rem .5rem;border-radius:8px;font-size:.62rem;}
+.timeline-entry{display:flex;gap:.7rem;align-items:flex-start;padding:.4rem .5rem;border-radius:3px;cursor:pointer;transition:background .15s;}
+.timeline-entry:hover{background:var(--parchment);}
+.timeline-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:.35rem;}
+.timeline-body{flex:1;min-width:0;}
+.timeline-name{font-size:.8rem;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.timeline-meta{font-size:.66rem;color:var(--muted);margin-top:.1rem;}
+.timeline-stars{font-size:.66rem;color:#f0b429;margin-left:.3rem;}
+.timeline-note{font-size:.66rem;color:var(--muted);font-style:italic;margin-top:.1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.timeline-empty,.reco-empty{font-size:.8rem;color:var(--muted);font-style:italic;padding:.4rem 0;}
+.timeline-date-badge{font-size:.6rem;background:rgba(232,117,58,.14);color:#a04010;padding:.1rem .45rem;border-radius:8px;font-weight:700;white-space:nowrap;flex-shrink:0;}
+.reco-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.6rem;margin-top:.4rem;}
+.reco-card{background:var(--parchment);border:1px solid rgba(0,0,0,.08);border-radius:6px;padding:.65rem .75rem;cursor:pointer;transition:all .15s;display:flex;gap:.55rem;align-items:flex-start;}
+.reco-card:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.1);}
+.reco-icon{font-size:1.35rem;flex-shrink:0;}
+.reco-body{flex:1;min-width:0;}
+.reco-name{font-size:.76rem;font-weight:700;color:var(--ink);line-height:1.3;}
+.reco-reason{font-size:.64rem;color:var(--moss);margin-top:.15rem;}
+.reco-meta{font-size:.6rem;color:var(--muted);margin-top:.15rem;}
+/* dark mode dla nowych elementów */
+body.dark .fuel-bar{background:#1c2a38;}
+body.dark .fuel-input,body.dark .weekend-date-input,body.dark .weekend-max-dist{background:#151f2b;color:#f5edd6;border-color:rgba(255,255,255,.18);}
+body.dark .weekend-section,body.dark .explorer-level,body.dark .reco-card,body.dark .timeline-entry:hover,body.dark .timeline-month-count{background:#1c2a38;}
+body.dark .weekend-suggestion{background:#151f2b;border-color:rgba(255,255,255,.08);}
+body.dark .ws-day{background:#253545;}
+body.dark .heatmap-cell{border-color:rgba(255,255,255,.08);}
+body.dark .share-copy{background:#253545;color:#f5edd6;border-color:rgba(255,255,255,.18);}
 /* PRINT */
 @media print{
-  header,nav,.controls,.progress-bar,.view-toggle,.activity-filter-row,
+  header,nav,.controls,.progress-bar,.view-toggle,.activity-filter-row,.fuel-bar,
   .tab-bar,#guest-banner,#pixabay-setup,#badge-toast,.modal-overlay,footer,#app{display:none!important;}
   #print-journal{display:block!important;}
   body{padding:0;background:white;color:#111;}
@@ -370,10 +466,19 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
   </div>
   <div class="controls-row">
     <input type="text" id="search-input" placeholder="🔍 szukaj atrakcji…" oninput="applyFilters()">
+    <button id="fb-priority" onclick="togglePriority()" title="Pokaż tylko priorytety (długie przytrzymanie atrakcji = ⭐)">⭐</button>
+    <button id="btn-fuel" onclick="toggleFuelBar()" title="Kalkulator kosztów paliwa">⛽</button>
     <button onclick="toggleDark()">🌙</button>
     <button onclick="showDataPanel()" id="data-btn">💾 Dane</button>
     <button class="danger" onclick="confirmReset()">↺</button>
   </div>
+</div>
+<div class="fuel-bar" id="fuel-bar">
+  <span class="fuel-label">⛽ Paliwo:</span>
+  <input class="fuel-input" id="fuel-price" type="number" step="0.01" min="1" max="15" placeholder="zł/l" oninput="updateFuelCosts()">
+  <input class="fuel-input" id="fuel-burn" type="number" step="0.1" min="1" max="30" placeholder="l/100km" oninput="updateFuelCosts()">
+  <span class="fuel-result" id="fuel-result"></span>
+  <span class="fuel-toggle" onclick="toggleFuelBar()">ukryj</span>
 </div>
 <div class="activity-filter-row" id="activity-row" style="display:none;">
   <button class="act-btn" data-act="trekking" onclick="toggleAct(this)">⛰ Trekking</button>
@@ -462,6 +567,30 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
   </div>
 </div>
 <div id="planner-panel">
+  <div class="weekend-section">
+    <div class="weekend-section-title">🗓️ Planer weekendu — gdzie będzie najlepsza pogoda?</div>
+    <div class="weekend-controls">
+      <input type="date" id="weekend-date" class="weekend-date-input">
+      <select id="weekend-maxdist" class="weekend-max-dist">
+        <option value="100">do 100 km</option>
+        <option value="200" selected>do 200 km</option>
+        <option value="300">do 300 km</option>
+        <option value="9999">dowolna odległość</option>
+      </select>
+      <select id="weekend-act" class="weekend-max-dist">
+        <option value="">Dowolna aktywność</option>
+        <option value="trekking">⛰ Trekking</option>
+        <option value="spacer">🚶 Spacer</option>
+        <option value="zwiedzanie">🏰 Zwiedzanie</option>
+        <option value="widoki">🌄 Widoki</option>
+        <option value="przyroda">🌿 Przyroda</option>
+        <option value="fotografia">📷 Fotografia</option>
+        <option value="kajaki">🛶 Kajaki</option>
+      </select>
+      <button class="weekend-go-btn" onclick="planWeekend()">🔍 Szukaj</button>
+    </div>
+    <div id="weekend-results"></div>
+  </div>
   <p class="planner-hint">Dodaj atrakcje przez „+ Plan" na liście — algorytm TSP ułoży optymalną trasę (maks. 8 miejsc).</p>
   <div id="planner-content"></div>
 </div>
@@ -493,11 +622,16 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
       <div class="modal-badges" id="modal-badges"></div>
       <div class="modal-acts" id="modal-acts"></div>
       <div class="modal-btn-row" id="modal-btn-row"></div>
+      <div class="modal-share-row">
+        <button class="share-btn share-wa" onclick="shareWhatsApp()">📲 WhatsApp</button>
+        <button class="share-btn share-copy" id="copy-btn" onclick="copyShareText()">📋 Kopiuj</button>
+      </div>
+      <div class="modal-fuel-info" id="modal-fuel-info"></div>
       <div class="modal-weather" id="modal-weather" style="display:none;"><div class="weather-title">🌤 Pogoda na 7 dni</div><div class="weather-days" id="weather-days"><span style="font-size:.73rem;color:var(--muted);font-style:italic;">ładowanie…</span></div></div>
       <div class="modal-desc" id="modal-desc"></div>
       <div class="modal-nearby">
         <div class="nearby-title">📍 W pobliżu</div>
-        <div class="nearby-tabs"><button class="nearby-tab active" onclick="showNearby('nearby',this)">Okoliczne</button><button class="nearby-tab" onclick="showNearby('route',this)">Po drodze z trasy</button></div>
+        <div class="nearby-tabs"><button class="nearby-tab active" onclick="showNearby('nearby',this)">Okoliczne</button><button class="nearby-tab" onclick="showNearby('route',this)">Po drodze z trasy</button><button class="nearby-tab" onclick="showNearby('osm',this)">🗺 Z mapy (OSM)</button></div>
         <div class="nearby-list" id="nearby-list"></div>
       </div>
       <div class="modal-user-section">
@@ -811,6 +945,11 @@ let checked     = JSON.parse(localStorage.getItem('pl-checked')  || '{}');
 let userData    = JSON.parse(localStorage.getItem('pl-userdata') || '{}');
 let plannerItems= JSON.parse(localStorage.getItem('pl-planner')  || '[]');
 let pixabayKey  = localStorage.getItem('pl-pxkey') || '';
+let priorities  = new Set(JSON.parse(localStorage.getItem('pl-priorities') || '[]'));
+let priorityOnly= false;
+let fuelPrice   = parseFloat(localStorage.getItem('pl-fuel-price')) || 0;
+let fuelBurn    = parseFloat(localStorage.getItem('pl-fuel-burn'))  || 0;
+const weatherCache = {};
 
 let currentFilter='all', currentSearch='', currentRegion='all';
 let currentWoj='', currentSort='default', kidsOnly=false;
@@ -825,6 +964,7 @@ function getKey(ci,ii){return `${ci}_${ii}`;}
 function save()   {if(!guestMode)localStorage.setItem('pl-checked',JSON.stringify(checked));}
 function saveUDL(){if(!guestMode)localStorage.setItem('pl-userdata',JSON.stringify(userData));}
 function savePl() {localStorage.setItem('pl-planner',JSON.stringify(plannerItems));}
+function savePrio(){localStorage.setItem('pl-priorities',JSON.stringify([...priorities]));}
 
 function haversine(a,b,c,d){
   const R=6371,dL=(c-a)*Math.PI/180,dG=(d-b)*Math.PI/180;
@@ -906,7 +1046,8 @@ function applyFilters(){
     const pg=passGeo(item);
     const pk=!kidsOnly||item.kids===true;
     const pa=activeActs.size===0||(item.acts||[]).some(a=>activeActs.has(a));
-    const vis=pf&&ps&&pg&&pk&&pa;
+    const pp=!priorityOnly||priorities.has(k);
+    const vis=pf&&ps&&pg&&pk&&pa&&pp;
     el.classList.toggle('hidden',!vis);
     if(vis)any=true;
   });
@@ -932,6 +1073,7 @@ function buildItemEl(item,ci,ii,key,done,ud,idx){
   el.dataset.name=(item.name+' '+(item.short||'')+' '+(item.desc||'')).toLowerCase();
   el.dataset.kids=item.kids?'1':'0';
   const km=distItem(item);
+  el.dataset.km=km||0;
   const pttk=item.pttk?`<span class="badge badge-pttk">${item.pttk==='KGP'?'👑 KGP':item.pttk==='KS'?'🗻 KS':item.pttk==='KP'?'🏅 KP':item.pttk==='KGK'?'💎 KGK':item.pttk}</span>`:'';
 
   if(currentView==='card'){
@@ -948,7 +1090,7 @@ function buildItemEl(item,ci,ii,key,done,ud,idx){
           <button class="add-to-plan-btn${inPlan?' in-plan':''}" onclick="event.stopPropagation();togglePlanItem('${key}',this)">+ Plan</button>
         </div>
       </div>`;
-    if(pixabayKey) setTimeout(()=>loadCardPhoto(key,item.pxq,ci),50);
+    // zdjęcie ładowane leniwie przez photoObserver (tylko widoczne karty)
   } else {
     el.innerHTML=`
       <div class="item-thumb" id="thumb-${key}" onclick="openModal(${ci},${ii},'${key}')" style="cursor:pointer;">${DATA[ci].cat.split(' ')[0]}</div>
@@ -968,7 +1110,7 @@ function buildItemEl(item,ci,ii,key,done,ud,idx){
           <button class="add-to-plan-btn${inPlan?' in-plan':''}" onclick="event.stopPropagation();togglePlanItem('${key}',this)">+ Plan</button>
         </div>
       </div>`;
-    if(pixabayKey) setTimeout(()=>loadThumbPhoto(key,item.pxq),50);
+    // miniaturka ładowana leniwie przez photoObserver (tylko widoczne pozycje)
   }
   return el;
 }
@@ -999,6 +1141,7 @@ function render(){
     if(currentView==='list') app.appendChild(Object.assign(document.createElement('div'),{className:'divider'}));
   });
   applyFilters();
+  afterRenderEnhance();
 }
 
 function renderFlat(){
@@ -1012,7 +1155,7 @@ function renderFlat(){
     const pg=passGeo(item);
     const pk=!kidsOnly||item.kids===true;
     const pa=activeActs.size===0||(item.acts||[]).some(a=>activeActs.has(a));
-    if(pf&&ps&&pg&&pk&&pa) all.push({cat,ci,item,ii,key,done,ud:userData[key]||{}});
+    if(pf&&ps&&pg&&pk&&pa&&(!priorityOnly||priorities.has(key))) all.push({cat,ci,item,ii,key,done,ud:userData[key]||{}});
   }));
   if(currentSort==='az') all.sort((a,b)=>a.item.name.localeCompare(b.item.name,'pl'));
   else if(currentSort==='dist-asc') all.sort((a,b)=>distItem(a.item)-distItem(b.item));
@@ -1029,6 +1172,7 @@ function renderFlat(){
   all.forEach(({ci,item,ii,key,done,ud})=>list.appendChild(buildItemEl(item,ci,ii,key,done,ud,globalIdx++)));
   sec.appendChild(hdr); sec.appendChild(list); app.appendChild(sec);
   updateStats();
+  afterRenderEnhance();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1044,6 +1188,489 @@ function toggle(key,el){
   updateStats();
   checkBadges();
   if(currentFilter!=='all')applyFilters();
+}
+
+// ═══════════════════════════════════════════════════════
+// ULEPSZENIA PO RENDERZE (priorytety, pogoda, zdjęcia, paliwo)
+// ═══════════════════════════════════════════════════════
+function afterRenderEnhance(){
+  applyPriorityClasses();
+  loadWeatherDots();
+  setupPhotoLazyLoad();
+  if(fuelPrice&&fuelBurn) updateFuelCosts();
+}
+
+// ═══════════════════════════════════════════════════════
+// PRIORYTETY (długie przytrzymanie = ⭐)
+// ═══════════════════════════════════════════════════════
+window.togglePriority=function(){
+  priorityOnly=!priorityOnly;
+  document.getElementById('fb-priority').classList.toggle('active',priorityOnly);
+  applyFilters();
+};
+
+function applyPriorityClasses(){
+  document.querySelectorAll('.item').forEach(el=>{
+    const key=el.dataset.key;
+    if(!key)return;
+    el.classList.toggle('priority',priorities.has(key));
+    if(!el.dataset.longpress){
+      el.dataset.longpress='1';
+      addLongPressHandler(el,key);
+    }
+  });
+}
+
+function addLongPressHandler(el,key){
+  let timer=null,didLongPress=false;
+  const start=()=>{
+    didLongPress=false;
+    timer=setTimeout(()=>{
+      timer=null;didLongPress=true;
+      toggleItemPriority(key);
+      if(navigator.vibrate)navigator.vibrate([30,20,30]);
+      el.classList.remove('pressing');
+    },600);
+    el.classList.add('pressing');
+  };
+  const cancel=()=>{if(timer){clearTimeout(timer);timer=null;}el.classList.remove('pressing');};
+  el.addEventListener('mousedown',start);
+  el.addEventListener('touchstart',start,{passive:true});
+  el.addEventListener('mouseup',cancel);
+  el.addEventListener('mouseleave',cancel);
+  el.addEventListener('touchend',e=>{cancel();if(didLongPress){e.preventDefault();}});
+  el.addEventListener('touchcancel',cancel);
+  el.addEventListener('touchmove',cancel,{passive:true});
+  // zablokuj click po long-pressie (desktop i mobile)
+  el.addEventListener('click',e=>{if(didLongPress){e.preventDefault();e.stopPropagation();didLongPress=false;}},true);
+  el.addEventListener('contextmenu',e=>{e.preventDefault();e.stopPropagation();});
+}
+
+function toggleItemPriority(key){
+  if(priorities.has(key)){priorities.delete(key);showMiniToast('Usunięto z priorytetów');}
+  else{priorities.add(key);showMiniToast('⭐ Dodano do priorytetów!');}
+  savePrio();
+  document.querySelectorAll(`.item[data-key="${key}"]`).forEach(item=>item.classList.toggle('priority',priorities.has(key)));
+}
+
+let miniToastTimer=null;
+function showMiniToast(msg){
+  let t=document.getElementById('mini-toast');
+  if(!t){
+    t=document.createElement('div');t.id='mini-toast';
+    t.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:.45rem 1.1rem;border-radius:20px;font-size:.78rem;font-weight:700;z-index:400;transition:opacity .2s;pointer-events:none;white-space:nowrap;opacity:0;';
+    document.body.appendChild(t);
+  }
+  t.textContent=msg;t.style.opacity='1';
+  if(miniToastTimer)clearTimeout(miniToastTimer);
+  miniToastTimer=setTimeout(()=>{t.style.opacity='0';},1800);
+}
+
+// ═══════════════════════════════════════════════════════
+// KROPKI POGODOWE — tylko widoczne pozycje (IntersectionObserver)
+// ═══════════════════════════════════════════════════════
+function weatherDotClass(code){
+  if(code<=2)return 'sunny';
+  if(code<=3)return 'cloudy';
+  if(code<=49)return 'fog';
+  if(code<=57)return 'drizzle';
+  if(code<=67)return 'rain';
+  if(code<=77)return 'snow';
+  if(code<=82)return 'drizzle';
+  if(code<=86)return 'snow';
+  return 'storm';
+}
+function weatherDotTitle(code){
+  if(code===0)return 'Słonecznie ☀️';
+  if(code<=2)return 'Częściowe zachmurzenie 🌤️';
+  if(code<=3)return 'Pochmurno ☁️';
+  if(code<=49)return 'Mgła 🌫️';
+  if(code<=57)return 'Przelotne opady 🌦️';
+  if(code<=67)return 'Deszcz 🌧️';
+  if(code<=77)return 'Śnieg ❄️';
+  if(code<=82)return 'Przelotny deszcz 🌦️';
+  if(code<=86)return 'Przelotny śnieg 🌨️';
+  return 'Burza ⛈️';
+}
+
+let weatherDotObserver=null;
+function loadWeatherDots(){
+  const today=new Date().toISOString().split('T')[0];
+  if(weatherDotObserver)weatherDotObserver.disconnect();
+  weatherDotObserver=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(!entry.isIntersecting)return;
+      const el=entry.target;
+      const key=el.dataset.key;
+      if(!key)return;
+      const [ci,ii]=key.split('_').map(Number);
+      const item=DATA[ci]?.items[ii];
+      if(!item?.lat)return;
+      weatherDotObserver.unobserve(el);
+      const cacheKey=`${item.lat}_${item.lng}_${today}`;
+      if(weatherCache[cacheKey]!==undefined){injectWeatherDot(el,weatherCache[cacheKey]);return;}
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${item.lat}&longitude=${item.lng}&daily=weathercode&forecast_days=1&timezone=Europe%2FWarsaw`)
+        .then(r=>r.json())
+        .then(data=>{
+          const code=data.daily?.weathercode?.[0]??99;
+          weatherCache[cacheKey]=code;
+          injectWeatherDot(el,code);
+        }).catch(()=>{});
+    });
+  },{rootMargin:'100px'});
+  document.querySelectorAll('.item').forEach(el=>{
+    if(!el.querySelector('.weather-dot'))weatherDotObserver.observe(el);
+  });
+}
+
+function injectWeatherDot(el,code){
+  if(el.querySelector('.weather-dot'))return;
+  const dot=document.createElement('div');
+  dot.className=`weather-dot ${weatherDotClass(code)}`;
+  dot.title=weatherDotTitle(code);
+  el.appendChild(dot);
+}
+
+// ═══════════════════════════════════════════════════════
+// LAZY LOADING ZDJĘĆ — tylko widoczne pozycje
+// ═══════════════════════════════════════════════════════
+let photoObserver=null;
+function setupPhotoLazyLoad(){
+  if(!pixabayKey)return;
+  if(photoObserver)photoObserver.disconnect();
+  photoObserver=new IntersectionObserver(entries=>{
+    entries.forEach(en=>{
+      if(!en.isIntersecting)return;
+      const el=en.target;
+      photoObserver.unobserve(el);
+      const key=el.dataset.key;
+      if(!key)return;
+      const [ci,ii]=key.split('_').map(Number);
+      const item=DATA[ci]?.items[ii];
+      if(!item?.pxq)return;
+      if(el.querySelector('.card-body'))loadCardPhoto(key,item.pxq,ci);
+      else loadThumbPhoto(key,item.pxq);
+    });
+  },{rootMargin:'250px'});
+  document.querySelectorAll('.item').forEach(el=>photoObserver.observe(el));
+}
+
+// ═══════════════════════════════════════════════════════
+// KALKULATOR PALIWA
+// ═══════════════════════════════════════════════════════
+window.toggleFuelBar=function(){
+  const bar=document.getElementById('fuel-bar');
+  const btn=document.getElementById('btn-fuel');
+  const visible=bar.classList.contains('visible');
+  bar.classList.toggle('visible',!visible);
+  btn.classList.toggle('active',!visible);
+  if(!visible){
+    document.getElementById('fuel-price').value=fuelPrice||'';
+    document.getElementById('fuel-burn').value=fuelBurn||'';
+    updateFuelCosts();
+  }
+};
+
+window.updateFuelCosts=function(){
+  const bar=document.getElementById('fuel-bar');
+  if(bar.classList.contains('visible')){
+    fuelPrice=parseFloat(document.getElementById('fuel-price').value)||0;
+    fuelBurn=parseFloat(document.getElementById('fuel-burn').value)||0;
+    if(fuelPrice>0)localStorage.setItem('pl-fuel-price',fuelPrice);
+    if(fuelBurn>0)localStorage.setItem('pl-fuel-burn',fuelBurn);
+    document.getElementById('fuel-result').textContent=(fuelPrice&&fuelBurn)?'✓ Koszty wyliczone':'Wpisz cenę paliwa i spalanie';
+  }
+  document.querySelectorAll('.item').forEach(el=>{
+    const km=parseInt(el.dataset.km)||0;
+    let fuelEl=el.querySelector('.item-fuel');
+    const bodyEl=el.querySelector('.item-body')||el.querySelector('.card-body');
+    if(fuelPrice&&fuelBurn&&km&&bodyEl){
+      const cost=Math.round(km*2*fuelBurn/100*fuelPrice);
+      if(!fuelEl){fuelEl=document.createElement('div');fuelEl.className='item-fuel';bodyEl.appendChild(fuelEl);}
+      fuelEl.textContent=`⛽ ~${cost} zł tam i z powrotem`;
+    }else if(fuelEl){fuelEl.remove();}
+  });
+  updateModalFuel();
+};
+
+function updateModalFuel(){
+  const fuelInfo=document.getElementById('modal-fuel-info');
+  if(!fuelInfo||currentModalCi===null)return;
+  const item=DATA[currentModalCi]?.items[currentModalIi];
+  const km=item?distItem(item):0;
+  if(fuelPrice&&fuelBurn&&km){
+    const cost=Math.round(km*2*fuelBurn/100*fuelPrice);
+    const liters=Math.round(km*2*fuelBurn/100*10)/10;
+    fuelInfo.textContent=`⛽ Szacowany koszt dojazdu: ~${cost} zł (${liters} l, tam i z powrotem ~${km*2} km)`;
+    fuelInfo.classList.add('visible');
+  }else{
+    fuelInfo.classList.remove('visible');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// UDOSTĘPNIANIE (WhatsApp / kopiuj)
+// ═══════════════════════════════════════════════════════
+function removePL(s){
+  return (s||'')
+    .replace(/ą/g,'a').replace(/ć/g,'c').replace(/ę/g,'e').replace(/ł/g,'l')
+    .replace(/ń/g,'n').replace(/ó/g,'o').replace(/ś/g,'s').replace(/ż/g,'z').replace(/ź/g,'z')
+    .replace(/Ą/g,'A').replace(/Ć/g,'C').replace(/Ę/g,'E').replace(/Ł/g,'L')
+    .replace(/Ń/g,'N').replace(/Ó/g,'O').replace(/Ś/g,'S').replace(/Ż/g,'Z').replace(/Ź/g,'Z');
+}
+
+function buildShareText(item,key){
+  const ud=userData[key]||{};
+  const date=ud.date?`\n📅 ${ud.date}`:'';
+  const mapsUrl=item.lat
+    ?`https://maps.google.com/?q=${item.lat},${item.lng}`
+    :`https://www.google.com/maps/search/${encodeURIComponent(item.name+' '+(item.woj||'Polska'))}`;
+  const km=distItem(item);
+  const starsText=ud.rating?'*'.repeat(ud.rating)+'/5':'';
+  return `*${removePL(item.name)}*${starsText?' ['+starsText+']':''}
+${removePL(item.short||'')}
+${km||'?'} km z Wroclawia · woj. ${removePL(item.woj||'')}${date}
+
+${removePL(item.desc||'')}
+
+Nawiguj: ${mapsUrl}`;
+}
+
+window.shareWhatsApp=function(){
+  if(currentModalCi===null)return;
+  const item=DATA[currentModalCi].items[currentModalIi];
+  const text=buildShareText(item,currentModalKey);
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,'_blank');
+};
+
+window.copyShareText=function(){
+  if(currentModalCi===null)return;
+  const item=DATA[currentModalCi].items[currentModalIi];
+  const text=buildShareText(item,currentModalKey);
+  const btn=document.getElementById('copy-btn');
+  const ok=()=>{
+    btn.textContent='✓ Skopiowano!';
+    btn.classList.add('share-copied');btn.classList.remove('share-copy');
+    setTimeout(()=>{btn.textContent='📋 Kopiuj';btn.classList.remove('share-copied');btn.classList.add('share-copy');},2500);
+  };
+  navigator.clipboard.writeText(text).then(ok).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=text;ta.style.cssText='position:fixed;opacity:0;';
+    document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);ok();
+  });
+};
+
+// ═══════════════════════════════════════════════════════
+// PLANER WEEKENDU — gdzie będzie najlepsza pogoda
+// ═══════════════════════════════════════════════════════
+function weatherIcon(code){
+  const ICONS={0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',71:'❄️',73:'❄️',75:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️'};
+  return ICONS[code]||'🌡️';
+}
+function weatherScore(code,rain){
+  if(code===0)return 10;
+  if(code<=2)return 8;
+  if(code<=3)return 6;
+  if(code<=49)return 4;
+  if(code<=59)return 3;
+  if(rain>5)return 2;
+  return 5;
+}
+
+function initWeekendDate(){
+  const inp=document.getElementById('weekend-date');
+  if(!inp)return;
+  const today=new Date();
+  const daysUntilSat=(6-today.getDay()+7)%7||7;
+  const sat=new Date(today);sat.setDate(today.getDate()+daysUntilSat);
+  const max=new Date(today);max.setDate(today.getDate()+15);
+  inp.value=sat.toISOString().split('T')[0];
+  inp.min=today.toISOString().split('T')[0];
+  inp.max=max.toISOString().split('T')[0];
+}
+
+window.planWeekend=function(){
+  const dateVal=document.getElementById('weekend-date').value;
+  const maxDist=parseInt(document.getElementById('weekend-maxdist').value)||200;
+  const prefAct=document.getElementById('weekend-act').value;
+  const resEl=document.getElementById('weekend-results');
+  if(!dateVal){alert('Wybierz datę wyjazdu');return;}
+
+  // tylko NIEZALICZONE atrakcje z GPS w zasięgu
+  const candidates=[];
+  DATA.forEach((cat,ci)=>{
+    cat.items.forEach((item,ii)=>{
+      const key=getKey(ci,ii);
+      if(checked[key])return;
+      if(!item.lat||!item.lng)return;
+      const km=distItem(item);
+      if(km>maxDist)return;
+      if(prefAct&&!(item.acts||[]).includes(prefAct))return;
+      candidates.push({item,key,ci,ii,km,catName:cat.cat.replace(/^\S+ /,'')});
+    });
+  });
+
+  if(candidates.length===0){
+    resEl.innerHTML='<div class="weekend-loading">Brak niezaliczonych atrakcji w tych kryteriach. Rozszerz dystans lub zmień aktywność.</div>';
+    return;
+  }
+
+  // max 30 najbliższych — żeby nie przeciążać API pogodowego
+  const sample=candidates.sort((a,b)=>a.km-b.km).slice(0,30);
+  resEl.innerHTML=`<div class="weekend-loading">⏳ Sprawdzam prognozę dla ${sample.length} niezaliczonych miejsc…</div>`;
+  let completed=0;
+  const results=[];
+
+  sample.forEach(cand=>{
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${cand.item.lat}&longitude=${cand.item.lng}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum&start_date=${dateVal}&end_date=${dateVal}&timezone=Europe%2FWarsaw`;
+    fetch(url)
+      .then(r=>r.json())
+      .then(data=>{
+        const d=data.daily;
+        if(!d||!d.weathercode)return;
+        const code=d.weathercode[0]??99;
+        const tmax=Math.round(d.temperature_2m_max[0]||0);
+        const tmin=Math.round(d.temperature_2m_min[0]||0);
+        const rain=d.precipitation_sum[0]||0;
+        const wScore=weatherScore(code,rain)*10+Math.max(0,tmax-5);
+        results.push({...cand,code,tmax,tmin,rain,wScore,icon:weatherIcon(code)});
+      })
+      .catch(()=>{})
+      .finally(()=>{
+        completed++;
+        if(completed===sample.length)renderWeekendResults(results,dateVal);
+      });
+  });
+};
+
+function renderWeekendResults(results,targetDate){
+  const resEl=document.getElementById('weekend-results');
+  if(!results.length){resEl.innerHTML='<div class="weekend-loading">Brak prognozy dla wybranej daty — spróbuj bliższego terminu (maks. 15 dni naprzód).</div>';return;}
+  results.sort((a,b)=>b.wScore-a.wScore);
+  const dateFormatted=new Date(targetDate+'T12:00:00').toLocaleDateString('pl-PL',{weekday:'long',day:'numeric',month:'long'});
+  const medals=['🥇','🥈','🥉'];
+  let html=`<div style="font-size:.76rem;color:var(--muted);margin-bottom:.7rem;">Niezaliczone miejsca na <strong>${dateFormatted}</strong> — od najlepszej pogody:</div>`;
+  results.slice(0,12).forEach((r,i)=>{
+    const rank=i<3?`<div class="ws-rank">${medals[i]}</div>`:`<div class="ws-rank" style="font-size:.95rem;color:var(--muted)">${i+1}</div>`;
+    const acts=(r.item.acts||[]).join(', ');
+    const inPlan=plannerItems.includes(r.key);
+    html+=`<div class="weekend-suggestion">
+      ${rank}
+      <div class="ws-body">
+        <div class="ws-name">${r.item.name}</div>
+        <div class="ws-meta">${r.catName} · ${r.km} km · ${acts}</div>
+        <div class="ws-weather"><span class="ws-day">${r.icon} ${r.tmin}–${r.tmax}°C ${r.rain>0.1?`💧 ${r.rain.toFixed(1)} mm`:'☀️ sucho'}</span></div>
+      </div>
+      <button class="add-to-plan-btn${inPlan?' in-plan':''}" style="align-self:center;white-space:nowrap" onclick="togglePlanItem('${r.key}',this)">+ Plan</button>
+    </div>`;
+  });
+  if(results.length>=3){
+    const top3=results.slice(0,3).map(r=>`'${r.key}'`).join(',');
+    html+=`<button class="weekend-route-btn" onclick="weekendToPlanner([${top3}])">🗺️ Zaplanuj trasę z TOP 3 miejsc</button>`;
+  }
+  resEl.innerHTML=html;
+}
+
+window.weekendToPlanner=function(keys){
+  plannerItems=[];
+  keys.forEach(k=>{if(plannerItems.length<8)plannerItems.push(k);});
+  savePl();updatePlannerBadge();renderPlanner();
+  document.getElementById('planner-content').scrollIntoView({behavior:'smooth'});
+};
+
+// ═══════════════════════════════════════════════════════
+// OKOLICA Z OPENSTREETMAP (Overpass API)
+// ═══════════════════════════════════════════════════════
+const OSM_CATS={
+  'tourism=attraction':{icon:'🎯',label:'Atrakcja'},
+  'tourism=museum':{icon:'🏛️',label:'Muzeum'},
+  'tourism=zoo':{icon:'🦁',label:'Zoo'},
+  'tourism=aquarium':{icon:'🐠',label:'Akwarium'},
+  'tourism=theme_park':{icon:'🎡',label:'Park rozrywki'},
+  'tourism=viewpoint':{icon:'🔭',label:'Punkt widokowy'},
+  'tourism=gallery':{icon:'🖼️',label:'Galeria'},
+  'historic=castle':{icon:'🏰',label:'Zamek'},
+  'historic=monument':{icon:'🗿',label:'Monument'},
+  'historic=ruins':{icon:'🏚️',label:'Ruiny'},
+  'historic=memorial':{icon:'🕊️',label:'Pomnik pamięci'},
+  'leisure=nature_reserve':{icon:'🌿',label:'Rezerwat'},
+  'leisure=park':{icon:'🌳',label:'Park'},
+  'leisure=garden':{icon:'🌸',label:'Ogród'},
+  'amenity=place_of_worship':{icon:'⛪',label:'Kościół/Świątynia'},
+  'natural=peak':{icon:'⛰️',label:'Szczyt'},
+  'waterway=waterfall':{icon:'💧',label:'Wodospad'},
+};
+function osmIcon(tags){
+  for(const [key,val] of Object.entries(OSM_CATS)){
+    const [k,v]=key.split('=');
+    if(tags[k]===v)return val;
+  }
+  return {icon:'📍',label:'Miejsce'};
+}
+
+function renderNearbyOSM(item){
+  const el=document.getElementById('nearby-list');
+  if(!item.lat){el.innerHTML='<div style="font-size:.72rem;color:var(--muted);">Brak lokalizacji GPS</div>';return;}
+  el.innerHTML='<div style="font-size:.74rem;color:var(--muted);font-style:italic;">⏳ Pobieram atrakcje z OpenStreetMap…</div>';
+  const radius=30000;
+  const query=`
+[out:json][timeout:15];
+(
+  node["tourism"~"^(attraction|museum|zoo|aquarium|theme_park|viewpoint|gallery)$"](around:${radius},${item.lat},${item.lng});
+  node["historic"~"^(castle|monument|ruins|memorial)$"](around:${radius},${item.lat},${item.lng});
+  node["leisure"~"^(nature_reserve|park|garden)$"](around:${radius},${item.lat},${item.lng});
+  node["waterway"="waterfall"](around:${radius},${item.lat},${item.lng});
+  way["tourism"~"^(attraction|museum|zoo|aquarium|theme_park)$"](around:${radius},${item.lat},${item.lng});
+  way["historic"~"^(castle|ruins)$"](around:${radius},${item.lat},${item.lng});
+);
+out center 50;
+`;
+  fetch('https://overpass-api.de/api/interpreter',{
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:'data='+encodeURIComponent(query)
+  })
+  .then(r=>r.json())
+  .then(data=>{
+    const elements=data.elements||[];
+    const results=elements
+      .filter(e=>{
+        const name=e.tags?.name||e.tags?.['name:pl']||'';
+        return name.length>=2&&name!==item.name;
+      })
+      .map(e=>{
+        const lat=e.lat||e.center?.lat;
+        const lng=e.lon||e.center?.lon;
+        const d=(lat&&lng)?haversine(item.lat,item.lng,lat,lng):999;
+        const tags=e.tags||{};
+        const name=tags['name:pl']||tags.name||'Nieznana nazwa';
+        const {icon,label}=osmIcon(tags);
+        const mapsUrl=`https://www.google.com/maps/search/${encodeURIComponent(name)}/@${lat},${lng},14z`;
+        return {name,icon,label,d,mapsUrl};
+      })
+      .filter(r=>r.d<=30)
+      .filter((r,i,arr)=>arr.findIndex(x=>x.name===r.name)===i)
+      .sort((a,b)=>a.d-b.d)
+      .slice(0,25);
+    if(results.length===0){
+      el.innerHTML=`<div style="font-size:.74rem;color:var(--muted);">Brak atrakcji w bazie OSM w promieniu 30 km.<br><a href="https://www.google.com/maps/search/atrakcje+turystyczne/@${item.lat},${item.lng},12z" target="_blank" style="color:var(--sky);">→ Otwórz Google Maps</a></div>`;
+      return;
+    }
+    el.innerHTML=results.map(r=>`
+      <div class="nearby-item" onclick="window.open('${r.mapsUrl}','_blank')">
+        <span class="nearby-icon">${r.icon}</span>
+        <div class="nearby-body">
+          <div class="nearby-name">${r.name}</div>
+          <div class="nearby-meta">${r.label}</div>
+        </div>
+        <span class="nearby-dist">${r.d} km</span>
+      </div>`).join('')+
+      `<div style="margin-top:.45rem;text-align:center"><a href="https://www.google.com/maps/search/atrakcje+turystyczne/@${item.lat},${item.lng},12z" target="_blank" style="font-size:.7rem;color:var(--sky);">→ Pokaż więcej w Google Maps</a></div>`;
+  })
+  .catch(()=>{
+    el.innerHTML=`<div style="font-size:.74rem;color:var(--muted);">Błąd ładowania danych OSM. Sprawdź połączenie.<br><a href="https://www.google.com/maps/search/atrakcje+turystyczne/@${item.lat},${item.lng},12z" target="_blank" style="color:var(--sky);">→ Otwórz Google Maps</a></div>`;
+  });
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1108,7 +1735,298 @@ function renderStats(){
     html+=`<div class="badge-card ${e?'earned':'locked'}"><div class="badge-icon">${b.icon}</div><div class="badge-name">${b.name}</div><div class="badge-desc">${b.desc}</div></div>`;
   });
   html+='</div></div>';
+  html+=`<div class="stats-section"><div class="stats-section-title">Poziom odkrywcy</div><div id="stats-explorer"></div></div>`;
+  html+=`<div class="stats-section"><div class="stats-section-title">Kilometry i koszty</div><div id="stats-km"></div></div>`;
+  html+=`<div class="stats-section"><div class="stats-section-title">Mapa województw</div><div class="heatmap-grid" id="stats-heatmap"></div></div>`;
+  html+=`<div class="stats-section"><div class="stats-section-title">Historia wyjazdów</div><div id="stats-timeline"></div></div>`;
+  html+=`<div class="stats-section"><div class="stats-section-title">Aktywność odkryć (12 mies.)</div><div id="stats-activity"></div></div>`;
+  html+=`<div class="stats-section"><div class="stats-section-title">✨ Polecane dla Ciebie</div><div id="stats-reco"></div></div>`;
   document.getElementById('stats-content').innerHTML=html;
+  renderExplorerLevel();
+  renderKmStats();
+  renderWojHeatmap();
+  renderTimeline();
+  renderActivityChart();
+  renderRecommendations();
+}
+
+// ═══════════════════════════════════════════════════════
+// POZIOM ODKRYWCY — 10 stopni (progi % całej listy)
+// ═══════════════════════════════════════════════════════
+const EXPLORER_LEVELS=[
+  {pmin:0, pmax:2,  icon:'🌱',title:'Początkujący',  subtitle:'Stawiasz pierwsze kroki w odkrywaniu Polski',color:'#7ab840'},
+  {pmin:2, pmax:5,  icon:'🚶',title:'Wędrowiec',     subtitle:'Kilka miejsc za Tobą — to dopiero początek!',color:'#5a9a30'},
+  {pmin:5, pmax:10, icon:'🧭',title:'Odkrywca',      subtitle:'Masz oko do ciekawych miejsc',color:'#4a8a20'},
+  {pmin:10,pmax:18, icon:'🏕️',title:'Turysta',       subtitle:'Polska zaczyna zdradzać swoje tajemnice',color:'#4a7fa5'},
+  {pmin:18,pmax:30, icon:'⛺',title:'Podróżnik',     subtitle:'Coraz więcej odkryć na koncie!',color:'#3a6f95'},
+  {pmin:30,pmax:45, icon:'🗺️',title:'Poszukiwacz',   subtitle:'Prawdziwy znawca kraju',color:'#e8753a'},
+  {pmin:45,pmax:60, icon:'🏔️',title:'Zdobywca',      subtitle:'Imponująca kolekcja odkryć!',color:'#b07020'},
+  {pmin:60,pmax:75, icon:'⚔️',title:'Rycerz Szlaku', subtitle:'Niewielu dotarło tak daleko',color:'#8b2c2c'},
+  {pmin:75,pmax:95, icon:'👑',title:'Mistrz Polski', subtitle:'Prawie wszystko odkryte — finisz w zasięgu!',color:'#c9a84c'},
+  {pmin:95,pmax:101,icon:'🦅',title:'Legenda Polski',subtitle:'Kompletna lista! Jesteś legendą!',color:'#1e2d40'},
+];
+
+function renderExplorerLevel(){
+  const el=document.getElementById('stats-explorer');
+  if(!el)return;
+  const done=Object.keys(checked).length;
+  const total=DATA.reduce((s,c)=>s+c.items.length,0);
+  const pctDone=done/total*100;
+  const level=EXPLORER_LEVELS.find(l=>pctDone>=l.pmin&&pctDone<l.pmax)||EXPLORER_LEVELS[EXPLORER_LEVELS.length-1];
+  const levelIdx=EXPLORER_LEVELS.indexOf(level);
+  const nextLevel=EXPLORER_LEVELS[levelIdx+1];
+  const lvlMin=Math.ceil(level.pmin/100*total), lvlMax=Math.min(Math.ceil(level.pmax/100*total),total);
+  const pct=lvlMax>lvlMin?Math.round((done-lvlMin)/(lvlMax-lvlMin)*100):100;
+  let html=`<div class="explorer-level">
+    <div class="explorer-badge">${level.icon}</div>
+    <div class="explorer-info">
+      <div class="explorer-title">${level.title}</div>
+      <div class="explorer-subtitle">${level.subtitle}</div>
+      <div class="explorer-bar-wrap"><div class="explorer-bar" style="width:${done>=total?100:Math.max(pct,3)}%;background:linear-gradient(90deg,${level.color},${level.color}aa)"></div></div>
+      <div class="explorer-next">${done>=total
+        ?`🎉 Osiągnięto maksymalny poziom! ${done}/${total} atrakcji`
+        :nextLevel
+          ?`${done}/${total} atrakcji · do poziomu <strong>${nextLevel.icon} ${nextLevel.title}</strong> jeszcze ${Math.max(1,Math.ceil(nextLevel.pmin/100*total)-done)}`
+          :`${done}/${total} atrakcji`
+      }</div>
+    </div>
+  </div>`;
+  html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.4rem;margin-top:.5rem;">`;
+  EXPLORER_LEVELS.forEach(l=>{
+    const lmin=Math.ceil(l.pmin/100*total), lmax=Math.min(Math.ceil(l.pmax/100*total),total);
+    const unlocked=pctDone>=l.pmin;
+    const current=l===level;
+    html+=`<div style="padding:.4rem .6rem;border-radius:3px;border:1.5px solid ${current?l.color:'rgba(0,0,0,.08)'};background:${current?l.color+'15':'transparent'};opacity:${unlocked?1:0.4};">
+      <span style="font-size:.9rem">${l.icon}</span>
+      <span style="font-size:.68rem;font-weight:700;color:${current?l.color:'var(--muted)'};margin-left:.3rem;">${l.title}</span>
+      <div style="font-size:.58rem;color:var(--muted)">${lmin}–${lmax} miejsc</div>
+    </div>`;
+  });
+  html+=`</div>`;
+  el.innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════
+// KILOMETRY I KOSZTY
+// ═══════════════════════════════════════════════════════
+function renderKmStats(){
+  const el=document.getElementById('stats-km');
+  if(!el)return;
+  let totalKm=0,totalTrips=0;
+  DATA.forEach((cat,ci)=>cat.items.forEach((item,ii)=>{
+    const key=getKey(ci,ii);
+    const km=distItem(item);
+    if(checked[key]&&km){totalKm+=km*2;totalTrips++;}
+  }));
+  const avgKm=totalTrips?Math.round(totalKm/totalTrips):0;
+  let fuelCostHtml='';
+  if(fuelPrice&&fuelBurn&&totalKm){
+    const cost=Math.round(totalKm*fuelBurn/100*fuelPrice);
+    fuelCostHtml=`<div class="stat-card"><div class="stat-card-num" style="font-size:1.4rem">~${cost} zł</div><div class="stat-card-label">Koszt paliwa łącznie</div></div>`;
+  }
+  el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.65rem">
+    <div class="stat-card"><div class="stats-km-total">${totalKm.toLocaleString('pl-PL')}</div><div class="stat-card-label">km łącznie (tam i z powrotem)</div></div>
+    <div class="stat-card"><div class="stat-card-num">${avgKm}</div><div class="stat-card-label">Średnio km / wycieczka</div></div>
+    <div class="stat-card"><div class="stat-card-num">${totalTrips}</div><div class="stat-card-label">Zaliczonych wycieczek</div></div>
+    ${fuelCostHtml}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// HEATMAPA WOJEWÓDZTW
+// ═══════════════════════════════════════════════════════
+const WOJ_NAMES={
+  'dolnoslaskie':'Dolnośląskie','kujawsko-pomorskie':'Kujawsko-Pom.','lubelskie':'Lubelskie',
+  'lubuskie':'Lubuskie','lodzkie':'Łódzkie','malopolskie':'Małopolskie','mazowieckie':'Mazowieckie',
+  'opolskie':'Opolskie','podkarpackie':'Podkarpackie','podlaskie':'Podlaskie','pomorskie':'Pomorskie',
+  'slaskie':'Śląskie','swietokrzyskie':'Świętokrzyskie','warminsko-mazurskie':'Warmińsko-Maz.',
+  'wielkopolskie':'Wielkopolskie','zachodniopomorskie':'Zachodniopom.'
+};
+function renderWojHeatmap(){
+  const el=document.getElementById('stats-heatmap');
+  if(!el)return;
+  const stats={};
+  DATA.forEach((cat,ci)=>cat.items.forEach((item,ii)=>{
+    const w=item.woj;if(!w)return;
+    if(!stats[w])stats[w]={done:0,total:0};
+    stats[w].total++;
+    if(checked[getKey(ci,ii)])stats[w].done++;
+  }));
+  el.innerHTML=Object.keys(WOJ_NAMES).filter(w=>stats[w]).map(w=>{
+    const {done,total}=stats[w];
+    const pct=total?done/total:0;
+    const alpha=(pct*0.45+0.05).toFixed(2);
+    return `<div class="heatmap-cell" style="background:rgba(232,117,58,${alpha});border-color:rgba(232,117,58,.25);">
+      <span class="hm-count" style="color:#a04010">${done}/${total}</span>
+      <span class="hm-name" style="color:#a04010">${WOJ_NAMES[w]}</span>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// HISTORIA WYJAZDÓW (timeline)
+// ═══════════════════════════════════════════════════════
+function renderTimeline(){
+  const el=document.getElementById('stats-timeline');
+  if(!el)return;
+  const entries=[];
+  DATA.forEach((cat,ci)=>cat.items.forEach((item,ii)=>{
+    const key=getKey(ci,ii);
+    if(!checked[key])return;
+    const ud=userData[key]||{};
+    entries.push({item,key,ud,ci,ii,catIcon:cat.cat.split(' ')[0],catName:cat.cat.replace(/^\S+ /,''),date:ud.date||null});
+  }));
+  if(entries.length===0){
+    el.innerHTML='<div class="timeline-empty">Brak zaliczonych miejsc. Zaznacz odwiedzone atrakcje, aby zobaczyć historię.</div>';
+    return;
+  }
+  const withDate=entries.filter(e=>e.date).sort((a,b)=>b.date.localeCompare(a.date));
+  const noDate=entries.filter(e=>!e.date);
+  const months={};
+  withDate.forEach(e=>{
+    const d=new Date(e.date+'T12:00:00');
+    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const label=d.toLocaleDateString('pl-PL',{year:'numeric',month:'long'});
+    if(!months[key])months[key]={label,entries:[]};
+    months[key].entries.push(e);
+  });
+  let html='';
+  Object.keys(months).sort((a,b)=>b.localeCompare(a)).forEach(mk=>{
+    const {label,entries:mes}=months[mk];
+    html+=`<div class="timeline-month"><div class="timeline-month-header"><span>${label}</span><span class="timeline-month-count">${mes.length} ${mes.length===1?'miejsce':mes.length<5?'miejsca':'miejsc'}</span></div>`;
+    mes.forEach(e=>{
+      const d=new Date(e.date+'T12:00:00');
+      const dayStr=d.toLocaleDateString('pl-PL',{weekday:'short',day:'numeric'});
+      const stars=e.ud.rating?'<span class="timeline-stars">'+'★'.repeat(e.ud.rating)+'</span>':'';
+      const note=e.ud.note?`<div class="timeline-note">📝 ${e.ud.note}</div>`:'';
+      html+=`<div class="timeline-entry" onclick="openModal(${e.ci},${e.ii},'${e.key}')">
+        <div class="timeline-dot"></div>
+        <div class="timeline-body">
+          <div class="timeline-name">${e.catIcon} ${e.item.name}${stars}</div>
+          <div class="timeline-meta">${e.catName} · ${distItem(e.item)||'?'} km</div>
+          ${note}
+        </div>
+        <span class="timeline-date-badge">${dayStr}</span>
+      </div>`;
+    });
+    html+='</div>';
+  });
+  if(noDate.length>0){
+    html+=`<div class="timeline-month"><div class="timeline-month-header"><span>Bez daty wizyty</span><span class="timeline-month-count">${noDate.length}</span></div>`;
+    noDate.forEach(e=>{
+      const stars=e.ud.rating?'<span class="timeline-stars">'+'★'.repeat(e.ud.rating)+'</span>':'';
+      html+=`<div class="timeline-entry" onclick="openModal(${e.ci},${e.ii},'${e.key}')">
+        <div class="timeline-dot" style="background:var(--muted)"></div>
+        <div class="timeline-body">
+          <div class="timeline-name">${e.catIcon} ${e.item.name}${stars}</div>
+          <div class="timeline-meta">${e.catName} · ${distItem(e.item)||'?'} km</div>
+        </div>
+        <span class="timeline-date-badge" style="background:rgba(0,0,0,.06);color:var(--muted)">brak daty</span>
+      </div>`;
+    });
+    html+='</div>';
+  }
+  el.innerHTML=`<div class="timeline">${html}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// WYKRES AKTYWNOŚCI (12 miesięcy)
+// ═══════════════════════════════════════════════════════
+function renderActivityChart(){
+  const el=document.getElementById('stats-activity');
+  if(!el)return;
+  const monthCounts={};
+  let totalWithDates=0;
+  Object.values(userData).forEach(ud=>{
+    if(ud.date&&ud.date.trim()){
+      const d=new Date(ud.date+'T12:00:00');
+      if(!isNaN(d)){
+        const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        monthCounts[key]=(monthCounts[key]||0)+1;
+        totalWithDates++;
+      }
+    }
+  });
+  if(totalWithDates===0){
+    el.innerHTML='<div class="reco-empty">Zapisz daty wizyt w opisach atrakcji, aby zobaczyć wykres aktywności.</div>';
+    return;
+  }
+  const months=[];
+  const today=new Date();
+  for(let i=11;i>=0;i--){
+    const d=new Date(today.getFullYear(),today.getMonth()-i,1);
+    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    months.push({key,label:d.toLocaleDateString('pl-PL',{month:'short'}),year:d.getFullYear(),count:monthCounts[key]||0});
+  }
+  const maxCount=Math.max(...months.map(m=>m.count),1);
+  const bars=months.map(m=>{
+    const pct=Math.round(m.count/maxCount*100);
+    const isCur=m.key===`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;min-width:0;">
+      <div style="font-size:.62rem;color:var(--moss);font-weight:700;height:16px;line-height:16px;">${m.count>0?m.count:''}</div>
+      <div style="width:100%;background:rgba(0,0,0,.06);border-radius:3px 3px 0 0;height:80px;display:flex;align-items:flex-end;overflow:hidden;">
+        <div style="width:100%;height:${pct}%;background:${isCur?'var(--accent)':'var(--moss)'};border-radius:3px 3px 0 0;opacity:${m.count>0?1:0.3};min-height:${m.count>0?'3px':'0'};"></div>
+      </div>
+      <div style="font-size:.6rem;color:var(--muted);text-align:center;line-height:1.2;">${m.label}${m.year!==today.getFullYear()?`<br>${m.year}`:''}</div>
+    </div>`;
+  }).join('');
+  const best=months.reduce((b,m)=>m.count>b.count?m:b,months[0]);
+  el.innerHTML=`<div style="display:flex;align-items:flex-end;gap:4px;padding:.5rem 0 0;">${bars}</div>
+    ${best.count>0?`<div style="font-size:.72rem;color:var(--muted);margin-top:.5rem;">Najaktywniejszy miesiąc: <strong>${best.label} ${best.year}</strong> (${best.count} miejsc)</div>`:''}
+    <div style="font-size:.68rem;color:var(--muted);margin-top:.2rem;">${totalWithDates} wizyt z zapisaną datą łącznie · pomarańczowy = bieżący miesiąc</div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// REKOMENDACJE — na podstawie ocen 4–5★
+// ═══════════════════════════════════════════════════════
+function renderRecommendations(){
+  const el=document.getElementById('stats-reco');
+  if(!el)return;
+  const rated=[];
+  DATA.forEach((cat,ci)=>cat.items.forEach((item,ii)=>{
+    const key=getKey(ci,ii);
+    const ud=userData[key]||{};
+    if(checked[key]&&ud.rating>=4)rated.push({item,rating:ud.rating,ci});
+  }));
+  if(rated.length===0){
+    el.innerHTML='<div class="reco-empty">Oceń zaliczone miejsca (4–5★), aby otrzymać rekomendacje podobnych atrakcji.</div>';
+    return;
+  }
+  const catScores={},actScores={};
+  rated.forEach(({item,rating,ci})=>{
+    catScores[ci]=(catScores[ci]||0)+rating;
+    (item.acts||[]).forEach(a=>{actScores[a]=(actScores[a]||0)+rating;});
+  });
+  const candidates=[];
+  DATA.forEach((cat,ci)=>cat.items.forEach((item,ii)=>{
+    const key=getKey(ci,ii);
+    if(checked[key])return;
+    let score=(catScores[ci]||0)*2;
+    (item.acts||[]).forEach(a=>{score+=(actScores[a]||0)*1.5;});
+    const km=distItem(item);
+    if(km)score+=Math.max(0,300-km)*0.1;
+    if(score>0)candidates.push({item,key,ci,ii,score,catIcon:cat.cat.split(' ')[0],catName:cat.cat.replace(/^\S+ /,'')});
+  }));
+  if(candidates.length===0){
+    el.innerHTML='<div class="reco-empty">Wszystkie miejsca z ulubionych kategorii już zaliczone! 🎉</div>';
+    return;
+  }
+  candidates.sort((a,b)=>b.score-a.score);
+  const top=candidates.slice(0,6);
+  const topCat=Object.entries(catScores).sort((a,b)=>b[1]-a[1])[0];
+  const topAct=Object.entries(actScores).sort((a,b)=>b[1]-a[1])[0];
+  el.innerHTML=`<div style="font-size:.72rem;color:var(--muted);margin-bottom:.5rem;">Na podstawie Twoich ocen — lubisz <strong>${topCat?DATA[topCat[0]].cat.replace(/^\S+ /,''):'odkrywanie'}</strong>${topAct?` i <strong>${topAct[0]}</strong>`:''}:</div>
+  <div class="reco-grid">${top.map(({item,key,ci,ii,catIcon,catName})=>{
+    const reason=catScores[ci]>0?'Podobne do Twoich ulubionych':'Pasuje do Twoich aktywności';
+    return `<div class="reco-card" onclick="openModal(${ci},${ii},'${key}')">
+      <div class="reco-icon">${catIcon}</div>
+      <div class="reco-body">
+        <div class="reco-name">${item.name}</div>
+        <div class="reco-reason">${reason}</div>
+        <div class="reco-meta">${distItem(item)||'?'} km · ${catName}</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1248,6 +2166,7 @@ function renderNearby(){
   const el=document.getElementById('nearby-list');
   const item=currentModalCi!==null?DATA[currentModalCi].items[currentModalIi]:null;
   if(!item||!item.lat){el.innerHTML='<div style="font-size:.72rem;color:var(--muted);">Brak lokalizacji GPS</div>';return;}
+  if(nearbyMode==='osm'){renderNearbyOSM(item);return;}
 
   let pool=[];
   if(nearbyMode==='nearby'){
@@ -1309,6 +2228,7 @@ window.openModal=function(ci,ii,key){
        <a class="modal-nav-btn" style="background:var(--sky);" href="https://www.openstreetmap.org/?mlat=${item.lat}&mlon=${item.lng}#map=14/${item.lat}/${item.lng}" target="_blank">📍 OSM</a>`:'';
   document.getElementById('modal-desc').textContent=item.desc||'';
   if(item.lat) loadWeather(item.lat,item.lng); else document.getElementById('modal-weather').style.display='none';
+  updateModalFuel();
   renderNearby();
   const ud=userData[key]||{};
   document.getElementById('modal-date').value=ud.date||'';
@@ -1576,6 +2496,7 @@ function printJournal(){
 // ═══════════════════════════════════════════════════════
 render();
 updatePlannerBadge();
+initWeekendDate();
 if(window.L)initLeafletMap();
 // Pokazuj setup Pixabay przy pierwszym uruchomieniu bez klucza
 if(!pixabayKey&&!localStorage.getItem('pl-pxskip')){

@@ -29,6 +29,20 @@ h1 span{color:var(--accent);}
 .subtitle{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(245,237,214,.4);margin-top:.22rem;font-weight:300;}
 .progress-bar{height:3px;background:rgba(255,255,255,.12);}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--moss),var(--accent));transition:width .4s ease;}
+#dark-toggle{position:absolute;top:.8rem;right:.8rem;z-index:2;font-size:.85rem;padding:.32rem .5rem;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(245,237,214,.4);background:transparent;color:var(--paper);cursor:pointer;}
+body.dark #dark-toggle{background:rgba(255,255,255,.13);}
+/* RZĄD PRZYCISKÓW (układ jak w aplikacji DŚ) */
+.controls-row-stats{display:flex;align-items:center;}
+.controls-row-btns{display:flex;gap:.3rem;flex-wrap:wrap;align-items:center;}
+.search-row{margin-top:0;}
+@media(max-width:640px){
+  .controls-row-btns{gap:.22rem;}
+  .btn-label{display:none;}
+  .controls-row.search-row{flex-wrap:nowrap;}
+  .search-row select{min-width:0;flex-shrink:1;max-width:34vw;}
+  .search-row #search-input{min-width:90px;}
+  .rchip{font-size:.85rem;padding:.22rem .55rem;}
+}
 /* TAB BAR */
 .tab-bar{position:fixed;bottom:0;left:0;right:0;height:calc(var(--tab-h) + env(safe-area-inset-bottom));background:var(--ink);display:flex;z-index:50;border-top:1px solid rgba(255,255,255,.1);}
 .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding-bottom:env(safe-area-inset-bottom);cursor:pointer;border:none;background:transparent;color:rgba(245,237,214,.4);font-family:'Lato',sans-serif;font-size:.56rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;transition:color .2s;position:relative;}
@@ -412,31 +426,37 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
   <h1>Atrakcje <span>Polski</span></h1>
   <div class="subtitle" id="header-subtitle">odkryj kraj</div>
 </div>
+<button id="dark-toggle" onclick="toggleDark()" title="Tryb ciemny">🌙</button>
 <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
 </header>
 
 <!-- LISTA -->
 <div id="tab-lista" class="tab-panel active">
 <div class="controls">
-  <div class="controls-row" style="justify-content:space-between;">
+  <div class="controls-row controls-row-stats">
     <div class="stats-line" id="stats-line">Ładowanie…</div>
-    <div style="display:flex;gap:.28rem;flex-wrap:wrap;">
-      <button id="filter-all" class="active" onclick="setFilter('all',this)" title="Wszystkie">🗂️</button>
-      <button id="filter-todo" onclick="setFilter('todo',this)" title="Do zrobienia">⬜</button>
-      <button id="filter-done" onclick="setFilter('done',this)" title="Zaliczone">✅</button>
-    </div>
   </div>
   <div class="region-chips">
-    <button class="rchip active" data-region="all" onclick="setRegion('all',this)">🇵🇱 Cała Polska</button>
-    <button class="rchip" data-region="poludnie" onclick="setRegion('poludnie',this)">🏔️ Południe</button>
-    <button class="rchip" data-region="zachod" onclick="setRegion('zachod',this)">🌿 Zachód</button>
-    <button class="rchip" data-region="centrum" onclick="setRegion('centrum',this)">🏛️ Centrum</button>
-    <button class="rchip" data-region="wschod" onclick="setRegion('wschod',this)">🌻 Wschód</button>
-    <button class="rchip" data-region="polnoc" onclick="setRegion('polnoc',this)">⚓ Północ</button>
+    <button class="rchip active" data-region="all" onclick="setRegion('all',this)" title="Cała Polska">🇵🇱 <span class="btn-label">Cała Polska</span></button>
+    <button class="rchip" data-region="poludnie" onclick="setRegion('poludnie',this)" title="Południe">🏔️ <span class="btn-label">Południe</span></button>
+    <button class="rchip" data-region="zachod" onclick="setRegion('zachod',this)" title="Zachód">🌿 <span class="btn-label">Zachód</span></button>
+    <button class="rchip" data-region="centrum" onclick="setRegion('centrum',this)" title="Centrum">🏛️ <span class="btn-label">Centrum</span></button>
+    <button class="rchip" data-region="wschod" onclick="setRegion('wschod',this)" title="Wschód">🌻 <span class="btn-label">Wschód</span></button>
+    <button class="rchip" data-region="polnoc" onclick="setRegion('polnoc',this)" title="Północ">⚓ <span class="btn-label">Północ</span></button>
   </div>
-  <div class="controls-row">
+  <div class="controls-row controls-row-btns">
+    <button id="filter-all" class="active" onclick="setFilter('all',this)" title="Wszystkie">🗂️ <span class="btn-label">Wszystkie</span></button>
+    <button id="filter-todo" onclick="setFilter('todo',this)" title="Do zrobienia">⬜ <span class="btn-label">Do zrobienia</span></button>
+    <button id="filter-done" onclick="setFilter('done',this)" title="Zaliczone">✅ <span class="btn-label">Zaliczone</span></button>
+    <button onclick="toggleKids(this)" id="kids-btn" title="Tylko atrakcje rodzinne">👶 <span class="btn-label">Rodzinne</span></button>
+    <button id="fb-priority" onclick="togglePriority()" title="Pokaż tylko priorytety (długie przytrzymanie atrakcji = ⭐)">⭐ <span class="btn-label">Priorytety</span></button>
+    <button onclick="toggleActivityFilter()" id="btn-activity" title="Filtr aktywności">🎯 <span class="btn-label">Aktywność</span></button>
+    <button id="btn-fuel" onclick="toggleFuelBar()" title="Kalkulator kosztów paliwa">⛽ <span class="btn-label">Paliwo</span></button>
+  </div>
+  <div class="controls-row search-row">
+    <input type="text" id="search-input" placeholder="🔍 szukaj atrakcji…" oninput="applyFilters()">
     <select id="woj-filter" onchange="setWoj(this.value)">
-      <option value="">Wszystkie województwa</option>
+      <option value="">📍 Wszystkie województwa</option>
       <option value="dolnoslaskie">Dolnośląskie</option>
       <option value="kujawsko-pomorskie">Kujawsko-Pomorskie</option>
       <option value="lubelskie">Lubelskie</option>
@@ -455,21 +475,13 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
       <option value="zachodniopomorskie">Zachodniopomorskie</option>
     </select>
     <select id="sort-filter" onchange="setSort(this.value)">
-      <option value="default">Kolejność domyślna</option>
+      <option value="default">↕ Kolejność domyślna</option>
       <option value="az">A–Z</option>
       <option value="dist-asc">Odległość ↑</option>
       <option value="dist-desc">Odległość ↓</option>
       <option value="rating">Ocena ↓</option>
     </select>
-    <button onclick="toggleKids(this)" id="kids-btn" title="Tylko atrakcje rodzinne">👶</button>
-    <button onclick="toggleActivityFilter()" id="btn-activity" title="Filtr aktywności">🎯</button>
-  </div>
-  <div class="controls-row">
-    <input type="text" id="search-input" placeholder="🔍 szukaj atrakcji…" oninput="applyFilters()">
-    <button id="fb-priority" onclick="togglePriority()" title="Pokaż tylko priorytety (długie przytrzymanie atrakcji = ⭐)">⭐</button>
-    <button id="btn-fuel" onclick="toggleFuelBar()" title="Kalkulator kosztów paliwa">⛽</button>
-    <button onclick="toggleDark()" title="Tryb ciemny">🌙</button>
-    <button onclick="showDataPanel()" id="data-btn" title="Dane i ustawienia">💾</button>
+    <button onclick="showDataPanel()" id="data-btn" title="Dane i ustawienia">💾 <span class="btn-label">Dane</span></button>
   </div>
 </div>
 <div class="fuel-bar" id="fuel-bar">

@@ -1,4 +1,4 @@
-const CACHE = 'atrakcje-polska-v1';
+const CACHE = 'atrakcje-polska-v2';
 const PRECACHE = [
   './atrakcje-polska.html',
   './manifest-polska.json',

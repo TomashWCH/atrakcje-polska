@@ -100,7 +100,8 @@ button.danger:hover{background:#c0392b;color:white;}
 .card-view .item.checked{border-color:rgba(74,103,65,.4);background:var(--checked-bg);}
 .card-view .item-img{width:100%;height:120px;object-fit:cover;display:block;background:var(--parchment);display:flex;align-items:center;justify-content:center;font-size:2.5rem;flex-shrink:0;}
 .card-view .card-body{padding:.5rem .6rem .55rem;}
-.card-view .card-chk{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.9);border:2px solid rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:var(--moss);}
+.card-view .card-chk{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.92);border:2px solid rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;color:var(--moss);z-index:3;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.card-view .item.checked .card-chk{background:var(--moss);border-color:var(--moss);color:white;}
 .card-view .item{position:relative;}
 /* SHARED ITEM */
 .item.checked{background:var(--checked-bg);}

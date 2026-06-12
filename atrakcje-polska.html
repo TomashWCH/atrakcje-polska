@@ -421,9 +421,9 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
   <div class="controls-row" style="justify-content:space-between;">
     <div class="stats-line" id="stats-line">Ładowanie…</div>
     <div style="display:flex;gap:.28rem;flex-wrap:wrap;">
-      <button id="filter-all" class="active" onclick="setFilter('all',this)">Wszystkie</button>
-      <button id="filter-todo" onclick="setFilter('todo',this)">Do zrobienia</button>
-      <button id="filter-done" onclick="setFilter('done',this)">Zaliczone</button>
+      <button id="filter-all" class="active" onclick="setFilter('all',this)" title="Wszystkie">🗂️</button>
+      <button id="filter-todo" onclick="setFilter('todo',this)" title="Do zrobienia">⬜</button>
+      <button id="filter-done" onclick="setFilter('done',this)" title="Zaliczone">✅</button>
     </div>
   </div>
   <div class="region-chips">
@@ -461,16 +461,15 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
       <option value="dist-desc">Odległość ↓</option>
       <option value="rating">Ocena ↓</option>
     </select>
-    <button onclick="toggleKids(this)" id="kids-btn">👶 Rodzinne</button>
-    <button onclick="toggleActivityFilter()" id="btn-activity">🎯 Aktywność</button>
+    <button onclick="toggleKids(this)" id="kids-btn" title="Tylko atrakcje rodzinne">👶</button>
+    <button onclick="toggleActivityFilter()" id="btn-activity" title="Filtr aktywności">🎯</button>
   </div>
   <div class="controls-row">
     <input type="text" id="search-input" placeholder="🔍 szukaj atrakcji…" oninput="applyFilters()">
     <button id="fb-priority" onclick="togglePriority()" title="Pokaż tylko priorytety (długie przytrzymanie atrakcji = ⭐)">⭐</button>
     <button id="btn-fuel" onclick="toggleFuelBar()" title="Kalkulator kosztów paliwa">⛽</button>
-    <button onclick="toggleDark()">🌙</button>
-    <button onclick="showDataPanel()" id="data-btn">💾 Dane</button>
-    <button class="danger" onclick="confirmReset()">↺</button>
+    <button onclick="toggleDark()" title="Tryb ciemny">🌙</button>
+    <button onclick="showDataPanel()" id="data-btn" title="Dane i ustawienia">💾</button>
   </div>
 </div>
 <div class="fuel-bar" id="fuel-bar">
@@ -1023,7 +1022,6 @@ function setView(v){
   document.getElementById('vbtn-card').classList.toggle('active',v==='card');
   render();
 }
-function confirmReset(){if(confirm('Wyczyścić wszystkie zaliczenia i dane?')){checked={};userData={};save();saveUDL();render();}}
 function toggleDark(){document.body.classList.toggle('dark');}
 
 function passGeo(item){

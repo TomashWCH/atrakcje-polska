@@ -439,6 +439,7 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
   </div>
   <div class="region-chips">
     <button class="rchip active" data-region="all" onclick="setRegion('all',this)" title="Cała Polska">🇵🇱 <span class="btn-label">Cała Polska</span></button>
+    <button class="rchip" data-region="gory" onclick="setRegion('gory',this)" title="Góry — korony PTTK">⛰️ <span class="btn-label">Góry</span></button>
     <button class="rchip" data-region="poludnie" onclick="setRegion('poludnie',this)" title="Południe">🏔️ <span class="btn-label">Południe</span></button>
     <button class="rchip" data-region="zachod" onclick="setRegion('zachod',this)" title="Zachód">🌿 <span class="btn-label">Zachód</span></button>
     <button class="rchip" data-region="centrum" onclick="setRegion('centrum',this)" title="Centrum">🏛️ <span class="btn-label">Centrum</span></button>
@@ -580,7 +581,7 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
 </div>
 <div id="planner-panel">
   <div class="weekend-section">
-    <div class="weekend-section-title">✨ Rekomendacje na wyprawę — TOP 5 dopasowane do Ciebie</div>
+    <div class="weekend-section-title">✨ Rekomendacje na wyprawę — TOP 20 dopasowane do Ciebie</div>
     <div style="font-size:.7rem;color:var(--muted);margin-bottom:.55rem;line-height:1.45;">Uwzględniam Twoje dotychczasowe wyprawy i oceny, pogodę w wybranym terminie, czas dojazdu i zwiedzania oraz orientacyjne ceny biletów.</div>
     <div class="weekend-controls">
       <input type="date" id="weekend-date" class="weekend-date-input">
@@ -1038,7 +1039,8 @@ function setView(v){
 }
 function toggleDark(){document.body.classList.toggle('dark');}
 
-function passGeo(item){
+function passGeo(item,ci){
+  if(currentRegion==="gory")return ci<=3; // korony PTTK (kategorie 0–3)
   if(currentWoj)return item.woj===currentWoj;
   if(currentRegion!=='all')return (REGION_WOJ[currentRegion]||[]).includes(item.woj);
   return true;
@@ -1055,7 +1057,7 @@ function applyFilters(){
     const done=!!checked[k];
     const pf=currentFilter==='all'||(currentFilter==='done'&&done)||(currentFilter==='todo'&&!done);
     const ps=!search||item.name.toLowerCase().includes(search)||(item.short||'').toLowerCase().includes(search)||(item.desc||'').toLowerCase().includes(search);
-    const pg=passGeo(item);
+    const pg=passGeo(item,ci);
     const pk=!kidsOnly||item.kids===true;
     const pa=activeActs.size===0||(item.acts||[]).some(a=>activeActs.has(a));
     const pp=!priorityOnly||priorities.has(k);
@@ -1164,7 +1166,7 @@ function renderFlat(){
     const done=!!checked[key];
     const pf=currentFilter==='all'||(currentFilter==='done'&&done)||(currentFilter==='todo'&&!done);
     const ps=!search||item.name.toLowerCase().includes(search)||(item.short||'').toLowerCase().includes(search);
-    const pg=passGeo(item);
+    const pg=passGeo(item,ci);
     const pk=!kidsOnly||item.kids===true;
     const pa=activeActs.size===0||(item.acts||[]).some(a=>activeActs.has(a));
     if(pf&&ps&&pg&&pk&&pa&&(!priorityOnly||priorities.has(key))) all.push({cat,ci,item,ii,key,done,ud:userData[key]||{}});
@@ -1582,7 +1584,7 @@ window.planWeekend=function(){
   }
 
   // max 30 do sprawdzenia pogody: najpierw wg Twoich preferencji, potem bliskość
-  const sample=candidates.sort((a,b)=>(b.pref-a.pref)||(a.km-b.km)).slice(0,30);
+  const sample=candidates.sort((a,b)=>(b.pref-a.pref)||(a.km-b.km)).slice(0,45);
   resEl.innerHTML=`<div class="weekend-loading">⏳ Analizuję ${sample.length} niezaliczonych miejsc: preferencje${hasPrefs?'':' (oceń kilka miejsc 4–5★, a dopasuję lepiej!)'}, pogoda, dojazd…</div>`;
   let completed=0;
   const results=[];
@@ -1615,10 +1617,10 @@ function renderWeekendResults(results,targetDate,hasPrefs){
   if(!results.length){resEl.innerHTML='<div class="weekend-loading">Brak prognozy dla wybranej daty — spróbuj bliższego terminu (maks. 15 dni naprzód).</div>';return;}
   results.sort((a,b)=>b.score-a.score);
   const dateFormatted=new Date(targetDate+'T12:00:00').toLocaleDateString('pl-PL',{weekday:'long',day:'numeric',month:'long'});
-  const medals=['🥇','🥈','🥉','4','5'];
-  let html=`<div style="font-size:.76rem;color:var(--muted);margin-bottom:.7rem;">TOP 5 na <strong>${dateFormatted}</strong>${hasPrefs?' — dopasowane do Twoich ocen, pogody i dojazdu:':' — wg pogody i dojazdu (oceń odwiedzone miejsca, a uwzględnię Twój gust):'}</div>`;
-  results.slice(0,5).forEach((r,i)=>{
-    const rank=`<div class="ws-rank"${i>2?' style="font-size:1rem;color:var(--muted)"':''}>${medals[i]}</div>`;
+  const medals=['🥇','🥈','🥉'];
+  let html=`<div style="font-size:.76rem;color:var(--muted);margin-bottom:.7rem;">TOP ${Math.min(results.length,20)} na <strong>${dateFormatted}</strong>${hasPrefs?' — dopasowane do Twoich ocen, pogody i dojazdu:':' — wg pogody i dojazdu (oceń odwiedzone miejsca, a uwzględnię Twój gust):'}</div>`;
+  results.slice(0,20).forEach((r,i)=>{
+    const rank=i<3?`<div class="ws-rank">${medals[i]}</div>`:`<div class="ws-rank" style="font-size:1rem;color:var(--muted)">${i+1}</div>`;
     const inPlan=plannerItems.includes(r.key);
     const info=catInfo(r.ci);
     const czas=r.item.czas||info.czas;
@@ -2252,6 +2254,7 @@ function renderNearby(){
   if(nearbyMode==='nearby'){
     DATA.forEach((cat,ci)=>cat.items.forEach((it,ii)=>{
       if(ci===currentModalCi&&ii===currentModalIi)return;
+      if(checked[getKey(ci,ii)])return; // pomiń zaliczone
       if(!it.lat)return;
       const d=haversine(item.lat,item.lng,it.lat,it.lng);
       if(d<=50) pool.push({cat,ci,it,ii,d});
@@ -2263,6 +2266,7 @@ function renderNearby(){
     if(!stops.length){el.innerHTML='<div style="font-size:.72rem;color:var(--muted);">Brak atrakcji w planerze</div>';return;}
     DATA.forEach((cat,ci)=>cat.items.forEach((it,ii)=>{
       if(ci===currentModalCi&&ii===currentModalIi)return;
+      if(checked[getKey(ci,ii)])return; // pomiń zaliczone
       if(!it.lat)return;
       const minD=Math.min(...stops.map(s=>haversine(s.lat,s.lng,it.lat,it.lng)));
       if(minD<=30) pool.push({cat,ci,it,ii,d:minD});
@@ -2480,11 +2484,82 @@ function updateMapMarkers(){
 // ═══════════════════════════════════════════════════════
 // EKSPORT / IMPORT / GOŚĆ
 // ═══════════════════════════════════════════════════════
+// ═══ EKSPORT / IMPORT — kompatybilny z aplikacją „Atrakcje Dolnego Śląska" ═══
+const APP_ID='polska';
+
+// mapa klucz→nazwa dla wszystkich kluczy występujących w danych
+function buildNamesForExport(){
+  const names={};
+  const allKeys=new Set([...Object.keys(checked),...Object.keys(userData),...plannerItems,...priorities]);
+  DATA.forEach((cat,ci)=>cat.items.forEach((item,ii)=>{
+    const k=getKey(ci,ii);
+    if(allKeys.has(k))names[k]=item.name;
+  }));
+  return names;
+}
+
 function exportData(){
-  const data={version:2,owner:'Atrakcje Polski',checked,userData,planner:plannerItems,exported:new Date().toISOString()};
+  const data={version:3,app:APP_ID,owner:'Atrakcje Polski',checked,userData,planner:plannerItems,priorities:[...priorities],names:buildNamesForExport(),exported:new Date().toISOString()};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download=`atrakcje-polski-${new Date().toISOString().slice(0,10)}.json`;a.click();
+}
+
+// — dopasowanie nazw między aplikacjami (tolerancja polskiej odmiany) —
+function normTokens(s){
+  let t=(s||'').toLowerCase().replace(/ł/g,'l');
+  t=t.normalize('NFKD').replace(/[\u0300-\u036f]/g,'');
+  t=t.replace(/\(.*?\)/g,' ').replace(/[—–]/g,' ');
+  const stop=new Set(['w','we','na','k','i','z','ze','do','u','plus','m','npm']);
+  return t.split(/[^a-z0-9]+/).filter(x=>x&&!stop.has(x));
+}
+function tokenEq(a,b){
+  if(a===b)return true;
+  const s=a.length<=b.length?a:b, l=a.length<=b.length?b:a;
+  if(s.length<4)return false;
+  if(l.startsWith(s)&&l.length-s.length<=3)return true; // odmiana: pełny prefiks (Henryków/Henrykowie)
+  const n=s.length;let p=0;while(p<n&&a[p]===b[p])p++;
+  return n>=5&&p>=n-1&&l.length-s.length<=2;            // różnica najwyżej w ostatniej literze (Kletno/Kletnie)
+}
+function tokensSubset(small,big){
+  return small.every(t=>big.some(b=>tokenEq(t,b)));
+}
+function namesMatch(tokA,tokB){
+  if(!tokA.length||!tokB.length)return false;
+  return tokA.length<=tokB.length?tokensSubset(tokA,tokB):tokensSubset(tokB,tokA);
+}
+
+// tłumaczy klucze z obcego pliku (po nazwach) na klucze tej aplikacji
+function coreTokens(s){
+  const cut=(s||'').split(/[—–]/)[0];
+  const t=normTokens(cut);
+  return t.length?t:normTokens(s);
+}
+function crossMatchKeys(foreignNames){
+  const own=[];
+  DATA.forEach((cat,ci)=>cat.items.forEach((item,ii)=>own.push({key:getKey(ci,ii),tokens:normTokens(item.name),core:coreTokens(item.name)})));
+  const sameTokens=(a,b)=>a.length===b.length&&[...a].sort().every((t,i)=>t===[...b].sort()[i]);
+  const map={};let matched=0,total=0;
+  for(const [fKey,fName] of Object.entries(foreignNames)){
+    total++;
+    // krok 1: rdzeń nazwy (część przed „—") — łapie tę samą atrakcję w wielu listach
+    const fCore=coreTokens(fName);
+    const coreHits=own.filter(o=>sameTokens(fCore,o.core));
+    if(coreHits.length){map[fKey]=coreHits.map(h=>h.key);matched++;continue;}
+    // krok 2: dopasowanie rozmyte pełnej nazwy
+    const fTok=normTokens(fName);
+    let hits=own.filter(o=>namesMatch(fTok,o.tokens));
+    // dopasowania dokładne mają pierwszeństwo przed rozmytymi (Śnieżnik vs Masyw Śnieżnika)
+    const exact=hits.filter(h=>sameTokens(fTok,h.tokens));
+    if(exact.length)hits=exact;
+    if(hits.length===1){map[fKey]=[hits[0].key];matched++;}
+    else if(hits.length>1){
+      // ta sama atrakcja w kilku kategoriach (np. Śnieżka w dwóch koronach) -> zalicz wszystkie
+      const sig=hits[0].tokens.join('|');
+      if(hits.every(h=>h.tokens.join('|')===sig)){map[fKey]=hits.map(h=>h.key);matched++;}
+    }
+  }
+  return {map,matched,total};
 }
 
 function importData(event){
@@ -2493,10 +2568,26 @@ function importData(event){
   reader.onload=e=>{
     try{
       const data=JSON.parse(e.target.result);
-      checked=data.checked||{};userData=data.userData||{};plannerItems=data.planner||[];
-      save();saveUDL();savePl();
-      hideDataPanel();render();updatePlannerBadge();
-      alert('Dane wczytane pomyślnie!');
+      if(!data.checked&&!data.userData){alert('Nieprawidłowy plik danych.');event.target.value='';return;}
+      const foreign=data.app&&data.app!==APP_ID;
+      if(foreign&&data.names){
+        // import krzyżowy (np. z aplikacji Dolny Śląsk): dopasuj po nazwach i DOŁĄCZ do obecnych danych
+        const {map,matched,total}=crossMatchKeys(data.names);
+        let added=0;
+        Object.entries(data.checked||{}).forEach(([k,v])=>{(map[k]||[]).forEach(m=>{if(!checked[m]){checked[m]=v;added++;}});});
+        Object.entries(data.userData||{}).forEach(([k,v])=>{(map[k]||[]).forEach(m=>{if(!userData[m])userData[m]=v;});});
+        (data.priorities||[]).forEach(k=>{(map[k]||[]).forEach(m=>priorities.add(m));});
+        save();saveUDL();savePrio();
+        hideDataPanel();render();updatePlannerBadge();
+        alert(`✓ Import z aplikacji „${data.owner||data.app}":\n• dopasowano ${matched} z ${total} pozycji po nazwach\n• dopisano ${added} nowych zaliczeń\n(pozycje spoza listy ogólnopolskiej zostały pominięte)`);
+      }else{
+        // ten sam format (Atrakcje Polski) — zastąp jak dotychczas
+        checked=data.checked||{};userData=data.userData||{};plannerItems=data.planner||[];
+        if(data.priorities){priorities=new Set(data.priorities);savePrio();}
+        save();saveUDL();savePl();
+        hideDataPanel();render();updatePlannerBadge();
+        alert('Dane wczytane pomyślnie!');
+      }
     }catch(err){alert('Błąd wczytywania: '+err.message);}
     event.target.value='';
   };

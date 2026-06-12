@@ -366,6 +366,14 @@ body.dark .weekend-suggestion{background:#151f2b;border-color:rgba(255,255,255,.
 body.dark .ws-day{background:#253545;}
 body.dark .heatmap-cell{border-color:rgba(255,255,255,.08);}
 body.dark .share-copy{background:#253545;color:#f5edd6;border-color:rgba(255,255,255,.18);}
+/* ── ZDJĘCIA / AKTYWNOŚĆ (linki użytkownika) ── */
+.photos-input-row{display:flex;gap:.4rem;align-items:stretch;}
+.photos-input-row .modal-input{flex:1;min-width:0;}
+.modal-photos-btn{font-family:'Lato',sans-serif;font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.3rem .65rem;border:1.5px solid rgba(0,0,0,.18);background:var(--parchment);color:var(--muted);cursor:pointer;border-radius:3px;white-space:nowrap;}
+.modal-photos-btn.has-link{background:var(--sky);border-color:var(--sky);color:white;}
+body.dark .modal-photos-btn{background:#253545;color:#aab;border-color:rgba(255,255,255,.18);}
+body.dark .modal-photos-btn.has-link{background:var(--sky);color:white;}
+.item-links{font-size:.62rem;margin-top:.1rem;display:flex;gap:.45rem;}
 /* PRINT */
 @media print{
   header,nav,.controls,.progress-bar,.view-toggle,.activity-filter-row,.fuel-bar,
@@ -655,6 +663,16 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
         <input type="date" class="modal-input" id="modal-date" onchange="saveUD()">
         <div class="modal-section-label" style="margin-top:.65rem;">Notatka</div>
         <textarea class="modal-input modal-textarea" id="modal-note" placeholder="Własne wspomnienia…" onchange="saveUD()"></textarea>
+        <div class="modal-section-label" style="margin-top:.65rem;">📷 Album zdjęć (Google Photos)</div>
+        <div class="photos-input-row">
+          <input type="url" class="modal-input" id="modal-photos-url" placeholder="https://photos.app.goo.gl/…" oninput="saveUD()">
+          <button class="modal-photos-btn" id="modal-photos-btn" onclick="openPhotosAlbum()">📷 Otwórz</button>
+        </div>
+        <div class="modal-section-label" style="margin-top:.65rem;">🏃 Aktywność (Garmin, Strava, Komoot…)</div>
+        <div class="photos-input-row">
+          <input type="url" class="modal-input" id="modal-activity-url" placeholder="https://connect.garmin.com/modern/activity/…" oninput="saveUD()">
+          <button class="modal-photos-btn" id="modal-activity-btn" onclick="openActivity()">🏃 Otwórz</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1101,6 +1119,8 @@ function buildItemEl(item,ci,ii,key,done,ud,idx){
         <div class="item-meta">
           ${km?`<span class="badge badge-dist">📍 ${km} km</span>`:''}
           ${pttk}
+          ${ud.photos?`<span class="badge" title="Album zdjęć" style="cursor:pointer" onclick="event.stopPropagation();window.open('${ud.photos}','_blank')">📷</span>`:''}
+          ${ud.activity?`<span class="badge" title="Aktywność" style="cursor:pointer" onclick="event.stopPropagation();window.open('${ud.activity}','_blank')">🏃</span>`:''}
           <button class="add-to-plan-btn${inPlan?' in-plan':''}" onclick="event.stopPropagation();togglePlanItem('${key}',this)">+ Plan</button>
         </div>
       </div>`;
@@ -1120,6 +1140,8 @@ function buildItemEl(item,ci,ii,key,done,ud,idx){
           ${km?`<span class="badge badge-dist">📍 ${km} km</span>`:''}
           ${pttk}
           ${item.kids?`<span class="badge badge-kids">👶</span>`:''}
+          ${ud.photos?`<span class="badge" title="Album zdjęć" style="cursor:pointer" onclick="event.stopPropagation();window.open('${ud.photos}','_blank')">📷</span>`:''}
+          ${ud.activity?`<span class="badge" title="Aktywność" style="cursor:pointer" onclick="event.stopPropagation();window.open('${ud.activity}','_blank')">🏃</span>`:''}
           <button class="info-btn" onclick="event.stopPropagation();openModal(${ci},${ii},'${key}')">📖 opis</button>
           <button class="add-to-plan-btn${inPlan?' in-plan':''}" onclick="event.stopPropagation();togglePlanItem('${key}',this)">+ Plan</button>
         </div>
@@ -2317,6 +2339,10 @@ window.openModal=function(ci,ii,key){
   const ud=userData[key]||{};
   document.getElementById('modal-date').value=ud.date||'';
   document.getElementById('modal-note').value=ud.note||'';
+  document.getElementById('modal-photos-url').value=ud.photos||'';
+  document.getElementById('modal-activity-url').value=ud.activity||'';
+  document.getElementById('modal-photos-btn').classList.toggle('has-link',!!ud.photos);
+  document.getElementById('modal-activity-btn').classList.toggle('has-link',!!ud.activity);
   const stEl=document.getElementById('modal-stars');
   stEl.innerHTML=[1,2,3,4,5].map(v=>`<span class="star${(ud.rating||0)>=v?' active':''}" onclick="setRating('${key}',${v})">★</span>`).join('');
   document.getElementById('modal-overlay').classList.add('open');
@@ -2343,7 +2369,26 @@ window.saveUD=function(){
   if(!userData[currentModalKey])userData[currentModalKey]={};
   userData[currentModalKey].date=document.getElementById('modal-date').value;
   userData[currentModalKey].note=document.getElementById('modal-note').value;
+  userData[currentModalKey].photos=document.getElementById('modal-photos-url').value.trim();
+  userData[currentModalKey].activity=document.getElementById('modal-activity-url').value.trim();
   saveUDL();
+  document.getElementById('modal-photos-btn').classList.toggle('has-link',!!userData[currentModalKey].photos);
+  document.getElementById('modal-activity-btn').classList.toggle('has-link',!!userData[currentModalKey].activity);
+};
+
+window.openPhotosAlbum=function(){
+  const ud=userData[currentModalKey]||{};
+  if(ud.photos){window.open(ud.photos,'_blank');return;}
+  // brak linku: otwórz Google Photos, by utworzyć/znaleźć album, i podpowiedz
+  window.open('https://photos.google.com/albums','_blank');
+  showMiniToast('Utwórz album, skopiuj link „Udostępnij" i wklej w pole 📷');
+};
+
+window.openActivity=function(){
+  const ud=userData[currentModalKey]||{};
+  if(ud.activity){window.open(ud.activity,'_blank');return;}
+  window.open('https://connect.garmin.com/modern/activities','_blank');
+  showMiniToast('Skopiuj link aktywności z Garmin Connect i wklej w pole 🏃');
 };
 
 // ═══════════════════════════════════════════════════════

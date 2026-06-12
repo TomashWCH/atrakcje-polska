@@ -374,6 +374,12 @@ body.dark .share-copy{background:#253545;color:#f5edd6;border-color:rgba(255,255
 body.dark .modal-photos-btn{background:#253545;color:#aab;border-color:rgba(255,255,255,.18);}
 body.dark .modal-photos-btn.has-link{background:var(--sky);color:white;}
 .item-links{font-size:.62rem;margin-top:.1rem;display:flex;gap:.45rem;}
+/* ── GEOLOKALIZACJA ── */
+.geo-banner{display:none;background:rgba(74,127,165,.1);border-bottom:1px solid rgba(74,127,165,.25);padding:.45rem .8rem;font-size:.74rem;font-weight:700;color:var(--ink);align-items:center;gap:.5rem;flex-wrap:wrap;}
+.geo-banner.visible{display:flex;}
+.item-geo-dist{font-size:.66rem;color:var(--sky);font-weight:700;margin-top:.1rem;}
+#geo-btn.active{background:var(--sky)!important;color:#fff!important;border-color:var(--sky)!important;}
+body.dark .geo-banner{background:rgba(74,127,165,.2);color:#f5edd6;}
 /* PRINT */
 @media print{
   header,nav,.controls,.progress-bar,.view-toggle,.activity-filter-row,.fuel-bar,
@@ -382,19 +388,37 @@ body.dark .modal-photos-btn.has-link{background:var(--sky);color:white;}
   body{padding:0;background:white;color:#111;}
 }
 #print-journal{display:none;}
-.pj-cover{page-break-after:always;text-align:center;padding:3rem 2rem;}
-.pj-cover-title{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:#1e2d40;line-height:1.3;margin:1rem 0 .5rem;}
-.pj-cover-sub{font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:#7a8a99;}
-.pj-cover-date{font-size:.78rem;color:#7a8a99;margin-top:1.5rem;}
-.pj-page{page-break-after:always;padding:2rem;}
-.pj-page-num{font-size:.68rem;color:#7a8a99;text-align:right;margin-bottom:.5rem;}
-.pj-cat{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:#e8753a;margin-bottom:.3rem;}
-.pj-title{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:#1e2d40;margin-bottom:.6rem;}
-.pj-stars{color:#f0b429;font-size:1.2rem;letter-spacing:2px;margin:.4rem 0;}
-.pj-date{font-size:.78rem;color:#7a8a99;margin-bottom:.4rem;}
-.pj-desc{font-size:.85rem;line-height:1.7;color:#1e2d40;margin:.7rem 0;}
-.pj-note-label{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:#7a8a99;margin-top:.8rem;}
-.pj-note{font-size:.85rem;line-height:1.6;color:#1e2d40;font-style:italic;margin-top:.25rem;}
+/* ── DZIENNIK PODRÓŻNICZY (druk) ── */
+@page{size:A4;margin:0;}
+.pj-cover{page-break-after:always;width:210mm;height:296mm;box-sizing:border-box;position:relative;background:linear-gradient(180deg,#1e2d40 0%,#0f1822 100%);color:#f5edd6;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden;print-color-adjust:exact;-webkit-print-color-adjust:exact;}
+.pj-cover svg{position:absolute;bottom:0;left:0;width:100%;height:45%;}
+.pj-cover-inner{position:relative;z-index:2;border:1.2mm solid rgba(232,117,58,.6);outline:.3mm solid rgba(245,237,214,.25);outline-offset:3mm;padding:22mm 16mm;margin:0 14mm;}
+.pj-cover-emblem{font-size:46pt;margin-bottom:6mm;}
+.pj-cover-kicker{font-size:10pt;letter-spacing:.35em;text-transform:uppercase;color:#e8753a;font-weight:700;margin-bottom:6mm;}
+.pj-cover-title{font-family:'Playfair Display',serif;font-size:34pt;font-weight:900;line-height:1.25;color:#f5edd6;}
+.pj-cover-title span{color:#e8753a;}
+.pj-cover-sub{font-size:9pt;letter-spacing:.22em;text-transform:uppercase;color:rgba(245,237,214,.65);margin-top:7mm;}
+.pj-cover-stats{display:flex;gap:10mm;justify-content:center;margin-top:11mm;}
+.pj-cover-stat{text-align:center;}
+.pj-cover-stat strong{display:block;font-family:'Playfair Display',serif;font-size:22pt;font-weight:900;color:#f0b429;}
+.pj-cover-stat span{font-size:7.5pt;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,237,214,.7);}
+.pj-cover-date{font-size:8pt;color:rgba(245,237,214,.55);margin-top:10mm;}
+.pj-page{page-break-after:always;page-break-inside:avoid;width:210mm;height:296mm;box-sizing:border-box;padding:14mm 16mm 12mm;overflow:hidden;position:relative;background:white;display:flex;flex-direction:column;}
+.pj-page-num{font-size:7.5pt;color:#7a8a99;text-align:right;}
+.pj-cat{font-size:8pt;letter-spacing:.16em;text-transform:uppercase;color:#e8753a;font-weight:700;margin-top:2mm;}
+.pj-title{font-family:'Playfair Display',serif;font-size:21pt;font-weight:900;color:#1e2d40;margin:1.5mm 0 1mm;line-height:1.15;}
+.pj-short{font-size:9.5pt;color:#5a6a79;font-style:italic;margin-bottom:3mm;}
+.pj-meta{display:flex;gap:4mm;margin:2mm 0 4mm;border-top:.4mm solid #e3d9c5;border-bottom:.4mm solid #e3d9c5;padding:2.5mm 0;}
+.pj-meta-item{flex:1;text-align:center;font-size:7pt;letter-spacing:.08em;text-transform:uppercase;color:#7a8a99;}
+.pj-meta-item strong{display:block;font-size:10.5pt;color:#1e2d40;letter-spacing:0;text-transform:none;margin-bottom:.6mm;}
+.pj-stars{color:#f0b429!important;letter-spacing:1px;}
+.pj-img{width:100%;height:72mm;object-fit:cover;border-radius:1.5mm;margin:1mm 0 4mm;display:block;}
+.pj-desc-label,.pj-note-label{font-size:7.5pt;letter-spacing:.14em;text-transform:uppercase;color:#7a8a99;font-weight:700;margin-bottom:1mm;}
+.pj-desc{font-size:9.5pt;line-height:1.65;color:#1e2d40;display:-webkit-box;-webkit-line-clamp:9;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:3.5mm;}
+.pj-note-box{border-left:1mm solid #e8753a;background:#faf6ec;padding:2.5mm 3.5mm;margin-bottom:2.5mm;print-color-adjust:exact;-webkit-print-color-adjust:exact;}
+.pj-note{font-size:9pt;line-height:1.55;color:#1e2d40;font-style:italic;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;}
+.pj-footer-line{margin-top:auto;display:flex;justify-content:space-between;font-size:7pt;color:#9aa6b1;border-top:.3mm solid #e3d9c5;padding-top:2mm;}
+#print-journal .pj-page:last-child{page-break-after:auto;}
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.18);border-radius:2px;}
 footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border-top:1px solid rgba(0,0,0,.07);margin-top:.5rem;}
@@ -462,6 +486,7 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
     <button id="fb-priority" onclick="togglePriority()" title="Pokaż tylko priorytety (długie przytrzymanie atrakcji = ⭐)">⭐ <span class="btn-label">Priorytety</span></button>
     <button onclick="toggleActivityFilter()" id="btn-activity" title="Filtr aktywności">🎯 <span class="btn-label">Aktywność</span></button>
     <button id="btn-fuel" onclick="toggleFuelBar()" title="Kalkulator kosztów paliwa">⛽ <span class="btn-label">Paliwo</span></button>
+    <button id="geo-btn" onclick="toggleGeo()" title="Atrakcje blisko mnie (GPS)">📍 <span class="btn-label">Blisko mnie</span></button>
   </div>
   <div class="controls-row search-row">
     <input type="text" id="search-input" placeholder="🔍 szukaj atrakcji…" oninput="applyFilters()">
@@ -500,6 +525,14 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
   <input class="fuel-input" id="fuel-burn" type="number" step="0.1" min="1" max="30" placeholder="l/100km" oninput="updateFuelCosts()">
   <span class="fuel-result" id="fuel-result"></span>
   <span class="fuel-toggle" onclick="toggleFuelBar()">ukryj</span>
+</div>
+<div class="geo-banner" id="geo-banner">
+  <span id="geo-status">Szukam Twojej lokalizacji…</span>
+  <select id="geo-radius" class="weekend-max-dist" onchange="applyFilters()" style="margin-left:auto;">
+    <option value="25">25 km</option>
+    <option value="50" selected>50 km</option>
+    <option value="100">100 km</option>
+  </select>
 </div>
 <div class="activity-filter-row" id="activity-row" style="display:none;">
   <button class="act-btn" data-act="trekking" onclick="toggleAct(this)">⛰ Trekking</button>
@@ -1079,10 +1112,28 @@ function applyFilters(){
     const pk=!kidsOnly||item.kids===true;
     const pa=activeActs.size===0||(item.acts||[]).some(a=>activeActs.has(a));
     const pp=!priorityOnly||priorities.has(k);
-    const vis=pf&&ps&&pg&&pk&&pa&&pp;
+    // geolokalizacja: tylko atrakcje w promieniu od mojej pozycji
+    let pgeo=true;
+    let geoEl=el.querySelector('.item-geo-dist');
+    if(geoMode&&userLat!==null){
+      const radius=parseInt(document.getElementById('geo-radius').value)||50;
+      const gd=item.lat?Math.round(haversine(userLat,userLng,item.lat,item.lng)):null;
+      pgeo=gd!==null&&gd<=radius;
+      if(pgeo){
+        const body=el.querySelector('.item-body')||el.querySelector('.card-body');
+        if(!geoEl&&body){geoEl=document.createElement('div');geoEl.className='item-geo-dist';body.appendChild(geoEl);}
+        if(geoEl)geoEl.textContent=`📍 ${gd} km od Ciebie`;
+      }else if(geoEl)geoEl.remove();
+    }else if(geoEl)geoEl.remove();
+    const vis=pf&&ps&&pg&&pk&&pa&&pp&&pgeo;
     el.classList.toggle('hidden',!vis);
     if(vis)any=true;
   });
+  if(geoMode&&userLat!==null){
+    const radius=parseInt(document.getElementById('geo-radius').value)||50;
+    const cnt=document.querySelectorAll('.item:not(.hidden)').length;
+    document.getElementById('geo-status').textContent=`📍 Znaleziono ${cnt} atrakcji w promieniu ${radius} km od Ciebie`;
+  }
   document.querySelectorAll('.category-section').forEach(sec=>{
     sec.classList.toggle('hidden',sec.querySelectorAll('.item:not(.hidden)').length===0);
   });
@@ -1225,6 +1276,151 @@ function toggle(key,el){
   checkBadges();
   if(currentFilter!=='all')applyFilters();
 }
+
+// ═══════════════════════════════════════════════════════
+// ROCZNIK ODKRYWCY — karta PNG do pobrania/udostępnienia
+// ═══════════════════════════════════════════════════════
+function yearbookYears(){
+  const years=new Set();
+  Object.values(userData).forEach(ud=>{if(ud.date&&/^\d{4}/.test(ud.date))years.add(ud.date.slice(0,4));});
+  return [...years].sort().reverse();
+}
+
+function renderYearbookControls(){
+  const el=document.getElementById('stats-yearbook');
+  if(!el)return;
+  const years=yearbookYears();
+  const opts=years.map(y=>`<option value="${y}">${y}</option>`).join('')+`<option value="all">Wszystkie lata</option>`;
+  el.innerHTML=`<div style="font-size:.74rem;color:var(--muted);margin-bottom:.55rem;line-height:1.45;">Wygeneruj ładną kartę podsumowania swoich odkryć — gotową do pochwalenia się rodzinie lub zapisania na pamiątkę.</div>
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+      <select id="yearbook-year" class="weekend-max-dist">${opts}</select>
+      <button class="weekend-go-btn" onclick="generateYearbook(false)">📜 Pobierz PNG</button>
+      ${navigator.share?`<button class="weekend-go-btn" style="background:#25D366" onclick="generateYearbook(true)">📲 Udostępnij</button>`:''}
+    </div>
+    <div id="yearbook-preview" style="margin-top:.7rem;"></div>`;
+}
+
+function yearbookStats(year){
+  const entries=[];
+  DATA.forEach((cat,ci)=>cat.items.forEach((item,ii)=>{
+    const key=getKey(ci,ii);
+    if(!checked[key])return;
+    const ud=userData[key]||{};
+    if(year!=='all'&&(!ud.date||!ud.date.startsWith(year)))return;
+    entries.push({item,ud,catIcon:cat.cat.split(' ')[0],km:distItem(item)||0});
+  }));
+  const kmSum=entries.reduce((s,e)=>s+e.km*2,0);
+  const wojs=new Set(entries.map(e=>e.item.woj).filter(Boolean));
+  const rated=entries.filter(e=>e.ud.rating>0).sort((a,b)=>b.ud.rating-a.ud.rating);
+  const peaks=entries.filter(e=>e.item.pttk).length;
+  return {entries,kmSum,wojs:wojs.size,top:rated.slice(0,5),peaks};
+}
+
+window.generateYearbook=function(share){
+  const year=document.getElementById('yearbook-year').value;
+  const st=yearbookStats(year);
+  if(!st.entries.length){alert(year==='all'?'Brak zaliczonych atrakcji.':'Brak wypraw z datami w roku '+year+'. Uzupełnij daty wizyt lub wybierz „Wszystkie lata".');return;}
+  const W=1080,H=1350;
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  const x=cv.getContext('2d');
+  // tło
+  const g=x.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#1e2d40');g.addColorStop(1,'#0f1822');
+  x.fillStyle=g;x.fillRect(0,0,W,H);
+  // góry w tle
+  x.fillStyle='rgba(245,237,214,.05)';
+  x.beginPath();x.moveTo(0,330);x.lineTo(240,160);x.lineTo(460,330);x.closePath();x.fill();
+  x.beginPath();x.moveTo(330,330);x.lineTo(620,110);x.lineTo(910,330);x.closePath();x.fill();
+  x.beginPath();x.moveTo(760,330);x.lineTo(980,200);x.lineTo(1080,300);x.lineTo(1080,330);x.closePath();x.fill();
+  // ramka
+  x.strokeStyle='rgba(232,117,58,.55)';x.lineWidth=5;x.strokeRect(36,36,W-72,H-72);
+  x.strokeStyle='rgba(245,237,214,.18)';x.lineWidth=1.5;x.strokeRect(52,52,W-104,H-104);
+  const cx=W/2;
+  x.textAlign='center';
+  // nagłówek
+  x.fillStyle='#e8753a';x.font='700 34px Lato,sans-serif';
+  x.fillText('✦  ATRAKCJE POLSKI  ✦',cx,128);
+  x.fillStyle='#f5edd6';x.font='900 84px "Playfair Display",Georgia,serif';
+  x.fillText('Rocznik Odkrywcy',cx,235);
+  x.fillStyle='#e8753a';x.font='900 64px "Playfair Display",Georgia,serif';
+  x.fillText(year==='all'?'— moje wszystkie wyprawy —':year,cx,322);
+  // wielkie liczby (2×2)
+  const stats=[[String(st.entries.length),'ODKRYTYCH MIEJSC'],[st.kmSum.toLocaleString('pl-PL'),'PRZEJECHANYCH KM'],[String(st.wojs),'WOJEWÓDZTW'],[String(st.peaks),'SZCZYTÓW KORON PTTK']];
+  stats.forEach((s,i)=>{
+    const sx=i%2===0?cx-250:cx+250, sy=470+Math.floor(i/2)*210;
+    x.fillStyle='rgba(245,237,214,.07)';
+    x.fillRect(sx-215,sy-105,430,175);
+    x.fillStyle='#f0b429';x.font='900 86px "Playfair Display",Georgia,serif';
+    x.fillText(s[0],sx,sy);
+    x.fillStyle='rgba(245,237,214,.75)';x.font='700 24px Lato,sans-serif';
+    x.fillText(s[1],sx,sy+44);
+  });
+  // najlepiej oceniane
+  let y=880;
+  if(st.top.length){
+    st.top=st.top.slice(0,4);
+    x.fillStyle='#e8753a';x.font='700 30px Lato,sans-serif';
+    x.fillText('— NAJLEPIEJ OCENIANE —',cx,y);y+=58;
+    x.font='400 33px Lato,sans-serif';
+    for(const t of st.top){
+      if(y>H-150)break; // nie nachodź na stopkę
+      const name=t.item.name.length>34?t.item.name.slice(0,33)+'…':t.item.name;
+      x.fillStyle='#f5edd6';
+      x.fillText(`${t.catIcon} ${name}`,cx,y);
+      x.fillStyle='#f0b429';x.font='400 26px Lato,sans-serif';
+      x.fillText('★'.repeat(t.ud.rating)+'☆'.repeat(5-t.ud.rating),cx,y+34);
+      x.font='400 33px Lato,sans-serif';
+      y+=84;
+    }
+  }
+  // stopka
+  x.fillStyle='rgba(245,237,214,.5)';x.font='400 24px Lato,sans-serif';
+  x.fillText(`wygenerowano ${new Date().toLocaleDateString('pl-PL')} · atrakcje-polska`,cx,H-78);
+  // wynik
+  cv.toBlob(blob=>{
+    const fname=`rocznik-odkrywcy-${year==='all'?'wszystko':year}.png`;
+    if(share&&navigator.share&&navigator.canShare&&navigator.canShare({files:[new File([blob],fname,{type:'image/png'})]})){
+      navigator.share({files:[new File([blob],fname,{type:'image/png'})],title:'Mój Rocznik Odkrywcy'}).catch(()=>{});
+    }else{
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;a.click();
+    }
+    const prev=document.getElementById('yearbook-preview');
+    if(prev){prev.innerHTML='';const img=new Image();img.src=cv.toDataURL('image/png');img.style.cssText='max-width:260px;border-radius:6px;box-shadow:0 4px 18px rgba(0,0,0,.3);';prev.appendChild(img);}
+  },'image/png');
+};
+
+// ═══════════════════════════════════════════════════════
+// GEOLOKALIZACJA — „Blisko mnie"
+// ═══════════════════════════════════════════════════════
+let geoMode=false,userLat=null,userLng=null;
+window.toggleGeo=function(){
+  const banner=document.getElementById('geo-banner');
+  const btn=document.getElementById('geo-btn');
+  if(geoMode){
+    geoMode=false;userLat=null;userLng=null;
+    banner.classList.remove('visible');
+    btn.classList.remove('active');
+    applyFilters();
+    return;
+  }
+  if(!navigator.geolocation){alert('Twoja przeglądarka nie obsługuje geolokalizacji.');return;}
+  banner.classList.add('visible');
+  btn.classList.add('active');
+  document.getElementById('geo-status').textContent='📡 Szukam Twojej lokalizacji…';
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      userLat=pos.coords.latitude;userLng=pos.coords.longitude;
+      geoMode=true;
+      applyFilters();
+    },
+    ()=>{
+      document.getElementById('geo-status').textContent='Nie udało się ustalić lokalizacji — sprawdź uprawnienia GPS.';
+      btn.classList.remove('active');
+      setTimeout(()=>{if(!geoMode)banner.classList.remove('visible');},3000);
+    },
+    {timeout:10000,enableHighAccuracy:false}
+  );
+};
 
 // ═══════════════════════════════════════════════════════
 // ULEPSZENIA PO RENDERZE (priorytety, pogoda, zdjęcia, paliwo)
@@ -1845,6 +2041,7 @@ function renderStats(){
   html+=`<div class="stats-section"><div class="stats-section-title">Historia wyjazdów</div><div id="stats-timeline"></div></div>`;
   html+=`<div class="stats-section"><div class="stats-section-title">Aktywność odkryć (12 mies.)</div><div id="stats-activity"></div></div>`;
   html+=`<div class="stats-section"><div class="stats-section-title">✨ Polecane dla Ciebie</div><div id="stats-reco"></div></div>`;
+  html+=`<div class="stats-section"><div class="stats-section-title">📜 Rocznik odkrywcy</div><div id="stats-yearbook"></div></div>`;
   document.getElementById('stats-content').innerHTML=html;
   renderExplorerLevel();
   renderKmStats();
@@ -1852,6 +2049,7 @@ function renderStats(){
   renderTimeline();
   renderActivityChart();
   renderRecommendations();
+  renderYearbookControls();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2182,50 +2380,50 @@ function savePxKeyFromData(){
 }
 function closePxSetup(){document.getElementById('pixabay-setup').style.display='none';}
 
-async function loadThumbPhoto(key,pxq){
-  if(!pixabayKey||!pxq)return;
-  const el=document.getElementById('thumb-'+key);
-  if(!el||el.querySelector('img'))return;
+// ─── cache adresów zdjęć Pixabay (mniej zapytań + zdjęcia w dzienniku) ───
+let pxCache=JSON.parse(localStorage.getItem('pl-pxcache')||'{}');
+function savePxCache(){try{localStorage.setItem('pl-pxcache',JSON.stringify(pxCache));}catch(e){pxCache={};}}
+async function getPhotoUrl(pxq){
+  if(!pixabayKey||!pxq)return null;
+  if(pxCache[pxq]!==undefined)return pxCache[pxq];
   try{
     const r=await fetch(`https://pixabay.com/api/?key=${pixabayKey}&q=${encodeURIComponent(pxq)}&image_type=photo&per_page=3&safesearch=true`);
     const d=await r.json();
-    if(d.hits?.length){
-      const img=document.createElement('img');
-      img.src=d.hits[0].previewURL;
-      img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
-      el.innerHTML=''; el.appendChild(img);
-    }
-  }catch(e){}
+    const url=d.hits?.length?d.hits[0].webformatURL:null;
+    pxCache[pxq]=url;savePxCache();
+    return url;
+  }catch(e){return null;}
+}
+
+async function loadThumbPhoto(key,pxq){
+  const el=document.getElementById('thumb-'+key);
+  if(!el||el.querySelector('img'))return;
+  const url=await getPhotoUrl(pxq);
+  if(!url)return;
+  const img=document.createElement('img');
+  img.src=url;
+  img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;border-radius:4px;';
+  el.innerHTML=''; el.appendChild(img);
 }
 
 async function loadCardPhoto(key,pxq,ci){
-  if(!pixabayKey||!pxq)return;
   const el=document.getElementById('cthumb-'+key);
   if(!el||el.querySelector('img'))return;
-  try{
-    const r=await fetch(`https://pixabay.com/api/?key=${pixabayKey}&q=${encodeURIComponent(pxq)}&image_type=photo&per_page=3&safesearch=true`);
-    const d=await r.json();
-    if(d.hits?.length){
-      const img=document.createElement('img');
-      img.src=d.hits[0].webformatURL;
-      img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
-      el.innerHTML=''; el.appendChild(img);
-    }
-  }catch(e){}
+  const url=await getPhotoUrl(pxq);
+  if(!url)return;
+  const img=document.createElement('img');
+  img.src=url;
+  img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
+  el.innerHTML=''; el.appendChild(img);
 }
 
 async function loadModalPhoto(pxq){
-  if(!pixabayKey||!pxq)return;
   const wrap=document.getElementById('modal-img-area');
-  try{
-    const r=await fetch(`https://pixabay.com/api/?key=${pixabayKey}&q=${encodeURIComponent(pxq)}&image_type=photo&per_page=5&safesearch=true`);
-    const d=await r.json();
-    if(d.hits?.length){
-      const img=document.createElement('img');
-      img.src=d.hits[0].webformatURL;
-      wrap.innerHTML=''; wrap.appendChild(img);
-    }
-  }catch(e){}
+  const url=await getPhotoUrl(pxq);
+  if(!url||!wrap)return;
+  const img=document.createElement('img');
+  img.src=url;
+  wrap.innerHTML=''; wrap.appendChild(img);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2450,15 +2648,17 @@ function renderPlanner(){
   total+=back;
   html+=`<div class="planner-route-item"><span class="planner-route-step">🏠</span><span class="planner-route-name">Wrocław (powrót)</span><span class="planner-route-dist">+${back} km</span></div></div>`;
   html+=`<div class="planner-summary"><div class="planner-sum-item">Łączny dystans: <strong>${total} km</strong></div><div class="planner-sum-item">Atrakcji: <strong>${ord.length}</strong></div></div>`;
-  const coords=ord.map(s=>`${s.item.lat},${s.item.lng}`).join('/');
+  const wps=ord.map(s=>`${s.item.lat},${s.item.lng}`).join('|');
+  const navUrl=`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent('Wrocław')}&destination=${encodeURIComponent('Wrocław')}&waypoints=${encodeURIComponent(wps)}&travelmode=driving`;
   html+=`<div class="planner-actions">
-    <a class="planner-gmaps-btn" href="https://www.google.com/maps/dir/Wroclaw/${coords}/Wroclaw" target="_blank">🗺️ Google Maps</a>
+    <a class="planner-gmaps-btn" href="${navUrl}" target="_blank" rel="noopener">🧭 Nawiguj w Google Maps</a>
     <button style="border:1.5px solid var(--accent);color:var(--accent);background:transparent;" onclick="clearPlanner()">✕ Wyczyść trasę</button>
   </div>`;
   // NEARBY na trasie
   const nearbyItems=[];
   DATA.forEach((cat,ci)=>cat.items.forEach((it,ii)=>{
     if(!it.lat||plannerItems.includes(getKey(ci,ii)))return;
+    if(checked[getKey(ci,ii)])return; // pomiń zaliczone
     const minD=Math.min(...ord.map(s=>haversine(s.item.lat,s.item.lng,it.lat,it.lng)));
     if(minD<=20)nearbyItems.push({cat,ci,it,ii,minD});
   }));
@@ -2680,7 +2880,7 @@ function hideDataPanel(e){
 // ═══════════════════════════════════════════════════════
 // DRUK DZIENNIKA
 // ═══════════════════════════════════════════════════════
-function printJournal(){
+async function printJournal(){
   const visited=[];
   DATA.forEach((cat,ci)=>cat.items.forEach((item,ii)=>{
     const key=getKey(ci,ii);
@@ -2688,23 +2888,84 @@ function printJournal(){
   }));
   if(!visited.length){alert('Brak zaliczonych miejsc. Zaznacz miejsca które odwiedziłaś/eś.');return;}
   visited.sort((a,b)=>{if(a.ud.date&&b.ud.date)return a.ud.date.localeCompare(b.ud.date);if(a.ud.date)return -1;if(b.ud.date)return 1;return 0;});
+
+  // dociągnij brakujące zdjęcia do cache (z Pixabay)
+  if(pixabayKey){
+    const missing=visited.filter(v=>v.item.pxq&&pxCache[v.item.pxq]===undefined);
+    if(missing.length){
+      showMiniToast(`📷 Przygotowuję zdjęcia (${missing.length})…`);
+      for(let i=0;i<missing.length;i+=6){
+        await Promise.all(missing.slice(i,i+6).map(v=>getPhotoUrl(v.item.pxq)));
+      }
+    }
+  }
+
   const dateStr=new Date().toLocaleDateString('pl-PL',{year:'numeric',month:'long',day:'numeric'});
-  let html=`<div class="pj-cover"><div class="pj-cover-title">Dziennik Podróżniczy<br><span style="color:#e8753a">Odkrycia Polski</span></div><div class="pj-cover-sub">odkryte miejsca · własne wspomnienia · oceny</div><div class="pj-cover-date">Wygenerowano: ${dateStr} · Miejsc zaliczonych: ${visited.length}</div></div>`;
+  const yearStr=new Date().getFullYear();
+  const kmSum=visited.reduce((s,v)=>s+(distItem(v.item)||0)*2,0);
+  const wojs=new Set(visited.map(v=>v.item.woj).filter(Boolean)).size;
+
+  // ── okładka ──
+  const mountains=`<svg viewBox="0 0 210 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="0,100 0,62 38,30 72,68 96,46 128,100" fill="rgba(245,237,214,0.06)"/>
+    <polygon points="52,100 105,18 132,48 152,32 210,100" fill="rgba(245,237,214,0.09)"/>
+    <polygon points="120,100 160,55 185,75 210,58 210,100" fill="rgba(232,117,58,0.12)"/>
+    <circle cx="172" cy="22" r="9" fill="rgba(240,180,41,0.55)"/>
+  </svg>`;
+  let html=`<div class="pj-cover">${mountains}
+    <div class="pj-cover-inner">
+      <div class="pj-cover-emblem">🇵🇱</div>
+      <div class="pj-cover-kicker">✦ Atrakcje Polski ✦</div>
+      <div class="pj-cover-title">Dziennik<br>Podróżniczy<br><span>Odkrycia Polski</span></div>
+      <div class="pj-cover-sub">odkryte miejsca · wspomnienia · oceny</div>
+      <div class="pj-cover-stats">
+        <div class="pj-cover-stat"><strong>${visited.length}</strong><span>miejsc</span></div>
+        <div class="pj-cover-stat"><strong>${kmSum.toLocaleString('pl-PL')}</strong><span>km</span></div>
+        <div class="pj-cover-stat"><strong>${wojs}</strong><span>województw</span></div>
+      </div>
+      <div class="pj-cover-date">Wygenerowano: ${dateStr}</div>
+    </div>
+  </div>`;
+
+  // ── jedna strona = jedna atrakcja ──
   visited.forEach((entry,idx)=>{
     const{cat,item,ud}=entry;
     const stars=ud.rating?'★'.repeat(ud.rating)+'☆'.repeat(5-ud.rating):null;
     const visitDate=ud.date?new Date(ud.date).toLocaleDateString('pl-PL',{year:'numeric',month:'long',day:'numeric'}):null;
-    html+=`<div class="pj-page"><div class="pj-page-num">Strona ${idx+1} z ${visited.length}</div>
+    const km=distItem(item);
+    const imgUrl=item.pxq?pxCache[item.pxq]:null;
+    html+=`<div class="pj-page">
+      <div class="pj-page-num">Strona ${idx+1} z ${visited.length}</div>
       <div class="pj-cat">${cat.replace(/^\S+ /,'')}</div>
       <div class="pj-title">${item.name}</div>
-      ${stars?`<div class="pj-stars">${stars}</div>`:''}
-      ${visitDate?`<div class="pj-date">📅 ${visitDate}</div>`:''}
-      <div class="pj-desc">${item.desc||''}</div>
-      ${ud.note?`<div class="pj-note-label">Moje wspomnienia</div><div class="pj-note">${ud.note}</div>`:''}</div>`;
+      <div class="pj-short">${item.short||''}</div>
+      <div class="pj-meta">
+        ${visitDate?`<div class="pj-meta-item"><strong>${visitDate}</strong>Data wizyty</div>`:''}
+        ${stars?`<div class="pj-meta-item"><strong class="pj-stars">${stars}</strong>Moja ocena</div>`:''}
+        ${km?`<div class="pj-meta-item"><strong>${km} km</strong>Z Wrocławia</div>`:''}
+        ${item.woj?`<div class="pj-meta-item"><strong>${(WOJ_NAMES[item.woj]||item.woj)}</strong>Województwo</div>`:''}
+      </div>
+      ${imgUrl?`<img class="pj-img" src="${imgUrl}" alt="${item.name}" onerror="this.style.display='none'">`:''}
+      <div class="pj-desc-label">O tym miejscu</div>
+      <div class="pj-desc"${imgUrl?'':' style="-webkit-line-clamp:18;"'}>${item.desc||''}</div>
+      ${ud.note&&ud.note.trim()?`<div class="pj-note-box"><div class="pj-note-label">📝 Moje wspomnienia</div><div class="pj-note">${ud.note}</div></div>`:''}
+      ${ud.photos&&ud.photos.trim()?`<div class="pj-note-box" style="border-color:#4a7fa5"><div class="pj-note-label" style="color:#4a7fa5">📷 Album ze zdjęciami</div><div class="pj-note" style="font-style:normal;font-size:7.5pt;word-break:break-all;">${ud.photos}</div></div>`:''}
+      ${ud.activity&&ud.activity.trim()?`<div class="pj-note-box" style="border-color:#4a6741"><div class="pj-note-label" style="color:#4a6741">🏃 Aktywność</div><div class="pj-note" style="font-style:normal;font-size:7.5pt;word-break:break-all;">${ud.activity}</div></div>`:''}
+      <div class="pj-footer-line"><span>🇵🇱 Dziennik Podróżniczy · Atrakcje Polski · ${yearStr}</span><span>${item.name}</span></div>
+    </div>`;
   });
-  document.getElementById('print-journal').innerHTML=html;
+
+  const container=document.getElementById('print-journal');
+  container.innerHTML=html;
   hideDataPanel();
-  setTimeout(()=>window.print(),200);
+  // poczekaj na załadowanie zdjęć przed drukiem
+  const images=Array.from(container.querySelectorAll('img.pj-img'));
+  await Promise.all(images.map(img=>{
+    if(img.complete&&img.naturalWidth>0)return Promise.resolve();
+    return new Promise(res=>{img.onload=res;img.onerror=()=>{img.style.display='none';res();};setTimeout(res,6000);});
+  }));
+  window.print();
+  setTimeout(()=>{container.innerHTML='';},1000);
 }
 
 // ═══════════════════════════════════════════════════════

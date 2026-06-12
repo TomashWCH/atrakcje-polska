@@ -82,8 +82,11 @@ button.danger:hover{background:#c0392b;color:white;}
 /* ITEMS */
 .category-section{margin:0;}
 .category-header{display:flex;align-items:center;gap:.55rem;padding:.75rem 1rem .32rem;cursor:pointer;user-select:none;border-left:3px solid transparent;}
-.category-header h2{font-family:'Playfair Display',serif;font-size:.88rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);flex:1;}
-.cat-count{font-size:.68rem;color:var(--muted);font-weight:300;}
+.category-header h2{font-family:'Playfair Display',serif;font-size:.88rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);flex:0 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cat-progress-wrap{flex:1;height:5px;background:rgba(0,0,0,.08);border-radius:3px;overflow:hidden;min-width:26px;}
+.cat-progress-bar{height:100%;border-radius:3px;transition:width .6s ease;}
+body.dark .cat-progress-wrap{background:rgba(255,255,255,.12);}
+.cat-count{font-size:.68rem;color:var(--muted);font-weight:300;flex-shrink:0;}
 .cat-toggle{font-size:.68rem;color:var(--muted);transition:transform .2s;}
 .category-section.collapsed .cat-toggle{transform:rotate(-90deg);}
 .category-section.collapsed .items-list{display:none!important;}
@@ -1215,8 +1218,10 @@ function render(){
     const icon=cat.cat.split(' ')[0];
     const name=cat.cat.replace(/^\S+ /,'');
     const catDone=cat.items.filter((_,ii)=>!!checked[getKey(ci,ii)]).length;
+    const catPct=Math.round(catDone/cat.items.length*100);
     hdr.style.borderLeftColor=cat.color;
-    hdr.innerHTML=`<span style="font-size:1.05rem">${icon}</span><h2>${name}</h2><span class="cat-count">${catDone}/${cat.items.length}</span><span class="cat-toggle">▾</span>`;
+    sec.dataset.ci=ci;
+    hdr.innerHTML=`<span style="font-size:1.05rem">${icon}</span><h2>${name}</h2><div class="cat-progress-wrap"><div class="cat-progress-bar" style="width:${catPct}%;background:linear-gradient(90deg,${cat.color||'var(--moss)'},${cat.color||'var(--moss)'}cc);"></div></div><span class="cat-count">${catDone}/${cat.items.length}</span><span class="cat-toggle">▾</span>`;
     hdr.addEventListener('click',()=>sec.classList.toggle('collapsed'));
     const list=document.createElement('div');
     list.className=`items-list ${currentView==='card'?'card-view':'list-view'}`;
@@ -1252,7 +1257,9 @@ function renderFlat(){
   if(!all.length){app.innerHTML='<div class="no-results">Brak wyników — zmień filtry lub wyszukiwanie</div>';return;}
   const sec=document.createElement('div'); sec.className='category-section';
   const hdr=document.createElement('div'); hdr.className='category-header';
-  hdr.innerHTML=`<span>↕</span><h2>Posortowane</h2><span class="cat-count">${all.length}</span><span class="cat-toggle">▾</span>`;
+  const flatDone=all.filter(a=>a.done).length;
+  const flatPct=all.length?Math.round(flatDone/all.length*100):0;
+  hdr.innerHTML=`<span>↕</span><h2>Posortowane</h2><div class="cat-progress-wrap"><div class="cat-progress-bar" style="width:${flatPct}%;background:linear-gradient(90deg,var(--moss),var(--accent));"></div></div><span class="cat-count">${flatDone}/${all.length}</span><span class="cat-toggle">▾</span>`;
   hdr.addEventListener('click',()=>sec.classList.toggle('collapsed'));
   const list=document.createElement('div');
   list.className=`items-list ${currentView==='card'?'card-view':'list-view'}`;
@@ -1265,6 +1272,17 @@ function renderFlat(){
 // ═══════════════════════════════════════════════════════
 // TOGGLE
 // ═══════════════════════════════════════════════════════
+function updateCatProgress(ci){
+  const sec=document.querySelector(`.category-section[data-ci="${ci}"]`);
+  if(!sec||!DATA[ci])return;
+  const total=DATA[ci].items.length;
+  const done=DATA[ci].items.filter((_,ii)=>!!checked[getKey(ci,ii)]).length;
+  const bar=sec.querySelector('.cat-progress-bar');
+  if(bar)bar.style.width=Math.round(done/total*100)+'%';
+  const cnt=sec.querySelector('.cat-count');
+  if(cnt)cnt.textContent=`${done}/${total}`;
+}
+
 function toggle(key,el){
   if(checked[key])delete checked[key];else checked[key]=Date.now();
   save();
@@ -1272,6 +1290,7 @@ function toggle(key,el){
   el.classList.toggle('checked',done);
   const chk=el.querySelector('.checkbox,.card-chk');
   if(chk)chk.textContent=done?'✓':'';
+  updateCatProgress(parseInt(key.split('_')[0]));
   updateStats();
   checkBadges();
   if(currentFilter!=='all')applyFilters();
@@ -2654,30 +2673,129 @@ function renderPlanner(){
     <a class="planner-gmaps-btn" href="${navUrl}" target="_blank" rel="noopener">🧭 Nawiguj w Google Maps</a>
     <button style="border:1.5px solid var(--accent);color:var(--accent);background:transparent;" onclick="clearPlanner()">✕ Wyczyść trasę</button>
   </div>`;
-  // NEARBY na trasie
-  const nearbyItems=[];
-  DATA.forEach((cat,ci)=>cat.items.forEach((it,ii)=>{
-    if(!it.lat||plannerItems.includes(getKey(ci,ii)))return;
-    if(checked[getKey(ci,ii)])return; // pomiń zaliczone
-    const minD=Math.min(...ord.map(s=>haversine(s.item.lat,s.item.lng,it.lat,it.lng)));
-    if(minD<=20)nearbyItems.push({cat,ci,it,ii,minD});
-  }));
-  nearbyItems.sort((a,b)=>a.minD-b.minD);
-  if(nearbyItems.length){
-    html+=`<div class="planner-nearby"><div class="planner-nearby-title">📍 Warte zobaczenia po drodze (w promieniu 20 km od trasy)</div>`;
-    nearbyItems.slice(0,6).forEach(({cat,ci,it,ii,minD})=>{
-      const key=getKey(ci,ii);
-      html+=`<div class="planner-nearby-item">
-        <span style="font-size:.9rem;">${cat.cat.split(' ')[0]}</span>
-        <span class="pn-name">${it.name}</span>
-        <span class="pn-cat">${it.short?.slice(0,25)||''}</span>
-        <span class="pn-dist">${minD} km</span>
-        <button class="planner-nearby-add" onclick="addToPlanner('${key}',this)">+ Dodaj</button>
-      </div>`;
-    });
-    html+='</div>';
-  }
+  // SUGESTIE: zakładki jak na karcie atrakcji
+  window.__plannerOrd=ord; // trasa w kolejności TSP dla renderPlannerNearby
+  html+=`<div class="planner-nearby"><div class="planner-nearby-title">📍 Sugestie do trasy</div>
+    <div class="nearby-tabs" style="margin-top:.4rem;">
+      <button class="nearby-tab${plannerNearbyMode==='around'?' active':''}" onclick="setPlannerNearby('around',this)">Okoliczne</button>
+      <button class="nearby-tab${plannerNearbyMode==='route'?' active':''}" onclick="setPlannerNearby('route',this)">Po drodze z trasy</button>
+      <button class="nearby-tab${plannerNearbyMode==='osm'?' active':''}" onclick="setPlannerNearby('osm',this)">🗺 Z mapy (OSM)</button>
+    </div>
+    <div id="planner-nearby-list"></div>
+  </div>`;
   el.innerHTML=html;
+  renderPlannerNearby();
+}
+
+// ─── sugestie do trasy: trzy tryby ───
+let plannerNearbyMode='around';
+window.setPlannerNearby=function(mode,btn){
+  plannerNearbyMode=mode;
+  document.querySelectorAll('.planner-nearby .nearby-tab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderPlannerNearby();
+};
+
+// odległość punktu od odcinka trasy (przybliżenie equirectangular, km)
+function distToSegmentKm(p,a,b){
+  const R=111.32, lat0=(a.lat+b.lat+p.lat)/3*Math.PI/180, kx=R*Math.cos(lat0);
+  const ax=a.lng*kx, ay=a.lat*R, bx=b.lng*kx, by=b.lat*R, px=p.lng*kx, py=p.lat*R;
+  const dx=bx-ax, dy=by-ay;
+  const t=Math.max(0,Math.min(1,((px-ax)*dx+(py-ay)*dy)/((dx*dx+dy*dy)||1)));
+  const cx=ax+t*dx, cy=ay+t*dy;
+  return Math.round(Math.hypot(px-cx,py-cy));
+}
+
+function renderPlannerNearby(){
+  const el=document.getElementById('planner-nearby-list');
+  if(!el)return;
+  const ord=window.__plannerOrd||[];
+  if(!ord.length){el.innerHTML='';return;}
+  const stops=[WROCLAW,...ord.map(s=>({lat:s.item.lat,lng:s.item.lng})),WROCLAW];
+
+  if(plannerNearbyMode==='osm'){renderPlannerNearbyOSM(ord);return;}
+
+  const stopCores=new Set(ord.map(s=>coreTokens(s.item.name).join('|')));
+  const pool=[];
+  DATA.forEach((cat,ci)=>cat.items.forEach((it,ii)=>{
+    const key=getKey(ci,ii);
+    if(!it.lat||plannerItems.includes(key)||checked[key])return;
+    if(stopCores.has(coreTokens(it.name).join('|')))return; // duplikat przystanku z innej listy
+    let d;
+    if(plannerNearbyMode==='around'){
+      d=Math.min(...ord.map(s=>haversine(s.item.lat,s.item.lng,it.lat,it.lng)));
+      if(d>20)return;
+    }else{ // 'route': odległość od odcinków jazdy
+      d=Infinity;
+      for(let i=0;i<stops.length-1;i++)d=Math.min(d,distToSegmentKm(it,stops[i],stops[i+1]));
+      if(d>15)return;
+    }
+    pool.push({cat,ci,it,ii,key,d});
+  }));
+  pool.sort((a,b)=>a.d-b.d);
+  const seen=new Set();
+  const top=pool.filter(p=>{const c=coreTokens(p.it.name).join('|');if(seen.has(c))return false;seen.add(c);return true;}).slice(0,8);
+  if(!top.length){
+    el.innerHTML=`<div style="font-size:.74rem;color:var(--muted);font-style:italic;padding:.35rem 0;">${plannerNearbyMode==='around'?'Brak niezaliczonych atrakcji w promieniu 20 km od przystanków.':'Brak niezaliczonych atrakcji w pasie 15 km wzdłuż trasy.'}</div>`;
+    return;
+  }
+  const label=plannerNearbyMode==='around'?'od przystanku':'od trasy';
+  el.innerHTML=top.map(({cat,ci,it,ii,key,d})=>`
+    <div class="planner-nearby-item">
+      <span style="font-size:.9rem;">${cat.cat.split(' ')[0]}</span>
+      <span class="pn-name" style="cursor:pointer" onclick="openModal(${ci},${ii},'${key}')">${it.name}</span>
+      <span class="pn-cat">${it.short?.slice(0,25)||''}</span>
+      <span class="pn-dist">${d} km ${label}</span>
+      <button class="planner-nearby-add" onclick="addToPlanner('${key}',this)">+ Dodaj</button>
+    </div>`).join('');
+}
+
+function renderPlannerNearbyOSM(ord){
+  const el=document.getElementById('planner-nearby-list');
+  el.innerHTML='<div style="font-size:.74rem;color:var(--muted);font-style:italic;padding:.35rem 0;">⏳ Pobieram atrakcje z OpenStreetMap wokół przystanków…</div>';
+  const radius=15000;
+  const arounds=ord.map(s=>`(around:${radius},${s.item.lat},${s.item.lng})`);
+  const mk=(filter)=>arounds.map(a=>`  node${filter}${a};`).join('\n');
+  const query=`
+[out:json][timeout:20];
+(
+${mk('["tourism"~"^(attraction|museum|zoo|viewpoint|theme_park)$"]')}
+${mk('["historic"~"^(castle|ruins|monument)$"]')}
+${mk('["waterway"="waterfall"]')}
+${mk('["natural"="peak"]["name"]')}
+);
+out center 60;`;
+  fetch('https://overpass-api.de/api/interpreter',{
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:'data='+encodeURIComponent(query)
+  })
+  .then(r=>r.json())
+  .then(data=>{
+    const ownNames=new Set();ord.forEach(s=>ownNames.add(s.item.name));
+    const results=(data.elements||[])
+      .filter(e=>{const n=e.tags?.name||e.tags?.['name:pl']||'';return n.length>=2&&!ownNames.has(n);})
+      .map(e=>{
+        const lat=e.lat||e.center?.lat, lng=e.lon||e.center?.lng;
+        const tags=e.tags||{};
+        const name=tags['name:pl']||tags.name;
+        const {icon,label}=osmIcon(tags);
+        const d=Math.min(...ord.map(s=>haversine(s.item.lat,s.item.lng,lat,lng)));
+        return {name,icon,label,d,mapsUrl:`https://www.google.com/maps/search/${encodeURIComponent(name)}/@${lat},${lng},14z`};
+      })
+      .filter(r=>r.d<=15)
+      .filter((r,i,arr)=>arr.findIndex(x=>x.name===r.name)===i)
+      .sort((a,b)=>a.d-b.d)
+      .slice(0,20);
+    if(!results.length){el.innerHTML='<div style="font-size:.74rem;color:var(--muted);font-style:italic;padding:.35rem 0;">Brak dodatkowych miejsc w bazie OSM wokół trasy.</div>';return;}
+    el.innerHTML=results.map(r=>`
+      <div class="nearby-item" onclick="window.open('${r.mapsUrl}','_blank')" style="margin-bottom:.3rem;">
+        <span class="nearby-icon">${r.icon}</span>
+        <div class="nearby-body"><div class="nearby-name">${r.name}</div><div class="nearby-meta">${r.label}</div></div>
+        <span class="nearby-dist">${r.d} km</span>
+      </div>`).join('');
+  })
+  .catch(()=>{el.innerHTML='<div style="font-size:.74rem;color:var(--muted);">Błąd ładowania danych OSM — sprawdź połączenie.</div>';});
 }
 
 window.addToPlanner=function(key,btn){

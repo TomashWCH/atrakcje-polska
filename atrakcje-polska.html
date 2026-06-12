@@ -580,7 +580,8 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
 </div>
 <div id="planner-panel">
   <div class="weekend-section">
-    <div class="weekend-section-title">🗓️ Planer weekendu — gdzie będzie najlepsza pogoda?</div>
+    <div class="weekend-section-title">✨ Rekomendacje na wyprawę — TOP 5 dopasowane do Ciebie</div>
+    <div style="font-size:.7rem;color:var(--muted);margin-bottom:.55rem;line-height:1.45;">Uwzględniam Twoje dotychczasowe wyprawy i oceny, pogodę w wybranym terminie, czas dojazdu i zwiedzania oraz orientacyjne ceny biletów.</div>
     <div class="weekend-controls">
       <input type="date" id="weekend-date" class="weekend-date-input">
       <select id="weekend-maxdist" class="weekend-max-dist">
@@ -1501,12 +1502,63 @@ function initWeekendDate(){
   inp.max=max.toISOString().split('T')[0];
 }
 
+// Orientacyjny czas zwiedzania i bilety wg kategorii (indeksy DATA).
+// Można nadpisać dla konkretnej atrakcji polami: czas:"2 h", bilet:"35 zł", biletUrl:"https://…"
+const CAT_INFO=[
+  {czas:'3–6 h trekkingu', bilet:'wstęp wolny (szlaki przez PN: bilet ~8–10 zł)'},   // 0 KGP
+  {czas:'3–6 h trekkingu', bilet:'wstęp wolny (szlaki przez PN: bilet ~8–10 zł)'},   // 1 Korona Sudetów
+  {czas:'2–5 h',           bilet:'wstęp wolny'},                                      // 2 Korona Polski
+  {czas:'2–4 h trekkingu', bilet:'wstęp wolny'},                                      // 3 Korona Gór Kaczawskich
+  {czas:'1–2 h',           bilet:'zwykle 5–15 zł'},                                   // 4 Wieże widokowe
+  {czas:'2–3 h',           bilet:'orientacyjnie 20–45 zł'},                           // 5 Zamki i twierdze
+  {czas:'2–3 h',           bilet:'orientacyjnie 15–35 zł'},                           // 6 Muzea i historia
+  {czas:'1–2 h',           bilet:'wstęp wolny / datek (zwiedzanie z przewodnikiem płatne)'}, // 7 Kościoły
+  {czas:'1,5–2,5 h',       bilet:'orientacyjnie 25–50 zł'},                           // 8 Podziemia i jaskinie
+  {czas:'3–6 h',           bilet:'bilet wstępu do PN ~6–12 zł'},                      // 9 Parki narodowe
+  {czas:'2–4 h',           bilet:'wstęp wolny'},                                      // 10 Wybrzeże
+  {czas:'2–5 h',           bilet:'wstęp wolny (rejsy/sprzęt płatne osobno)'},         // 11 Jeziora i Mazury
+  {czas:'4–8 h',           bilet:'spacer bezpłatny, atrakcje płatne osobno'},         // 12 Miasta
+  {czas:'2–4 h',           bilet:'zależnie od obiektu ~15–60 zł'},                    // 13 UNESCO
+  {czas:'2–4 h',           bilet:'wstęp wolny lub ~8–12 zł'},                         // 14 Skały i formacje
+  {czas:'4–8 h',           bilet:'wstęp wolny'},                                      // 15 Szlaki tematyczne
+  {czas:'2–4 h',           bilet:'zwykle ~5–15 zł'},                                  // 16 Przyroda i fauna
+  {czas:'2–4 h',           bilet:'wstęp wolny, pijalnie/baseny płatne'},              // 17 Uzdrowiska
+];
+function catInfo(ci){return CAT_INFO[ci]||{czas:'2–4 h',bilet:'sprawdź na miejscu'};}
+
+function driveTime(kmOneWay){
+  const min=Math.round(kmOneWay/75*60/5)*5; // śr. 75 km/h, zaokrąglenie do 5 min
+  const h=Math.floor(min/60),m=min%60;
+  return h?`${h} h${m?` ${m} min`:''}`:`${m} min`;
+}
+
+function ticketLink(item){
+  return item.biletUrl||`https://www.google.com/search?q=${encodeURIComponent(item.name+' bilety cennik godziny otwarcia')}`;
+}
+
+// preferencje z Twoich ocen (4–5★) — te same co w rekomendacjach statystyk
+function getPrefScores(){
+  const catScores={},actScores={};
+  DATA.forEach((cat,ci)=>cat.items.forEach((item,ii)=>{
+    const key=getKey(ci,ii);
+    const ud=userData[key]||{};
+    if(checked[key]&&ud.rating>=4){
+      catScores[ci]=(catScores[ci]||0)+ud.rating;
+      (item.acts||[]).forEach(a=>{actScores[a]=(actScores[a]||0)+ud.rating;});
+    }
+  }));
+  return {catScores,actScores};
+}
+
 window.planWeekend=function(){
   const dateVal=document.getElementById('weekend-date').value;
   const maxDist=parseInt(document.getElementById('weekend-maxdist').value)||200;
   const prefAct=document.getElementById('weekend-act').value;
   const resEl=document.getElementById('weekend-results');
   if(!dateVal){alert('Wybierz datę wyjazdu');return;}
+
+  const {catScores,actScores}=getPrefScores();
+  const hasPrefs=Object.keys(catScores).length>0;
 
   // tylko NIEZALICZONE atrakcje z GPS w zasięgu
   const candidates=[];
@@ -1518,7 +1570,9 @@ window.planWeekend=function(){
       const km=distItem(item);
       if(km>maxDist)return;
       if(prefAct&&!(item.acts||[]).includes(prefAct))return;
-      candidates.push({item,key,ci,ii,km,catName:cat.cat.replace(/^\S+ /,'')});
+      let pref=(catScores[ci]||0)*2;
+      (item.acts||[]).forEach(a=>{pref+=(actScores[a]||0)*1.5;});
+      candidates.push({item,key,ci,ii,km,pref,catName:cat.cat.replace(/^\S+ /,''),catIcon:cat.cat.split(' ')[0]});
     });
   });
 
@@ -1527,9 +1581,9 @@ window.planWeekend=function(){
     return;
   }
 
-  // max 30 najbliższych — żeby nie przeciążać API pogodowego
-  const sample=candidates.sort((a,b)=>a.km-b.km).slice(0,30);
-  resEl.innerHTML=`<div class="weekend-loading">⏳ Sprawdzam prognozę dla ${sample.length} niezaliczonych miejsc…</div>`;
+  // max 30 do sprawdzenia pogody: najpierw wg Twoich preferencji, potem bliskość
+  const sample=candidates.sort((a,b)=>(b.pref-a.pref)||(a.km-b.km)).slice(0,30);
+  resEl.innerHTML=`<div class="weekend-loading">⏳ Analizuję ${sample.length} niezaliczonych miejsc: preferencje${hasPrefs?'':' (oceń kilka miejsc 4–5★, a dopasuję lepiej!)'}, pogoda, dojazd…</div>`;
   let completed=0;
   const results=[];
 
@@ -1544,42 +1598,57 @@ window.planWeekend=function(){
         const tmax=Math.round(d.temperature_2m_max[0]||0);
         const tmin=Math.round(d.temperature_2m_min[0]||0);
         const rain=d.precipitation_sum[0]||0;
-        const wScore=weatherScore(code,rain)*10+Math.max(0,tmax-5);
-        results.push({...cand,code,tmax,tmin,rain,wScore,icon:weatherIcon(code)});
+        // wynik: pogoda (dominuje) + Twoje preferencje + bliskość
+        const score=weatherScore(code,rain)*10+Math.max(0,tmax-5)+Math.min(cand.pref,50)*0.6+Math.max(0,(300-cand.km))*0.03;
+        results.push({...cand,code,tmax,tmin,rain,score,icon:weatherIcon(code)});
       })
       .catch(()=>{})
       .finally(()=>{
         completed++;
-        if(completed===sample.length)renderWeekendResults(results,dateVal);
+        if(completed===sample.length)renderWeekendResults(results,dateVal,hasPrefs);
       });
   });
 };
 
-function renderWeekendResults(results,targetDate){
+function renderWeekendResults(results,targetDate,hasPrefs){
   const resEl=document.getElementById('weekend-results');
   if(!results.length){resEl.innerHTML='<div class="weekend-loading">Brak prognozy dla wybranej daty — spróbuj bliższego terminu (maks. 15 dni naprzód).</div>';return;}
-  results.sort((a,b)=>b.wScore-a.wScore);
+  results.sort((a,b)=>b.score-a.score);
   const dateFormatted=new Date(targetDate+'T12:00:00').toLocaleDateString('pl-PL',{weekday:'long',day:'numeric',month:'long'});
-  const medals=['🥇','🥈','🥉'];
-  let html=`<div style="font-size:.76rem;color:var(--muted);margin-bottom:.7rem;">Niezaliczone miejsca na <strong>${dateFormatted}</strong> — od najlepszej pogody:</div>`;
-  results.slice(0,12).forEach((r,i)=>{
-    const rank=i<3?`<div class="ws-rank">${medals[i]}</div>`:`<div class="ws-rank" style="font-size:.95rem;color:var(--muted)">${i+1}</div>`;
-    const acts=(r.item.acts||[]).join(', ');
+  const medals=['🥇','🥈','🥉','4','5'];
+  let html=`<div style="font-size:.76rem;color:var(--muted);margin-bottom:.7rem;">TOP 5 na <strong>${dateFormatted}</strong>${hasPrefs?' — dopasowane do Twoich ocen, pogody i dojazdu:':' — wg pogody i dojazdu (oceń odwiedzone miejsca, a uwzględnię Twój gust):'}</div>`;
+  results.slice(0,5).forEach((r,i)=>{
+    const rank=`<div class="ws-rank"${i>2?' style="font-size:1rem;color:var(--muted)"':''}>${medals[i]}</div>`;
     const inPlan=plannerItems.includes(r.key);
+    const info=catInfo(r.ci);
+    const czas=r.item.czas||info.czas;
+    const bilet=r.item.bilet||info.bilet;
+    const fuel=(fuelPrice&&fuelBurn)?` · ⛽ ~${Math.round(r.km*2*fuelBurn/100*fuelPrice)} zł`:'';
+    const whyPref=r.pref>0?'<span style="color:var(--moss);">♥ pasuje do Twoich ocen</span> · ':'';
     html+=`<div class="weekend-suggestion">
       ${rank}
       <div class="ws-body">
-        <div class="ws-name">${r.item.name}</div>
-        <div class="ws-meta">${r.catName} · ${r.km} km · ${acts}</div>
-        <div class="ws-weather"><span class="ws-day">${r.icon} ${r.tmin}–${r.tmax}°C ${r.rain>0.1?`💧 ${r.rain.toFixed(1)} mm`:'☀️ sucho'}</span></div>
+        <div class="ws-name">${r.catIcon} ${r.item.name}</div>
+        <div class="ws-meta">${whyPref}${r.catName}</div>
+        <div class="ws-weather">
+          <span class="ws-day">${r.icon} ${r.tmin}–${r.tmax}°C ${r.rain>0.1?`💧 ${r.rain.toFixed(1)} mm`:'☀️ sucho'}</span>
+          <span class="ws-day">🚗 ~${driveTime(r.km)} w jedną stronę (${r.km} km)${fuel}</span>
+          <span class="ws-day">⏱ na miejscu: ${czas}</span>
+          <span class="ws-day">🎫 ${bilet}</span>
+        </div>
+        <div style="margin-top:.4rem;display:flex;gap:.4rem;flex-wrap:wrap;">
+          <a href="${ticketLink(r.item)}" target="_blank" rel="noopener" style="font-size:.68rem;font-weight:700;color:white;background:var(--sky);padding:.28rem .65rem;border-radius:3px;text-decoration:none;text-transform:uppercase;letter-spacing:.05em;">🎫 Bilety i godziny</a>
+          <button class="add-to-plan-btn${inPlan?' in-plan':''}" style="white-space:nowrap" onclick="togglePlanItem('${r.key}',this)">+ Plan</button>
+          <button class="add-to-plan-btn" style="white-space:nowrap" onclick="openModal(${r.ci},${r.ii},'${r.key}')">📖 Opis</button>
+        </div>
       </div>
-      <button class="add-to-plan-btn${inPlan?' in-plan':''}" style="align-self:center;white-space:nowrap" onclick="togglePlanItem('${r.key}',this)">+ Plan</button>
     </div>`;
   });
   if(results.length>=3){
     const top3=results.slice(0,3).map(r=>`'${r.key}'`).join(',');
     html+=`<button class="weekend-route-btn" onclick="weekendToPlanner([${top3}])">🗺️ Zaplanuj trasę z TOP 3 miejsc</button>`;
   }
+  html+=`<div style="font-size:.62rem;color:var(--muted);margin-top:.55rem;line-height:1.4;">Czasy i ceny biletów są orientacyjne (wg typu atrakcji) — przed wyjazdem sprawdź aktualny cennik i godziny pod „🎫 Bilety i godziny". Czas dojazdu liczony dla śr. 75 km/h z Wrocławia.</div>`;
   resEl.innerHTML=html;
 }
 

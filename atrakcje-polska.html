@@ -46,6 +46,10 @@ body.dark #dark-toggle{background:rgba(255,255,255,.13);}
 /* TAB BAR */
 .tab-bar{position:fixed;bottom:0;left:0;right:0;height:calc(var(--tab-h) + env(safe-area-inset-bottom));background:var(--ink);display:flex;z-index:50;border-top:1px solid rgba(255,255,255,.1);}
 .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding-bottom:env(safe-area-inset-bottom);cursor:pointer;border:none;background:transparent;color:rgba(245,237,214,.4);font-family:'Lato',sans-serif;font-size:.56rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;transition:color .2s;position:relative;}
+.tab-btn.tab-action{color:rgba(245,237,214,.62);}
+.tab-btn.tab-action .tab-icon{filter:saturate(1.3);}
+.tab-btn.tab-action.active-action{color:var(--accent);}
+.tab-btn.tab-action::before{content:'';position:absolute;left:0;top:22%;height:56%;width:1px;background:rgba(245,237,214,.12);}
 .tab-btn.active{color:var(--accent);}
 .tab-icon{font-size:1.15rem;line-height:1;}
 .planner-count-badge{display:inline-block;background:var(--accent);color:white;border-radius:50%;width:15px;height:15px;font-size:.55rem;font-weight:900;text-align:center;line-height:15px;position:absolute;top:5px;right:12px;}
@@ -193,6 +197,8 @@ body.dark .cat-progress-wrap{background:rgba(255,255,255,.12);}
 .planner-route-name{flex:1;font-weight:700;}
 .planner-route-dist{font-size:.65rem;color:var(--muted);flex-shrink:0;}
 .planner-remove-btn{font-size:.68rem;color:#c0392b;cursor:pointer;border:none;background:none;padding:0 .28rem;flex-shrink:0;}
+.planner-info-btn{font-size:.78rem;cursor:pointer;border:none;background:none;padding:0 .25rem;flex-shrink:0;opacity:.75;}
+.planner-info-btn:hover{opacity:1;}
 .planner-summary{background:var(--parchment);border:1px solid rgba(0,0,0,.1);padding:.7rem .9rem;border-radius:3px;margin:.65rem 0;display:flex;gap:1.4rem;flex-wrap:wrap;}
 .planner-sum-item{font-size:.75rem;color:var(--ink);}
 .planner-sum-item strong{color:var(--moss);font-size:.95rem;font-family:'Playfair Display',serif;}
@@ -489,8 +495,6 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
     <button id="fb-priority" onclick="togglePriority()" title="Pokaż tylko priorytety (długie przytrzymanie atrakcji = ⭐)">⭐ <span class="btn-label">Priorytety</span></button>
     <button onclick="toggleActivityFilter()" id="btn-activity" title="Filtr aktywności">🎯 <span class="btn-label">Aktywność</span></button>
     <button id="btn-fuel" onclick="toggleFuelBar()" title="Kalkulator kosztów paliwa">⛽ <span class="btn-label">Paliwo</span></button>
-    <button id="geo-btn" onclick="toggleGeo()" title="Atrakcje blisko mnie (GPS)">📍 <span class="btn-label">Blisko mnie</span></button>
-    <button id="btn-surprise" onclick="surpriseMe()" title="Zaskocz mnie — losowa niezaliczona atrakcja z uwzględnieniem filtrów">🎲 <span class="btn-label">Zaskocz mnie</span></button>
   </div>
   <div class="controls-row search-row">
     <input type="text" id="search-input" placeholder="🔍 szukaj atrakcji…" oninput="applyFilters()">
@@ -666,6 +670,8 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
 <nav class="tab-bar">
   <button class="tab-btn active" id="tbtn-lista" onclick="switchTab('lista')"><span class="tab-icon">📋</span>Lista</button>
   <button class="tab-btn" id="tbtn-mapa" onclick="switchTab('mapa')"><span class="tab-icon">🗺️</span>Mapa</button>
+  <button class="tab-btn tab-action" id="tbtn-geo" onclick="toggleGeo()"><span class="tab-icon">📍</span>Blisko</button>
+  <button class="tab-btn tab-action" id="tbtn-surprise" onclick="surpriseMe()"><span class="tab-icon">🎲</span>Losuj</button>
   <button class="tab-btn" id="tbtn-planer" onclick="switchTab('planer')"><span class="tab-icon">🧭</span>Planer<span class="planner-count-badge" id="planner-badge" style="display:none;">0</span></button>
   <button class="tab-btn" id="tbtn-statystyki" onclick="switchTab('statystyki')"><span class="tab-icon">📊</span>Stats</button>
 </nav>
@@ -2039,11 +2045,13 @@ function distItem(item){return item.lat?haversine(WROCLAW.lat,WROCLAW.lng,item.l
 // ═══════════════════════════════════════════════════════
 // TABS
 // ═══════════════════════════════════════════════════════
+let currentTab='lista';
 function switchTab(n){
+  currentTab=n;
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn:not(.tab-action)').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+n).classList.add('active');
-  document.getElementById('tbtn-'+n).classList.add('active');
+  const tb=document.getElementById('tbtn-'+n); if(tb)tb.classList.add('active');
   if(n==='mapa')       setTimeout(initLeafletMap,100);
   if(n==='statystyki') renderStats();
   if(n==='planer')     renderPlanner();
@@ -2448,17 +2456,18 @@ window.surpriseMe=function(){
 let geoMode=false,userLat=null,userLng=null;
 window.toggleGeo=function(){
   const banner=document.getElementById('geo-banner');
-  const btn=document.getElementById('geo-btn');
+  const btn=document.getElementById('tbtn-geo');
   if(geoMode){
     geoMode=false;userLat=null;userLng=null;
     banner.classList.remove('visible');
-    btn.classList.remove('active');
+    if(btn)btn.classList.remove('active-action');
     applyFilters();
     return;
   }
   if(!navigator.geolocation){alert('Twoja przeglądarka nie obsługuje geolokalizacji.');return;}
+  if(currentTab!=='lista')switchTab('lista');
   banner.classList.add('visible');
-  btn.classList.add('active');
+  if(btn)btn.classList.add('active-action');
   document.getElementById('geo-status').textContent='📡 Szukam Twojej lokalizacji…';
   navigator.geolocation.getCurrentPosition(
     pos=>{
@@ -2468,7 +2477,7 @@ window.toggleGeo=function(){
     },
     ()=>{
       document.getElementById('geo-status').textContent='Nie udało się ustalić lokalizacji — sprawdź uprawnienia GPS.';
-      btn.classList.remove('active');
+      if(btn)btn.classList.remove('active-action');
       setTimeout(()=>{if(!geoMode)banner.classList.remove('visible');},3000);
     },
     {timeout:10000,enableHighAccuracy:false}
@@ -3435,7 +3444,21 @@ function closePxSetup(){document.getElementById('pixabay-setup').style.display='
 
 // ─── cache adresów zdjęć Pixabay (mniej zapytań + zdjęcia w dzienniku) ───
 let pxCache=JSON.parse(localStorage.getItem('pl-pxcache')||'{}');
-function savePxCache(){try{localStorage.setItem('pl-pxcache',JSON.stringify(pxCache));}catch(e){pxCache={};}}
+let pxCacheDirty=0;
+function savePxCache(){
+  // zapisuj rzadziej i przytnij, by nie przekroczyć limitu localStorage
+  try{
+    let s=JSON.stringify(pxCache);
+    if(s.length>2_000_000){ // ~2 MB: zostaw ostatnie ~800 wpisów
+      const keys=Object.keys(pxCache);
+      keys.slice(0,keys.length-800).forEach(k=>delete pxCache[k]);
+      s=JSON.stringify(pxCache);
+    }
+    localStorage.setItem('pl-pxcache',s);
+  }catch(e){ /* QuotaExceeded — czyść i próbuj raz jeszcze */
+    try{pxCache={};localStorage.removeItem('pl-pxcache');}catch(_){}
+  }
+}
 async function getPhotoUrl(pxq){
   if(!pixabayKey||!pxq)return null;
   if(pxCache[pxq]!==undefined)return pxCache[pxq];
@@ -3684,7 +3707,7 @@ function solveTSP(stops){
 function renderPlanner(){
   const el=document.getElementById('planner-content');
   if(!plannerItems.length){el.innerHTML='<div class="planner-hint">Brak atrakcji. Dodaj przez „+ Plan" na liście.</div>';return;}
-  const stops=plannerItems.map(key=>({key,item:keyToItem(key)})).filter(s=>s.item?.lat);
+  const stops=plannerItems.map(key=>{const[ci,ii]=key.split('_').map(Number);return{key,ci,ii,item:keyToItem(key)};}).filter(s=>s.item?.lat);
   if(!stops.length){el.innerHTML='<div class="planner-hint">Atrakcje bez GPS — brak trasy.</div>';return;}
   const{order}=solveTSP(stops);
   const ord=order.map(i=>stops[i]);
@@ -3695,7 +3718,7 @@ function renderPlanner(){
     const prev=i===0?WROCLAW:{lat:ord[i-1].item.lat,lng:ord[i-1].item.lng};
     const d=haversine(prev.lat,prev.lng,s.item.lat,s.item.lng);
     if(i>0)total+=d;
-    html+=`<div class="planner-route-item"><span class="planner-route-step">${i+1}</span><span class="planner-route-name">${s.item.name}</span><span class="planner-route-dist">+${d} km</span><button class="planner-remove-btn" onclick="togglePlanItem('${s.key}',this)">✕</button></div>`;
+    html+=`<div class="planner-route-item"><span class="planner-route-step">${i+1}</span><span class="planner-route-name" onclick="openModal(${s.ci},${s.ii},'${s.key}')" style="cursor:pointer">${s.item.name}</span><span class="planner-route-dist">+${d} km</span><button class="planner-info-btn" title="Opis" onclick="openModal(${s.ci},${s.ii},'${s.key}')">📖</button><button class="planner-remove-btn" onclick="togglePlanItem('${s.key}',this)">✕</button></div>`;
   });
   const back=haversine(ord[ord.length-1].item.lat,ord[ord.length-1].item.lng,WROCLAW.lat,WROCLAW.lng);
   total+=back;

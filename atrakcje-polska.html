@@ -18,10 +18,50 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
 :root{--ink:#1e2d40;--paper:#f5edd6;--parchment:#ede5c8;--accent:#e8753a;--gold:#e8753a;--moss:#4a6741;--sky:#4a7fa5;--muted:#7a8a99;--checked-bg:#eaf5ea;--tab-h:52px;}
+
+/* ═══════════════════════════════════
+   KEYFRAMES
+═══════════════════════════════════ */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes slideUpFade{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes splashFadeOut{0%{opacity:1;transform:scale(1)}80%{opacity:1;transform:scale(1.03)}100%{opacity:0;transform:scale(1.05)}}
+@keyframes splashPop{0%{opacity:0;transform:translateY(18px) scale(.94)}60%{transform:translateY(-4px) scale(1.03)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes splashDot{0%,80%,100%{transform:scale(0);opacity:.3}40%{transform:scale(1);opacity:1}}
+@keyframes checkPop{0%{transform:scale(1)}30%{transform:scale(1.35)}60%{transform:scale(.9)}100%{transform:scale(1)}}
+@keyframes checkRipple{0%{transform:scale(0);opacity:.5}100%{transform:scale(3.5);opacity:0}}
+@keyframes starFloat{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-38px) scale(0)}}
+@keyframes headerPulse{0%,100%{opacity:.18}50%{opacity:.28}}
+@keyframes cardAppear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══════════════════════════════════
+   SPLASH SCREEN
+═══════════════════════════════════ */
+#splash-screen{position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#1a2535 0%,#1e2d40 50%,#253848 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;}
+#splash-screen.hiding{animation:splashFadeOut .55s ease forwards;pointer-events:none;}
+.splash-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(232,117,58,.22) 0%,transparent 65%);}
+.splash-mountains{position:absolute;bottom:0;left:0;right:0;height:45%;opacity:.7;}
+.splash-content{position:relative;text-align:center;animation:splashPop .7s ease .2s both;}
+.splash-icon{font-size:3.2rem;margin-bottom:.6rem;filter:drop-shadow(0 4px 16px rgba(232,117,58,.4));}
+.splash-title{font-family:'Playfair Display',serif;font-size:2.1rem;font-weight:900;color:#f5edd6;letter-spacing:-.01em;line-height:1.1;}
+.splash-title span{color:#e8753a;}
+.splash-sub{font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(245,237,214,.4);margin-top:.4rem;font-weight:300;}
+.splash-dots{display:flex;gap:.45rem;justify-content:center;margin-top:1.6rem;}
+.splash-dots span{width:7px;height:7px;border-radius:50%;background:var(--accent);}
+.splash-dots span:nth-child(1){animation:splashDot 1.3s .1s infinite ease}
+.splash-dots span:nth-child(2){animation:splashDot 1.3s .25s infinite ease}
+.splash-dots span:nth-child(3){animation:splashDot 1.3s .4s infinite ease}
+
+/* ═══════════════════════════════════
+   HEADER ULEPSZONY
+═══════════════════════════════════ */
+header{background:linear-gradient(160deg,#1a2535 0%,#1e2d40 60%,#253848 100%);color:var(--paper);padding:0;text-align:center;position:relative;overflow:hidden;}
+header::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(232,117,58,.18) 0%,transparent 60%);pointer-events:none;animation:headerPulse 4s ease infinite;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--paper);color:var(--ink);font-family:'Lato',sans-serif;min-height:100vh;padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom));}
 /* HEADER */
-header{background:var(--ink);color:var(--paper);padding:0;text-align:center;position:relative;overflow:hidden;}
+header{background:linear-gradient(160deg,#1a2535 0%,#1e2d40 60%,#253848 100%);color:var(--paper);padding:0;text-align:center;position:relative;overflow:hidden;}
+header::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(232,117,58,.18) 0%,transparent 60%);pointer-events:none;animation:headerPulse 4s ease infinite;}
 .header-bg{position:absolute;inset:0;width:100%;height:100%;}
 .header-content{position:relative;z-index:1;padding:1.5rem 1.5rem 1.1rem;}
 h1{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,5vw,2.5rem);font-weight:900;}
@@ -107,20 +147,25 @@ body.dark .cat-progress-wrap{background:rgba(255,255,255,.12);}
 .list-view .item .item-thumb img{width:100%;height:100%;object-fit:cover;}
 /* CARD VIEW */
 .items-list.card-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:9px;padding:.45rem .9rem .9rem;}
-.card-view .item{flex-direction:column;padding:0;border-radius:10px;border:1.5px solid rgba(0,0,0,.1);overflow:hidden;background:var(--paper);box-shadow:0 1px 4px rgba(0,0,0,.06);transition:box-shadow .18s,border-color .18s;cursor:pointer;}
-.card-view .item:hover{box-shadow:0 4px 16px rgba(0,0,0,.12);border-color:rgba(0,0,0,.18);}
-.card-view .item.checked{border-color:rgba(74,103,65,.4);background:var(--checked-bg);}
-.card-view .item-img{width:100%;height:120px;object-fit:cover;display:block;background:var(--parchment);display:flex;align-items:center;justify-content:center;font-size:2.5rem;flex-shrink:0;}
-.card-view .card-body{padding:.5rem .6rem .55rem;}
-.card-view .card-chk{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.92);border:2px solid rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;color:var(--moss);z-index:3;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.2);}
-.card-view .item.checked .card-chk{background:var(--moss);border-color:var(--moss);color:white;}
+.card-view .item{flex-direction:column;padding:0;border-radius:14px;border:1.5px solid rgba(0,0,0,.08);overflow:hidden;background:var(--paper);box-shadow:0 2px 8px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);transition:box-shadow .22s,border-color .22s,transform .18s;cursor:pointer;animation:cardAppear .35s ease both;}
+.card-view .item:hover{box-shadow:0 8px 28px rgba(0,0,0,.14);border-color:rgba(232,117,58,.3);transform:translateY(-2px);}
+.card-view .item.checked{border-color:rgba(74,103,65,.35);background:linear-gradient(135deg,#eaf5ea 0%,#f0f7f0 100%);}
+.card-view .item-img{width:100%;height:120px;object-fit:cover;display:block;background:linear-gradient(135deg,var(--parchment) 0%,#e8dfc0 100%);display:flex;align-items:center;justify-content:center;font-size:2.8rem;flex-shrink:0;position:relative;}
+.card-view .item-img::after{content:'';position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,rgba(30,45,64,.15));}
+.card-view .card-body{padding:.6rem .7rem .6rem;}
+.card-view .card-chk{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.95);border:2px solid rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;color:var(--moss);z-index:3;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);transition:all .2s;position:relative;}
+.card-view .item.checked .card-chk{background:var(--moss);border-color:var(--moss);color:white;animation:checkPop .35s ease;}
 .card-view .item{position:relative;}
 /* SHARED ITEM */
 .item.checked{background:var(--checked-bg);}
 .item.checked .item-name{text-decoration:line-through;color:var(--moss);opacity:.75;}
 .item.checked .item-short{opacity:.5;}
-.checkbox{width:15px;height:15px;min-width:15px;border:2px solid rgba(0,0,0,.22);border-radius:3px;display:flex;align-items:center;justify-content:center;margin-top:2px;transition:all .15s;font-size:.6rem;color:white;background:transparent;flex-shrink:0;cursor:pointer;}
-.item.checked .checkbox{background:var(--moss);border-color:var(--moss);}
+/* CHECKBOX Z ANIMACJĄ */
+.checkbox{width:15px;height:15px;min-width:15px;border:2px solid rgba(0,0,0,.22);border-radius:3px;display:flex;align-items:center;justify-content:center;margin-top:2px;transition:all .18s;font-size:.6rem;color:white;background:transparent;flex-shrink:0;cursor:pointer;position:relative;}
+.item.checked .checkbox{background:var(--moss);border-color:var(--moss);animation:checkPop .3s ease;}
+/* RIPPLE na checkboxie */
+.checkbox-ripple{position:absolute;top:50%;left:50%;width:15px;height:15px;border-radius:50%;background:rgba(74,103,65,.35);transform:translate(-50%,-50%) scale(0);pointer-events:none;}
+.checkbox-ripple.active{animation:checkRipple .5s ease forwards;}
 .item-idx{font-size:.58rem;font-weight:700;color:var(--muted);min-width:18px;text-align:right;margin-top:3px;flex-shrink:0;}
 .item-body{flex:1;min-width:0;}
 .item-name{font-weight:700;font-size:.82rem;color:var(--ink);line-height:1.28;cursor:pointer;}
@@ -286,8 +331,9 @@ body.dark .modal-input{background:#151f2b;color:#f5edd6;border-color:rgba(255,25
 body.dark .weather-day{background:#253545;}
 body.dark .nearby-item{background:#253545;}
 body.dark .nearby-item:hover{background:#2e3f52;}
-body.dark .card-view .item{border-color:rgba(255,255,255,.1);}
-body.dark .card-view .item:hover{border-color:rgba(255,255,255,.2);}
+body.dark .card-view .item{border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.04);}
+body.dark .card-view .item:hover{border-color:rgba(232,117,58,.35);box-shadow:0 8px 28px rgba(0,0,0,.4);}
+body.dark .card-view .item.checked{border-color:rgba(74,103,65,.4);background:rgba(74,103,65,.15);}
 body.dark .px-box{background:#1c2a38;}
 body.dark .px-title,body.dark .px-sub{color:#f5edd6;}
 /* ── PRIORYTETY (long press) ── */
@@ -460,6 +506,40 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
     <div class="px-skip" onclick="closePxSetup()">Pomiń na razie</div>
   </div>
 </div>
+<!-- SPLASH SCREEN -->
+<div id="splash-screen">
+  <div class="splash-bg"></div>
+  <div class="splash-mountains">
+    <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax slice">
+      <polygon points="0,200 80,80 160,200" fill="rgba(255,255,255,0.04)"/>
+      <polygon points="60,200 160,50 260,200" fill="rgba(255,255,255,0.07)"/>
+      <polygon points="150,200 240,70 330,200" fill="rgba(255,255,255,0.05)"/>
+      <polygon points="240,200 320,90 400,200" fill="rgba(255,255,255,0.06)"/>
+      <polygon points="160,50 175,80 145,80" fill="rgba(245,237,214,0.6)"/>
+      <polygon points="240,70 255,95 225,95" fill="rgba(245,237,214,0.5)"/>
+    </svg>
+  </div>
+  <div class="splash-content">
+    <div class="splash-icon">🇵🇱</div>
+    <div class="splash-title">Atrakcje <span>Polski</span></div>
+    <div class="splash-sub">odkryj kraj</div>
+    <div class="splash-dots">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</div>
+
+<!-- PWA INSTALL BANNER -->
+<div id="pwa-install-banner" style="display:none;position:fixed;bottom:calc(var(--tab-h,52px) + 12px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:200;background:var(--ink);color:var(--paper);border-radius:12px;padding:.75rem 1.1rem;display:none;align-items:center;gap:.75rem;box-shadow:0 4px 24px rgba(0,0,0,.35);max-width:340px;width:90%;animation:slideUp .4s ease;">
+  <span style="font-size:1.4rem">📲</span>
+  <div style="flex:1;min-width:0;">
+    <div style="font-size:.8rem;font-weight:700;">Zainstaluj aplikację</div>
+    <div style="font-size:.68rem;opacity:.7;margin-top:.1rem;">Działa offline, bez przeglądarki</div>
+  </div>
+  <button id="pwa-install-btn" style="background:var(--accent);color:white;border:none;border-radius:6px;padding:.4rem .85rem;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;letter-spacing:.04em;text-transform:uppercase;">Instaluj</button>
+  <button onclick="document.getElementById('pwa-install-banner').style.display='none'" style="background:transparent;border:none;color:rgba(245,237,214,.5);font-size:1.1rem;cursor:pointer;padding:.2rem;line-height:1;">×</button>
+</div>
+
 <div id="guest-banner">
   👤 Tryb gościa: <span id="guest-name"></span>
   <button onclick="exitGuestMode()">✕ Wyjdź</button>
@@ -2317,10 +2397,42 @@ function toggle(key,el){
   el.classList.toggle('checked',done);
   const chk=el.querySelector('.checkbox,.card-chk');
   if(chk)chk.textContent=done?'✓':'';
+
+  // Animacja przy zaznaczaniu
+  if(done){
+    // Ripple na checkboxie
+    if(chk){
+      let ripple=chk.querySelector('.checkbox-ripple');
+      if(!ripple){ripple=document.createElement('span');ripple.className='checkbox-ripple';chk.appendChild(ripple);}
+      ripple.classList.remove('active');
+      void ripple.offsetWidth;
+      ripple.classList.add('active');
+    }
+    // Gwiazdki wylatujące z elementu
+    spawnStars(el);
+    // Wibracja
+    if(navigator.vibrate)navigator.vibrate(40);
+  } else {
+    if(navigator.vibrate)navigator.vibrate(20);
+  }
+
   updateCatProgress(parseInt(key.split('_')[0]));
   updateStats();
   checkBadges();
   if(currentFilter!=='all')applyFilters();
+}
+
+function spawnStars(el){
+  const rect=el.getBoundingClientRect();
+  const cx=rect.left+rect.width/2, cy=rect.top+rect.height/4;
+  const emojis=['⭐','✨','🌟','💫'];
+  for(let i=0;i<3;i++){
+    const s=document.createElement('span');
+    s.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    s.style.cssText=`position:fixed;left:${cx+(-24+Math.random()*48)}px;top:${cy}px;font-size:${.9+Math.random()*.5}rem;pointer-events:none;z-index:9000;animation:starFloat ${.55+Math.random()*.35}s ease forwards;animation-delay:${i*80}ms`;
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),900);
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -3185,6 +3297,30 @@ function renderStats(){
     {group:'Wyzwania',icon:'🌄',name:'Alpinista Sudetów',desc:'Zdobądź pełną Koronę Sudetów',id:'bksfull',ok:()=>catDone(1)>=DATA[1].items.length},
     {group:'Wyzwania',icon:'🕌',name:'Pielgrzym',desc:'Odwiedź 15 kościołów i klasztorów',id:'bkosciol15',ok:()=>catDone(7)>=15},
     {group:'Wyzwania',icon:'🏙️',name:'Urbanista',desc:'Odwiedź 10 polskich miast (must see)',id:'bmiasta10',ok:()=>catDone(12)>=10},
+    {group:'Wyzwania',icon:'🦉',name:'Naturalista',desc:'Odwiedź wszystkie obiekty Przyrody i Fauny',id:'bprzfull',ok:()=>catDone(16)>=DATA[16].items.length},
+    {group:'Wyzwania',icon:'🛤️',name:'Szlakowy Globtroter',desc:'Przejdź wszystkie szlaki tematyczne',id:'bszlfull',ok:()=>catDone(15)>=DATA[15].items.length},
+    // ── HISTORIA ROZBUDOWANA — DATA[5]=124 zamki, DATA[6]=117 muzeów ──────
+    {group:'Historia',icon:'🏯',name:'Kasztelan',desc:'Odwiedź 50 zamków i twierdz',id:'bzam50',ok:()=>catDone(5)>=50},
+    {group:'Historia',icon:'🎓',name:'Kustosz',desc:'Odwiedź 25 muzeów i miejsc historycznych',id:'bhist25',ok:()=>catDone(6)>=25},
+    {group:'Historia',icon:'📚',name:'Kronikarz',desc:'Odwiedź 50 muzeów i miejsc historycznych',id:'bhist50',ok:()=>catDone(6)>=50},
+    // ── KOŚCIOŁY — DATA[7]=185 (największa kategoria, dotąd tylko 1 odznaka) ──
+    {group:'Kościoły i klasztory',icon:'⛪',name:'Pątnik',desc:'Odwiedź 5 kościołów lub klasztorów',id:'bkosciol5',ok:()=>catDone(7)>=5},
+    {group:'Kościoły i klasztory',icon:'🔔',name:'Wierny Szlaku',desc:'Odwiedź 30 kościołów i klasztorów',id:'bkosciol30',ok:()=>catDone(7)>=30},
+    {group:'Kościoły i klasztory',icon:'✝️',name:'Kronikarz Sacrum',desc:'Odwiedź 60 kościołów i klasztorów',id:'bkosciol60',ok:()=>catDone(7)>=60},
+    // ── PODZIEMIA — DATA[8]=32 ─────────────────────────────────────────────
+    {group:'Przyroda',icon:'🕯️',name:'Speleolog',desc:'Odwiedź wszystkie podziemia i jaskinie',id:'bjaskfull',ok:()=>catDone(8)>=DATA[8].items.length},
+    // ── PARKI — DATA[9]=79, brak progu pośredniego ────────────────────────
+    {group:'Przyroda',icon:'🌲',name:'Leśnik',desc:'Odwiedź 25 obiektów w parkach narodowych',id:'bpn25',ok:()=>catDone(9)>=25},
+    // ── SKAŁY — DATA[14]=23 ───────────────────────────────────────────────
+    {group:'Przyroda',icon:'🗿',name:'Geolog',desc:'Odkryj wszystkie formacje skalne',id:'bskalyfull',ok:()=>catDone(14)>=DATA[14].items.length},
+    // ── UZDROWISKA — DATA[17]=501 (dotąd zero odznak!) ────────────────────
+    {group:'Uzdrowiska i ciekawostki',icon:'💆',name:'Kuracjusz',desc:'Odwiedź 5 uzdrowisk lub ciekawostek',id:'buzdr5',ok:()=>catDone(17)>=5},
+    {group:'Uzdrowiska i ciekawostki',icon:'🌡️',name:'Bywalec',desc:'Odwiedź 25 uzdrowisk i ciekawostek',id:'buzdr25',ok:()=>catDone(17)>=25},
+    {group:'Uzdrowiska i ciekawostki',icon:'🏥',name:'Sanatoryjny Wyjadacz',desc:'Odwiedź 75 uzdrowisk i ciekawostek',id:'buzdr75',ok:()=>catDone(17)>=75},
+    // ── MAZURY — DATA[11]=8, brak pełnej ─────────────────────────────────
+    {group:'Woda',icon:'⛵',name:'Kapitan Mazur',desc:'Odkryj wszystkie jeziora i Mazury',id:'bmazuryfull',ok:()=>catDone(11)>=DATA[11].items.length},
+    // ── WIDOKI — trzeci próg, DATA[4]=16 ─────────────────────────────────
+    {group:'Widoki',icon:'🌅',name:'Zdobywca Wież',desc:'Wejdź na wszystkie wieże widokowe',id:'bwiezafull',ok:()=>catDone(4)>=DATA[4].items.length},
   ];
   const earnedCount=BADGES.filter(b=>b.ok()).length;
   html+=`<div class="stats-section"><div class="stats-section-title">Odznaki <span style="font-size:.72rem;font-weight:400;color:var(--muted);margin-left:.4rem;">${earnedCount} / ${BADGES.length}</span></div>`;
@@ -3572,6 +3708,22 @@ function checkBadges(){
     // Wyzwania zbiorcze
     ['bwojall',Object.keys(WOJ_NAMES).every(w=>wojDone(w)>=1),'🗺️','Kartograf'],
     ['bznawcaall',['wdol10','wkuj10','wlub10','wlubu10','wlod10','wmal10','wmaz10','wopo10','wpdk10','wpdl10','wpom10','wsl10','wswk10','wwarm10','wwlkp10','wzach10'].every(id=>earnedBadges.has(id)),'🔑','Mistrz Regionów'],
+    ['bzam50',catDone(5)>=50,'🏯','Kasztelan'],
+    ['bhist25',catDone(6)>=25,'🎓','Kustosz'],
+    ['bhist50',catDone(6)>=50,'📚','Kronikarz'],
+    ['bkosciol5',catDone(7)>=5,'⛪','Pątnik'],
+    ['bkosciol30',catDone(7)>=30,'🔔','Wierny Szlaku'],
+    ['bkosciol60',catDone(7)>=60,'✝️','Kronikarz Sacrum'],
+    ['bjaskfull',catDone(8)>=DATA[8].items.length,'🕯️','Speleolog'],
+    ['bpn25',catDone(9)>=25,'🌲','Leśnik'],
+    ['bskalyfull',catDone(14)>=DATA[14].items.length,'🗿','Geolog'],
+    ['buzdr5',catDone(17)>=5,'💆','Kuracjusz'],
+    ['buzdr25',catDone(17)>=25,'🌡️','Bywalec'],
+    ['buzdr75',catDone(17)>=75,'🏥','Sanatoryjny Wyjadacz'],
+    ['bmazuryfull',catDone(11)>=DATA[11].items.length,'⛵','Kapitan Mazur'],
+    ['bwiezafull',catDone(4)>=DATA[4].items.length,'🌅','Zdobywca Wież'],
+    ['bprzfull',catDone(16)>=DATA[16].items.length,'🦉','Naturalista'],
+    ['bszlfull',catDone(15)>=DATA[15].items.length,'🛤️','Szlakowy Globtroter'],
   ];
   CHECKS.forEach(([id,cond,icon,name])=>{
     if(cond&&!earnedBadges.has(id)){
@@ -4365,6 +4517,58 @@ if('serviceWorker' in navigator){
     navigator.serviceWorker.register('sw-polska.js').catch(()=>{});
   });
 }
+
+// ═══════════════════════════════════
+// SPLASH SCREEN
+// ═══════════════════════════════════
+(function(){
+  const splash=document.getElementById('splash-screen');
+  if(!splash)return;
+  // Minimalne 1.6s dla efektu, potem fade out
+  const hideSplash=()=>{
+    splash.classList.add('hiding');
+    setTimeout(()=>{splash.style.display='none';},600);
+  };
+  // Czekaj na załadowanie strony + minimalny czas
+  let loaded=false, minPassed=false;
+  const tryHide=()=>{if(loaded&&minPassed)hideSplash();};
+  setTimeout(()=>{minPassed=true;tryHide();},1600);
+  window.addEventListener('load',()=>{loaded=true;tryHide();},{once:true});
+  // Failsafe — po 3s zawsze ukryj
+  setTimeout(()=>{if(splash.style.display!=='none')hideSplash();},3000);
+})();
+
+// ═══════════════════════════════════
+// PWA INSTALL PROMPT
+// ═══════════════════════════════════
+let _pwaPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  _pwaPrompt=e;
+  // Pokaż baner po 3s jeśli nie był już instalowany
+  if(!localStorage.getItem('pl-pwa-installed')){
+    setTimeout(()=>{
+      const b=document.getElementById('pwa-install-banner');
+      if(b){b.style.display='flex';}
+    },3000);
+  }
+});
+document.getElementById('pwa-install-btn')?.addEventListener('click',()=>{
+  if(!_pwaPrompt)return;
+  _pwaPrompt.prompt();
+  _pwaPrompt.userChoice.then(r=>{
+    if(r.outcome==='accepted'){
+      localStorage.setItem('pl-pwa-installed','1');
+      document.getElementById('pwa-install-banner').style.display='none';
+    }
+    _pwaPrompt=null;
+  });
+});
+window.addEventListener('appinstalled',()=>{
+  localStorage.setItem('pl-pwa-installed','1');
+  const b=document.getElementById('pwa-install-banner');
+  if(b)b.style.display='none';
+});
 </script>
 </body>
 </html>

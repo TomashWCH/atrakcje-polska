@@ -4225,6 +4225,13 @@ if(!pixabayKey&&!localStorage.getItem('pl-pxskip')){
   // Opcjonalnie: document.getElementById('pixabay-setup').style.display='flex';
   localStorage.setItem('pl-pxskip','1');
 }
+
+// Rejestracja service workera (offline + PWA) — ścieżka względna, działa w dowolnym katalogu
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw-polska.js').catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>

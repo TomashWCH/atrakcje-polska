@@ -3104,30 +3104,102 @@ function renderStats(){
     </div>`;
   });
   html+='</div>';
+  // Helper: ile zaliczonych w kategorii o indeksie ci
+  const catDone=(ci)=>DATA[ci].items.filter((_,ii)=>!!checked[getKey(ci,ii)]).length;
+  // Helper: ile zaliczonych w danym województwie
+  const wojDone=(woj)=>DATA.reduce((s,cat,ci)=>s+cat.items.filter((item,ii)=>item.woj===woj&&!!checked[getKey(ci,ii)]).length,0);
+  // Helper: ile łącznie atrakcji w danym województwie
+  const wojTotal=(woj)=>DATA.reduce((s,cat)=>s+cat.items.filter(item=>item.woj===woj).length,0);
+
   const BADGES=[
-    {icon:'🌱',name:'Pierwszy krok',desc:'Zalicz 1 atrakcję',id:'b1',ok:()=>done>=1},
-    {icon:'🔟',name:'Dziesiątka',desc:'Zalicz 10 atrakcji',id:'b10',ok:()=>done>=10},
-    {icon:'🥈',name:'Pięćdziesiątka',desc:'Zalicz 50 atrakcji',id:'b50',ok:()=>done>=50},
-    {icon:'🥇',name:'Setka',desc:'Zalicz 100 atrakcji',id:'b100',ok:()=>done>=100},
-    {icon:'🏆',name:'Dwieście',desc:'Zalicz 200 atrakcji',id:'b200',ok:()=>done>=200},
-    {icon:'👑',name:'Kandydat KGP',desc:'Zdobądź 10 szczytów KGP',id:'bkgp10',ok:()=>DATA[0].items.filter((_,ii)=>!!checked[getKey(0,ii)]).length>=10},
-    {icon:'🏔️',name:'Zdobywca Korony Gór',desc:'Wszystkie 28 szczytów KGP',id:'bkgpfull',ok:()=>DATA[0].items.filter((_,ii)=>!!checked[getKey(0,ii)]).length>=DATA[0].items.length},
-    {icon:'⛰️',name:'Taternik',desc:'Zdobądź Rysy',id:'brysy',ok:()=>!!checked[getKey(0,0)]},
-    {icon:'🗻',name:'Sudecki Włóczykij',desc:'10 szczytów Korony Sudetów',id:'bks10',ok:()=>DATA[1].items.filter((_,ii)=>!!checked[getKey(1,ii)]).length>=10},
-    {icon:'🏅',name:'Pielgrzym Korony Polski',desc:'Wszystkie 16 pkt Korony Polski',id:'bkpfull',ok:()=>DATA[2].items.filter((_,ii)=>!!checked[getKey(2,ii)]).length>=DATA[2].items.length},
-    {icon:'💎',name:'Kaczawski Zdobywca',desc:'Wszystkie 10 szczytów KGK',id:'bkgkfull',ok:()=>DATA[3].items.filter((_,ii)=>!!checked[getKey(3,ii)]).length>=DATA[3].items.length},
-    {icon:'🦬',name:'Król Puszcz',desc:'Odwiedź Białowieżę',id:'bbia',ok:()=>!!checked[getKey(9,1)]},
-    {icon:'🌿',name:'Parkowicz',desc:'Odwiedź 10 parków narodowych',id:'bpn10',ok:()=>DATA[9].items.filter((_,ii)=>!!checked[getKey(9,ii)]).length>=10},
-    {icon:'⚓',name:'Wilk Morski',desc:'5 miejsc nad Bałtykiem',id:'bmorze',ok:()=>DATA[10].items.filter((_,ii)=>!!checked[getKey(10,ii)]).length>=5},
-    {icon:'🏛️',name:'UNESCO Kolekcjoner',desc:'Wszystkie miejsca UNESCO',id:'bunesco',ok:()=>DATA[13].items.filter((_,ii)=>!!checked[getKey(13,ii)]).length>=DATA[13].items.length},
-    {icon:'📜',name:'Historyk',desc:'10 miejsc historycznych',id:'bhist',ok:()=>DATA[6].items.filter((_,ii)=>!!checked[getKey(6,ii)]).length>=10},
+    // ── MILESTONY OGÓLNE (7) ───────────────────────────────────────────
+    {group:'Milestony',icon:'🌱',name:'Pierwszy krok',desc:'Zalicz 1 atrakcję',id:'b1',ok:()=>done>=1},
+    {group:'Milestony',icon:'🔟',name:'Dziesiątka',desc:'Zalicz 10 atrakcji',id:'b10',ok:()=>done>=10},
+    {group:'Milestony',icon:'🥈',name:'Pięćdziesiątka',desc:'Zalicz 50 atrakcji',id:'b50',ok:()=>done>=50},
+    {group:'Milestony',icon:'🥇',name:'Setka',desc:'Zalicz 100 atrakcji',id:'b100',ok:()=>done>=100},
+    {group:'Milestony',icon:'🏆',name:'Dwieście',desc:'Zalicz 200 atrakcji',id:'b200',ok:()=>done>=200},
+    {group:'Milestony',icon:'🌟',name:'Trzysta',desc:'Zalicz 300 atrakcji',id:'b300',ok:()=>done>=300},
+    {group:'Milestony',icon:'🦅',name:'Pół tysiąca',desc:'Zalicz 500 atrakcji',id:'b500',ok:()=>done>=500},
+    // ── SZCZYTY PTTK (6) ──────────────────────────────────────────────
+    {group:'Szczyty PTTK',icon:'⛰️',name:'Taternik',desc:'Zdobądź Rysy',id:'brysy',ok:()=>!!checked[getKey(0,0)]},
+    {group:'Szczyty PTTK',icon:'👑',name:'Kandydat KGP',desc:'10 szczytów Korony Gór Polski',id:'bkgp10',ok:()=>catDone(0)>=10},
+    {group:'Szczyty PTTK',icon:'🏔️',name:'Zdobywca Korony Gór',desc:'Wszystkie 28 szczytów KGP',id:'bkgpfull',ok:()=>catDone(0)>=DATA[0].items.length},
+    {group:'Szczyty PTTK',icon:'🗻',name:'Sudecki Włóczykij',desc:'10 szczytów Korony Sudetów',id:'bks10',ok:()=>catDone(1)>=10},
+    {group:'Szczyty PTTK',icon:'🏅',name:'Pielgrzym Korony Polski',desc:'Wszystkie 16 pkt Korony Polski',id:'bkpfull',ok:()=>catDone(2)>=DATA[2].items.length},
+    {group:'Szczyty PTTK',icon:'💎',name:'Kaczawski Zdobywca',desc:'Wszystkie szczyty KGK',id:'bkgkfull',ok:()=>catDone(3)>=DATA[3].items.length},
+    // ── ZAMKI I HISTORIA (4) ──────────────────────────────────────────
+    {group:'Historia',icon:'🏰',name:'Giermek',desc:'Odwiedź 5 zamków',id:'bzam5',ok:()=>catDone(5)>=5},
+    {group:'Historia',icon:'⚔️',name:'Rycerz Szlaku',desc:'Odwiedź 20 zamków',id:'bzam20',ok:()=>catDone(5)>=20},
+    {group:'Historia',icon:'📜',name:'Historyk',desc:'10 miejsc historycznych/muzealnych',id:'bhist',ok:()=>catDone(6)>=10},
+    {group:'Historia',icon:'🏛️',name:'UNESCO Kolekcjoner',desc:'Wszystkie miejsca UNESCO w Polsce',id:'bunesco',ok:()=>catDone(13)>=DATA[13].items.length},
+    // ── PARKI I PRZYRODA (5) ──────────────────────────────────────────
+    {group:'Przyroda',icon:'🦬',name:'Król Puszcz',desc:'Odwiedź Białowieski PN',id:'bbia',ok:()=>!!checked[getKey(9,1)]},
+    {group:'Przyroda',icon:'🌿',name:'Parkowicz',desc:'Odwiedź 10 parków narodowych',id:'bpn10',ok:()=>catDone(9)>=10},
+    {group:'Przyroda',icon:'🦁',name:'Strażnik Przyrody',desc:'Wszystkie parki narodowe',id:'bpnfull',ok:()=>catDone(9)>=DATA[9].items.length},
+    {group:'Przyroda',icon:'🪨',name:'Skalny Łazik',desc:'Odwiedź 10 formacji skalnych',id:'bskaly10',ok:()=>catDone(14)>=10},
+    {group:'Przyroda',icon:'⛏️',name:'Jaskiniowiec',desc:'Odwiedź 5 jaskiń i podziemi',id:'bjask5',ok:()=>catDone(8)>=5},
+    // ── WYBRZEŻE I JEZIORA (3) ────────────────────────────────────────
+    {group:'Woda',icon:'⚓',name:'Wilk Morski',desc:'5 miejsc nad Bałtykiem',id:'bmorze',ok:()=>catDone(10)>=5},
+    {group:'Woda',icon:'🏖️',name:'Pan Bałtyku',desc:'Wszystkie miejsca nad morzem',id:'bmorze_full',ok:()=>catDone(10)>=DATA[10].items.length},
+    {group:'Woda',icon:'🚣',name:'Mazurski Kawaler',desc:'Odwiedź 5 miejsc na Mazurach',id:'bmazury5',ok:()=>catDone(11)>=5},
+    // ── WIEŻE I PANORAMY (2) ──────────────────────────────────────────
+    {group:'Widoki',icon:'🗼',name:'Obserwator',desc:'Wejdź na 5 wież widokowych',id:'bwieza5',ok:()=>catDone(4)>=5},
+    {group:'Widoki',icon:'🔭',name:'Łowca Widoków',desc:'Wejdź na 15 wież widokowych',id:'bwieza15',ok:()=>catDone(4)>=15},
+    // ── ODKRYTO WOJEWÓDZTWO (16) ──────────────────────────────────────
+    {group:'Regiony',icon:'📍',name:'Odkryto Dolnośląskie',desc:'Pierwsza atrakcja w Dolnośląskim',id:'wdol1',ok:()=>wojDone('dolnoslaskie')>=1},
+    {group:'Regiony',icon:'📍',name:'Odkryto Kujawsko-Pom.',desc:'Pierwsza atrakcja w Kujawsko-Pom.',id:'wkuj1',ok:()=>wojDone('kujawsko-pomorskie')>=1},
+    {group:'Regiony',icon:'📍',name:'Odkryto Lubelskie',desc:'Pierwsza atrakcja w Lubelskim',id:'wlub1',ok:()=>wojDone('lubelskie')>=1},
+    {group:'Regiony',icon:'📍',name:'Odkryto Lubuskie',desc:'Pierwsza atrakcja w Lubuskim',id:'wlubu1',ok:()=>wojDone('lubuskie')>=1},
+    {group:'Regiony',icon:'📍',name:'Odkryto Łódzkie',desc:'Pierwsza atrakcja w Łódzkim',id:'wlod1',ok:()=>wojDone('lodzkie')>=1},
+    {group:'Regiony',icon:'📍',name:'Odkryto Małopolskie',desc:'Pierwsza atrakcja w Małopolskim',id:'wmal1',ok:()=>wojDone('malopolskie')>=1},
+    {group:'Regiony',icon:'📍',name:'Odkryto Mazowieckie',desc:'Pierwsza atrakcja w Mazowieckim',id:'wmaz1',ok:()=>wojDone('mazowieckie')>=1},
+    {group:'Regiony',icon:'📍',name:'Odkryto Opolskie',desc:'Pierwsza atrakcja w Opolskim',id:'wopo1',ok:()=>wojDone('opolskie')>=1},
+    {group:'Regiony',icon:'📍',name:'Odkryto Podkarpackie',desc:'Pierwsza atrakcja w Podkarpackim',id:'wpdk1',ok:()=>wojDone('podkarpackie')>=1},
+    {group:'Regiony',icon:'📍',name:'Odkryto Podlaskie',desc:'Pierwsza atrakcja w Podlaskim',id:'wpdl1',ok:()=>wojDone('podlaskie')>=1},
+    {group:'Regiony',icon:'📍',name:'Odkryto Pomorskie',desc:'Pierwsza atrakcja w Pomorskim',id:'wpom1',ok:()=>wojDone('pomorskie')>=1},
+    {group:'Regiony',icon:'📍',name:'Odkryto Śląskie',desc:'Pierwsza atrakcja w Śląskim',id:'wsl1',ok:()=>wojDone('slaskie')>=1},
+    {group:'Regiony',icon:'📍',name:'Odkryto Świętokrzyskie',desc:'Pierwsza atrakcja w Świętokrzyskim',id:'wswk1',ok:()=>wojDone('swietokrzyskie')>=1},
+    {group:'Regiony',icon:'📍',name:'Odkryto Warmińsko-Maz.',desc:'Pierwsza atrakcja w Warmińsko-Maz.',id:'wwarm1',ok:()=>wojDone('warminsko-mazurskie')>=1},
+    {group:'Regiony',icon:'📍',name:'Odkryto Wielkopolskie',desc:'Pierwsza atrakcja w Wielkopolskim',id:'wwlkp1',ok:()=>wojDone('wielkopolskie')>=1},
+    {group:'Regiony',icon:'📍',name:'Odkryto Zachodniopom.',desc:'Pierwsza atrakcja w Zachodniopom.',id:'wzach1',ok:()=>wojDone('zachodniopomorskie')>=1},
+    // ── ZNAWCA WOJEWÓDZTWA (16) ───────────────────────────────────────
+    {group:'Znawcy regionów',icon:'🏅',name:'Znawca Dolnośląskiego',desc:'10 atrakcji w Dolnośląskim',id:'wdol10',ok:()=>wojDone('dolnoslaskie')>=10},
+    {group:'Znawcy regionów',icon:'🏅',name:'Znawca Kujawsko-Pom.',desc:'5 atrakcji w Kujawsko-Pom.',id:'wkuj10',ok:()=>wojDone('kujawsko-pomorskie')>=5},
+    {group:'Znawcy regionów',icon:'🏅',name:'Znawca Lubelskiego',desc:'5 atrakcji w Lubelskim',id:'wlub10',ok:()=>wojDone('lubelskie')>=5},
+    {group:'Znawcy regionów',icon:'🏅',name:'Znawca Lubuskiego',desc:'5 atrakcji w Lubuskim',id:'wlubu10',ok:()=>wojDone('lubuskie')>=5},
+    {group:'Znawcy regionów',icon:'🏅',name:'Znawca Łódzkiego',desc:'5 atrakcji w Łódzkim',id:'wlod10',ok:()=>wojDone('lodzkie')>=5},
+    {group:'Znawcy regionów',icon:'🏅',name:'Znawca Małopolskiego',desc:'10 atrakcji w Małopolskim',id:'wmal10',ok:()=>wojDone('malopolskie')>=10},
+    {group:'Znawcy regionów',icon:'🏅',name:'Znawca Mazowieckiego',desc:'10 atrakcji w Mazowieckim',id:'wmaz10',ok:()=>wojDone('mazowieckie')>=10},
+    {group:'Znawcy regionów',icon:'🏅',name:'Znawca Opolskiego',desc:'5 atrakcji w Opolskim',id:'wopo10',ok:()=>wojDone('opolskie')>=5},
+    {group:'Znawcy regionów',icon:'🏅',name:'Znawca Podkarpackiego',desc:'5 atrakcji w Podkarpackim',id:'wpdk10',ok:()=>wojDone('podkarpackie')>=5},
+    {group:'Znawcy regionów',icon:'🏅',name:'Znawca Podlaskiego',desc:'5 atrakcji w Podlaskim',id:'wpdl10',ok:()=>wojDone('podlaskie')>=5},
+    {group:'Znawcy regionów',icon:'🏅',name:'Znawca Pomorskiego',desc:'5 atrakcji w Pomorskim',id:'wpom10',ok:()=>wojDone('pomorskie')>=5},
+    {group:'Znawcy regionów',icon:'🏅',name:'Znawca Śląskiego',desc:'8 atrakcji w Śląskim',id:'wsl10',ok:()=>wojDone('slaskie')>=8},
+    {group:'Znawcy regionów',icon:'🏅',name:'Znawca Świętokrzyskiego',desc:'5 atrakcji w Świętokrzyskim',id:'wswk10',ok:()=>wojDone('swietokrzyskie')>=5},
+    {group:'Znawcy regionów',icon:'🏅',name:'Znawca Warmii i Mazur',desc:'5 atrakcji w Warmińsko-Maz.',id:'wwarm10',ok:()=>wojDone('warminsko-mazurskie')>=5},
+    {group:'Znawcy regionów',icon:'🏅',name:'Znawca Wielkopolskiego',desc:'5 atrakcji w Wielkopolskim',id:'wwlkp10',ok:()=>wojDone('wielkopolskie')>=5},
+    {group:'Znawcy regionów',icon:'🏅',name:'Znawca Zachodniopom.',desc:'5 atrakcji w Zachodniopom.',id:'wzach10',ok:()=>wojDone('zachodniopomorskie')>=5},
+    // ── WYZWANIA (5) ──────────────────────────────────────────────────
+    {group:'Wyzwania',icon:'🗺️',name:'Kartograf',desc:'Odwiedź atrakcje w każdym z 16 województw',id:'bwojall',ok:()=>Object.keys(WOJ_NAMES).every(w=>wojDone(w)>=1)},
+    {group:'Wyzwania',icon:'🔑',name:'Mistrz Regionów',desc:'Zdobądź wszystkie 16 odznak Znawcy',id:'bznawcaall',ok:()=>['wdol10','wkuj10','wlub10','wlubu10','wlod10','wmal10','wmaz10','wopo10','wpdk10','wpdl10','wpom10','wsl10','wswk10','wwarm10','wwlkp10','wzach10'].every(id=>earnedBadges.has(id))},
+    {group:'Wyzwania',icon:'🌄',name:'Alpinista Sudetów',desc:'Zdobądź pełną Koronę Sudetów',id:'bksfull',ok:()=>catDone(1)>=DATA[1].items.length},
+    {group:'Wyzwania',icon:'🕌',name:'Pielgrzym',desc:'Odwiedź 15 kościołów i klasztorów',id:'bkosciol15',ok:()=>catDone(7)>=15},
+    {group:'Wyzwania',icon:'🏙️',name:'Urbanista',desc:'Odwiedź 10 polskich miast (must see)',id:'bmiasta10',ok:()=>catDone(12)>=10},
   ];
-  html+=`<div class="stats-section"><div class="stats-section-title">Odznaki</div><div class="badges-grid">`;
-  BADGES.forEach(b=>{
-    const e=b.ok();
-    html+=`<div class="badge-card ${e?'earned':'locked'}"><div class="badge-icon">${b.icon}</div><div class="badge-name">${b.name}</div><div class="badge-desc">${b.desc}</div></div>`;
+  const earnedCount=BADGES.filter(b=>b.ok()).length;
+  html+=`<div class="stats-section"><div class="stats-section-title">Odznaki <span style="font-size:.72rem;font-weight:400;color:var(--muted);margin-left:.4rem;">${earnedCount} / ${BADGES.length}</span></div>`;
+  const badgeGroups=[...new Set(BADGES.map(b=>b.group))];
+  badgeGroups.forEach(grp=>{
+    const grpBadges=BADGES.filter(b=>b.group===grp);
+    const grpEarned=grpBadges.filter(b=>b.ok()).length;
+    html+=`<div style="margin-bottom:.9rem;"><div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;">${grp} <span style="opacity:.6">${grpEarned}/${grpBadges.length}</span></div><div class="badges-grid">`;
+    grpBadges.forEach(b=>{
+      const e=b.ok();
+      html+=`<div class="badge-card ${e?'earned':'locked'}"><div class="badge-icon">${b.icon}</div><div class="badge-name">${b.name}</div><div class="badge-desc">${b.desc}</div></div>`;
+    });
+    html+=`</div></div>`;
   });
-  html+='</div></div>';
+  html+='</div>';
   html+=`<div class="stats-section"><div class="stats-section-title">Poziom odkrywcy</div><div id="stats-explorer"></div></div>`;
   html+=`<div class="stats-section"><div class="stats-section-title">Kilometry i koszty</div><div id="stats-km"></div></div>`;
   html+=`<div class="stats-section"><div class="stats-section-title">Mapa województw</div><div class="heatmap-grid" id="stats-heatmap"></div></div>`;
@@ -3430,15 +3502,76 @@ function renderRecommendations(){
 const earnedBadges=new Set(JSON.parse(localStorage.getItem('pl-earned')||'[]'));
 function checkBadges(){
   const done=Object.keys(checked).length;
+  const catDone=(ci)=>DATA[ci].items.filter((_,ii)=>!!checked[getKey(ci,ii)]).length;
+  const wojDone=(woj)=>DATA.reduce((s,cat,ci)=>s+cat.items.filter((item,ii)=>item.woj===woj&&!!checked[getKey(ci,ii)]).length,0);
   const CHECKS=[
     ['b1',done>=1,'🌱','Pierwszy krok'],
     ['b10',done>=10,'🔟','Dziesiątka'],
     ['b50',done>=50,'🥈','Pięćdziesiątka'],
     ['b100',done>=100,'🥇','Setka'],
     ['b200',done>=200,'🏆','Dwieście'],
-    ['bkgp10',DATA[0].items.filter((_,ii)=>!!checked[getKey(0,ii)]).length>=10,'👑','Kandydat KGP'],
+    ['b300',done>=300,'🌟','Trzysta'],
+    ['b500',done>=500,'🦅','Pół tysiąca'],
     ['brysy',!!checked[getKey(0,0)],'⛰️','Taternik'],
+    ['bkgp10',catDone(0)>=10,'👑','Kandydat KGP'],
+    ['bkgpfull',catDone(0)>=DATA[0].items.length,'🏔️','Zdobywca Korony Gór'],
+    ['bks10',catDone(1)>=10,'🗻','Sudecki Włóczykij'],
+    ['bksfull',catDone(1)>=DATA[1].items.length,'🌄','Alpinista Sudetów'],
+    ['bkpfull',catDone(2)>=DATA[2].items.length,'🏅','Pielgrzym Korony Polski'],
+    ['bkgkfull',catDone(3)>=DATA[3].items.length,'💎','Kaczawski Zdobywca'],
+    ['bzam5',catDone(5)>=5,'🏰','Giermek'],
+    ['bzam20',catDone(5)>=20,'⚔️','Rycerz Szlaku'],
+    ['bhist',catDone(6)>=10,'📜','Historyk'],
+    ['bunesco',catDone(13)>=DATA[13].items.length,'🏛️','UNESCO Kolekcjoner'],
     ['bbia',!!checked[getKey(9,1)],'🦬','Król Puszcz'],
+    ['bpn10',catDone(9)>=10,'🌿','Parkowicz'],
+    ['bpnfull',catDone(9)>=DATA[9].items.length,'🦁','Strażnik Przyrody'],
+    ['bskaly10',catDone(14)>=10,'🪨','Skalny Łazik'],
+    ['bjask5',catDone(8)>=5,'⛏️','Jaskiniowiec'],
+    ['bmorze',catDone(10)>=5,'⚓','Wilk Morski'],
+    ['bmorze_full',catDone(10)>=DATA[10].items.length,'🏖️','Pan Bałtyku'],
+    ['bmazury5',catDone(11)>=5,'🚣','Mazurski Kawaler'],
+    ['bwieza5',catDone(4)>=5,'🗼','Obserwator'],
+    ['bwieza15',catDone(4)>=15,'🔭','Łowca Widoków'],
+    ['bkosciol15',catDone(7)>=15,'🕌','Pielgrzym'],
+    ['bmiasta10',catDone(12)>=10,'🏙️','Urbanista'],
+    // Województwa - odkryto
+    ['wdol1',wojDone('dolnoslaskie')>=1,'📍','Odkryto Dolnośląskie'],
+    ['wkuj1',wojDone('kujawsko-pomorskie')>=1,'📍','Odkryto Kujawsko-Pom.'],
+    ['wlub1',wojDone('lubelskie')>=1,'📍','Odkryto Lubelskie'],
+    ['wlubu1',wojDone('lubuskie')>=1,'📍','Odkryto Lubuskie'],
+    ['wlod1',wojDone('lodzkie')>=1,'📍','Odkryto Łódzkie'],
+    ['wmal1',wojDone('malopolskie')>=1,'📍','Odkryto Małopolskie'],
+    ['wmaz1',wojDone('mazowieckie')>=1,'📍','Odkryto Mazowieckie'],
+    ['wopo1',wojDone('opolskie')>=1,'📍','Odkryto Opolskie'],
+    ['wpdk1',wojDone('podkarpackie')>=1,'📍','Odkryto Podkarpackie'],
+    ['wpdl1',wojDone('podlaskie')>=1,'📍','Odkryto Podlaskie'],
+    ['wpom1',wojDone('pomorskie')>=1,'📍','Odkryto Pomorskie'],
+    ['wsl1',wojDone('slaskie')>=1,'📍','Odkryto Śląskie'],
+    ['wswk1',wojDone('swietokrzyskie')>=1,'📍','Odkryto Świętokrzyskie'],
+    ['wwarm1',wojDone('warminsko-mazurskie')>=1,'📍','Odkryto Warmińsko-Maz.'],
+    ['wwlkp1',wojDone('wielkopolskie')>=1,'📍','Odkryto Wielkopolskie'],
+    ['wzach1',wojDone('zachodniopomorskie')>=1,'📍','Odkryto Zachodniopom.'],
+    // Województwa - znawca
+    ['wdol10',wojDone('dolnoslaskie')>=10,'🏅','Znawca Dolnośląskiego'],
+    ['wkuj10',wojDone('kujawsko-pomorskie')>=5,'🏅','Znawca Kujawsko-Pom.'],
+    ['wlub10',wojDone('lubelskie')>=5,'🏅','Znawca Lubelskiego'],
+    ['wlubu10',wojDone('lubuskie')>=5,'🏅','Znawca Lubuskiego'],
+    ['wlod10',wojDone('lodzkie')>=5,'🏅','Znawca Łódzkiego'],
+    ['wmal10',wojDone('malopolskie')>=10,'🏅','Znawca Małopolskiego'],
+    ['wmaz10',wojDone('mazowieckie')>=10,'🏅','Znawca Mazowieckiego'],
+    ['wopo10',wojDone('opolskie')>=5,'🏅','Znawca Opolskiego'],
+    ['wpdk10',wojDone('podkarpackie')>=5,'🏅','Znawca Podkarpackiego'],
+    ['wpdl10',wojDone('podlaskie')>=5,'🏅','Znawca Podlaskiego'],
+    ['wpom10',wojDone('pomorskie')>=5,'🏅','Znawca Pomorskiego'],
+    ['wsl10',wojDone('slaskie')>=8,'🏅','Znawca Śląskiego'],
+    ['wswk10',wojDone('swietokrzyskie')>=5,'🏅','Znawca Świętokrzyskiego'],
+    ['wwarm10',wojDone('warminsko-mazurskie')>=5,'🏅','Znawca Warmii i Mazur'],
+    ['wwlkp10',wojDone('wielkopolskie')>=5,'🏅','Znawca Wielkopolskiego'],
+    ['wzach10',wojDone('zachodniopomorskie')>=5,'🏅','Znawca Zachodniopom.'],
+    // Wyzwania zbiorcze
+    ['bwojall',Object.keys(WOJ_NAMES).every(w=>wojDone(w)>=1),'🗺️','Kartograf'],
+    ['bznawcaall',['wdol10','wkuj10','wlub10','wlubu10','wlod10','wmal10','wmaz10','wopo10','wpdk10','wpdl10','wpom10','wsl10','wswk10','wwarm10','wwlkp10','wzach10'].every(id=>earnedBadges.has(id)),'🔑','Mistrz Regionów'],
   ];
   CHECKS.forEach(([id,cond,icon,name])=>{
     if(cond&&!earnedBadges.has(id)){

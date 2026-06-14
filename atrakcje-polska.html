@@ -64,6 +64,11 @@ body.dark #dark-toggle{background:rgba(255,255,255,.13);}
 .region-chips{display:flex;gap:.28rem;overflow-x:auto;padding-bottom:.1rem;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .region-chips::-webkit-scrollbar{display:none;}
 .rchip{font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.25rem .6rem;border:1.5px solid rgba(0,0,0,.18);background:transparent;color:var(--muted);cursor:pointer;border-radius:20px;transition:all .15s;white-space:nowrap;font-family:'Lato',sans-serif;}
+.rchip-dir{display:inline-flex;align-items:center;gap:.32rem;}
+.dir-badge{display:inline-flex;align-items:center;justify-content:center;width:1.15rem;height:1.15rem;border-radius:50%;border:1.5px solid currentColor;font-size:.6rem;font-weight:900;line-height:1;flex-shrink:0;}
+.dir-center{font-size:.7rem;border-style:dashed;}
+.rchip-dir.active .dir-badge{background:var(--paper);color:var(--moss);border-color:var(--paper);}
+body.dark .rchip-dir.active .dir-badge{background:var(--ink);color:var(--paper);}
 .rchip.active{background:var(--ink);border-color:var(--ink);color:var(--paper);}
 /* INPUTS */
 select,input[type=text]{font-family:'Lato',sans-serif;font-size:.75rem;color:var(--ink);background:var(--paper);border:1.5px solid rgba(0,0,0,.18);border-radius:3px;padding:.35rem .55rem;}
@@ -265,6 +270,12 @@ body.dark{--paper:#151f2b;--parchment:#1c2a38;--ink:#f5edd6;--muted:#8a9aaa;--ch
 body.dark .controls,body.dark .activity-filter-row{background:#1c2a38;}
 body.dark select,body.dark input,body.dark textarea{background:#1c2a38;color:#f5edd6;border-color:rgba(255,255,255,.18);}
 body.dark .rchip{color:rgba(245,237,214,.45);border-color:rgba(255,255,255,.18);}
+.legend-chip{display:inline-flex;align-items:center;gap:.3rem;font-size:.64rem;font-weight:600;padding:.22rem .5rem;border:1px solid rgba(0,0,0,.14);border-radius:14px;background:transparent;color:var(--muted);cursor:pointer;opacity:.45;transition:opacity .15s,background .15s;font-family:'Lato',sans-serif;}
+.legend-chip.on{opacity:1;background:rgba(0,0,0,.04);}
+.legend-chip.legend-all{font-weight:800;}
+.legend-dot{width:9px;height:9px;border-radius:50%;border:1.5px solid;flex-shrink:0;}
+body.dark .legend-chip{color:rgba(245,237,214,.6);border-color:rgba(255,255,255,.16);}
+body.dark .legend-chip.on{background:rgba(255,255,255,.08);}
 body.dark .rchip.active{background:var(--accent);border-color:var(--accent);color:white;}
 body.dark button{border-color:rgba(255,255,255,.28);color:#f5edd6;}
 body.dark button:hover,body.dark button.active{background:rgba(255,255,255,.13);}
@@ -378,6 +389,9 @@ body.dark .share-copy{background:#253545;color:#f5edd6;border-color:rgba(255,255
 /* ── ZDJĘCIA / AKTYWNOŚĆ (linki użytkownika) ── */
 .photos-input-row{display:flex;gap:.4rem;align-items:stretch;}
 .photos-input-row .modal-input{flex:1;min-width:0;}
+.modal-gmaps-btn{display:flex;align-items:center;justify-content:center;gap:.4rem;margin:.7rem 0 .2rem;padding:.5rem;background:#fff;border:1.5px solid #4285F4;color:#4285F4;border-radius:6px;font-size:.78rem;font-weight:700;text-decoration:none;font-family:'Lato',sans-serif;}
+.modal-gmaps-btn:hover{background:#4285F4;color:#fff;}
+body.dark .modal-gmaps-btn{background:transparent;}
 .modal-photos-btn{font-family:'Lato',sans-serif;font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.3rem .65rem;border:1.5px solid rgba(0,0,0,.18);background:var(--parchment);color:var(--muted);cursor:pointer;border-radius:3px;white-space:nowrap;}
 .modal-photos-btn.has-link{background:var(--sky);border-color:var(--sky);color:white;}
 body.dark .modal-photos-btn{background:#253545;color:#aab;border-color:rgba(255,255,255,.18);}
@@ -481,11 +495,11 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
   <div class="region-chips">
     <button class="rchip active" data-region="all" onclick="setRegion('all',this)" title="Cała Polska">🇵🇱 <span class="btn-label">Cała Polska</span></button>
     <button class="rchip" data-region="gory" onclick="setRegion('gory',this)" title="Góry — korony PTTK">⛰️ <span class="btn-label">Góry</span></button>
-    <button class="rchip" data-region="poludnie" onclick="setRegion('poludnie',this)" title="Południe">🏔️ <span class="btn-label">Południe</span></button>
-    <button class="rchip" data-region="zachod" onclick="setRegion('zachod',this)" title="Zachód">🌿 <span class="btn-label">Zachód</span></button>
-    <button class="rchip" data-region="centrum" onclick="setRegion('centrum',this)" title="Centrum">🏛️ <span class="btn-label">Centrum</span></button>
-    <button class="rchip" data-region="wschod" onclick="setRegion('wschod',this)" title="Wschód">🌻 <span class="btn-label">Wschód</span></button>
-    <button class="rchip" data-region="polnoc" onclick="setRegion('polnoc',this)" title="Północ">⚓ <span class="btn-label">Północ</span></button>
+    <button class="rchip rchip-dir" data-region="polnoc" onclick="setRegion('polnoc',this)" title="Północ"><span class="dir-badge">N</span><span class="btn-label">Północ</span></button>
+    <button class="rchip rchip-dir" data-region="poludnie" onclick="setRegion('poludnie',this)" title="Południe"><span class="dir-badge">S</span><span class="btn-label">Południe</span></button>
+    <button class="rchip rchip-dir" data-region="wschod" onclick="setRegion('wschod',this)" title="Wschód"><span class="dir-badge">E</span><span class="btn-label">Wschód</span></button>
+    <button class="rchip rchip-dir" data-region="zachod" onclick="setRegion('zachod',this)" title="Zachód"><span class="dir-badge">W</span><span class="btn-label">Zachód</span></button>
+    <button class="rchip rchip-dir" data-region="centrum" onclick="setRegion('centrum',this)" title="Centrum"><span class="dir-badge dir-center">✛</span><span class="btn-label">Centrum</span></button>
   </div>
   <div class="controls-row controls-row-btns">
     <button id="filter-all" class="active" onclick="setFilter('all',this)" title="Wszystkie">🗂️ <span class="btn-label">Wszystkie</span></button>
@@ -694,6 +708,7 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
       <div class="modal-fuel-info" id="modal-fuel-info"></div>
       <div class="modal-weather" id="modal-weather" style="display:none;"><div class="weather-title">🌤 Pogoda na 7 dni</div><div class="weather-days" id="weather-days"><span style="font-size:.73rem;color:var(--muted);font-style:italic;">ładowanie…</span></div></div>
       <div class="modal-desc" id="modal-desc"></div>
+      <a id="modal-gmaps" href="#" target="_blank" rel="noopener" class="modal-gmaps-btn">📍 Zobacz w Google Maps — opinie i oceny</a>
       <div class="modal-nearby">
         <div class="nearby-title">📍 W pobliżu</div>
         <div class="nearby-tabs"><button class="nearby-tab active" onclick="showNearby('nearby',this)">Okoliczne</button><button class="nearby-tab" onclick="showNearby('route',this)">Po drodze z trasy</button><button class="nearby-tab" onclick="showNearby('osm',this)">🗺 Z mapy (OSM)</button></div>
@@ -1148,7 +1163,7 @@ const DATA = [
   {name:"Kościół św. Stanisława Biskupa w Kramsku",woj:"wielkopolskie",region:"zachod",acts:["zwiedzanie"],pxq:"sw. Stanislawa church Poland",short:"Kościół św.",km:160,lat:52.2669,lng:18.42477,kids:true,desc:"Kościół św. Stanisława Biskupa w Kramsku — kościoły i sanktuaria w województwie wielkopolskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
   {name:"Lubusko - kościół pw. Najświętszej Marii Panny",woj:"lubuskie",region:"zachod",acts:["zwiedzanie"],pxq:"Lubusko church Poland",short:"Kościół, jak w wielu innych miastach łużyckich kościół usytuowany jest na rynku.",km:162,lat:51.78787,lng:14.97166,kids:true,desc:"Kościół, jak w wielu innych miastach łużyckich kościół usytuowany jest na rynku. Jest to budowla późnoromańska, typu bazylika, zbudowana z kostki granitowej. Pierwotny kościół istniał tu już od poł. XIII w. Z tamtego czasu pochodzą fragmenty murów południowej nawy oraz dolna część szerokiej wieży z granitowym, portalem. Obecna trzynawowa hala powstała w wyniku przebudowy i powiększenia pierwotnego założenia, co nastąpiło w XIV, XV i na początku XVI wieku. Ciekawostka jest to, że do kościoła schodzi się w dół po kamiennych schodach. Różnica poziomów pokazuje jak przez lata narastał grunt. Wnętrze posiada piekne sklepienia gwiaździste i sieciowe sklepienia naw oraz kaplic."},
   {name:"Gniezno - bazylika archikatedralna pw. Wniebowzięcia Najświętszej Maryi Panny",woj:"wielkopolskie",region:"zachod",acts:["zwiedzanie"],pxq:"Gniezno church Poland",short:"Budowę katedry na Wzgórzu Lecha rozpoczęto w 1342 roku, tuż po powołaniu na stolicę arcybi…",km:163,lat:52.5367,lng:17.5928,kids:true,desc:"Budowę katedry na Wzgórzu Lecha rozpoczęto w 1342 roku, tuż po powołaniu na stolicę arcybiskupią w Gnieźnie Jarosława Skotnickiego herbu Bogoria, człowieka światowego, wykształconego, bliskiego współpracownika króla Kazimierza Wielkiego. Prace zorganizowano tak, by w ich trakcie część świątyni mogła nadal służyć wiernym. Gdy wznoszono prezbiterium, nabożeństwa i Msze św. odbywały się w oddzielonym i zabezpieczonym romańskim korpusie nawowym. Gdy zaczęto go wyburzać i stawiać nowy, ludzie modlili się w nowej, gotyckiej części prezbiterialnej. Inicjator przedsięwzięcia, abp Skotnickie, nie doczekał zakończenia budowy."},
-  {name:"Licheń Stary - sanktuarium maryjne",woj:"wielkopolskie",region:"zachod",acts:["zwiedzanie"],pxq:"Lichen Stary church Poland",short:"Niemożliwe jest omówienie tematu,,Sanktuarium wczoraj i dziś' w krótkim tekście; nie jest …",km:163,lat:52.32207,lng:18.3564,kids:true,desc:"Niemożliwe jest omówienie tematu,,Sanktuarium wczoraj i dziś' w krótkim tekście; nie jest łatwe, choćby pobieżne, przybliżenie różnych jego aspektów (w zakładce prezentujemy te z nich, które są „podlinkowane”) w kilku zdaniach. Przyczyną tego jest bogactwo wydarzeń, jakie miały miejsce w przeciągu ostatnich dwustu lat. Wszystkie ważne momenty historii Polski w dziewiętnastym i dwudziestym wieku odcisnęły swój ślad również na dziejach tego miejsca. Sanktuarium to objawienia Matki Bożej: w 1813 r. pod Lipskiem i w 1850 – w lesie Grąblińskim. To ponad półtora wieku modlitw milionów ludzi przed wizerunkiem Licheńskiej Pani."},
+  {name:"Licheń Stary - sanktuarium maryjne",woj:"wielkopolskie",region:"zachod",acts:["zwiedzanie"],pxq:"Lichen Stary church Poland",short:"Niemożliwe jest omówienie tematu,Sanktuarium wczoraj i dziś' w krótkim tekście; nie jest …",km:163,lat:52.32207,lng:18.3564,kids:true,desc:"Niemożliwe jest omówienie tematu,Sanktuarium wczoraj i dziś' w krótkim tekście; nie jest łatwe, choćby pobieżne, przybliżenie różnych jego aspektów (w zakładce prezentujemy te z nich, które są „podlinkowane”) w kilku zdaniach. Przyczyną tego jest bogactwo wydarzeń, jakie miały miejsce w przeciągu ostatnich dwustu lat. Wszystkie ważne momenty historii Polski w dziewiętnastym i dwudziestym wieku odcisnęły swój ślad również na dziejach tego miejsca. Sanktuarium to objawienia Matki Bożej: w 1813 r. pod Lipskiem i w 1850 – w lesie Grąblińskim. To ponad półtora wieku modlitw milionów ludzi przed wizerunkiem Licheńskiej Pani."},
   {name:"Katedra Gnieźnieńska",woj:"wielkopolskie",region:"zachod",acts:["zwiedzanie"],pxq:"Gnieznienska church Poland",short:"Katedra Gnieźnieńska — kościoły i sanktuaria w województwie wielkopolskie.",km:163,lat:52.53702,lng:17.59278,kids:true,desc:"Katedra Gnieźnieńska — kościoły i sanktuaria w województwie wielkopolskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
   {name:"Trzemeszno - kościół pw. Najświętszej Maryi Panny i św. Wojciecha",woj:"wielkopolskie",region:"zachod",acts:["zwiedzanie"],pxq:"Trzemeszno church Poland",short:"Trzemeszeńska katedra pod wezwaniem Wniebowzięcia NMP i św.",km:170,lat:52.55967,lng:17.81743,kids:true,desc:"Trzemeszeńska katedra pod wezwaniem Wniebowzięcia NMP i św. Michała Archanioła była świątynią przyklasztorną. Tytuł katedry związany jest z wyniesieniem przeora klasztoru do godności opata, łączący się z przywilejem posługiwania się infułą i pastorałem. Podziemia bazyliki kryją kamienne pozostałości romańskie. Z budowli wzniesionej w XII wieku przez kanoników regularnych zachowały się dwie wieże i elementy architektury wnętrza. W świątyni widoczne są pozostałości przebudowy gotyckiej.W latach 1764-81 staraniem opata Michała Kościeszy Kosmowskiego kościół został gruntownie odrestaurowany i przebudowany, a jego wnętrze ozdobione w stylu późnego baroku."},
   {name:"Gościkowo - Paradyż - zespół pocysterski",woj:"lubuskie",region:"zachod",acts:["spacer"],pxq:"Goscikowo church Poland",short:"Pierwsze jego zabudowania wzniesiono ok.",km:171,lat:52.33703,lng:15.54555,kids:true,desc:"Pierwsze jego zabudowania wzniesiono ok. połowy XIII w. Na przestrzeni XVIII w. przebudowany on został w stylu barokowo-rokokowym. Klasztor i przylegający do niego kościół należą do najwspanialszych zabytków sakralnych województwa lubuskiego. W jego wnętrzu znajduje się wiele wysokiej klasy zabytków. Wyjątkowym jest monumentalny barokowy ołtarz, w centralnej części z płótnem przedstawiającym 'Wniebowzięcie Najświętszej Maryi Panny' z przełomu XVII i XVIII w. autora F.A. Scheffera z Wrocławia. Szczególnym kultem od wieków otaczany jest obraz Matki Bożej Paradyskiej w kaplicy południowej. Jest to kopia ikony bizantyjskiej namalowana ok. 1650 r. w Bolonii przez nieznanego malarza."},
@@ -1269,11 +1284,10 @@ const DATA = [
   {name:"Kopalnia Złota — Złoty Stok",woj:"dolnoslaskie",region:"zachod",acts:["zwiedzanie","historia"],pxq:"Zloty Stok gold mine underground waterfall",short:"Jedyna kopalnia złota w Polsce, wodospad pod ziemią",km:125,lat:50.4333,lng:16.8833,kids:true,desc:"Jedyna kopalnia złota w Polsce (XIII–XX w.). Trasa z podziemnym wodospadem i rejsem łódką."},
   {name:"Jaskinia Wierzchowska Górna",woj:"malopolskie",region:"poludnie",acts:["zwiedzanie","przyroda"],pxq:"Wierzchowska cave Ojcow Poland stalagmites",short:"Ojcowski PN, długa trasa 980 m",km:280,lat:50.2067,lng:19.8400,desc:"Jedna z dłuższych jaskiń na trasie turystycznej (980 m). Piękne nacieki, komory."},
   {name:"Podziemne Miasto Włodarz",woj:"dolnoslaskie",region:"zachod",acts:["zwiedzanie","historia"],pxq:"Wlodarz underground Riese Gory Sowie WW2",short:"Największy kompleks RIESE, Góry Sowie",km:85,lat:50.7000,lng:16.4667,desc:"Włodarz — największy z kompleksów podziemnych projektu Riese. Kilometry tuneli, kamer i szyb."},{name:"Kopalnia Niklu, Chryzoprazu i Opalu w Szklarach",woj:"dolnoslaskie",region:"zachod",acts:["zwiedzanie"],pxq:"Kopalnia Niklu, cave Poland",short:"Kopalnia Niklu, Chryzoprazu i Opalu w Szklarach — podziemia i jaskinie w województwie doln…",km:53,lat:50.64577,lng:16.82762,kids:true,desc:"Kopalnia Niklu, Chryzoprazu i Opalu w Szklarach — podziemia i jaskinie w województwie dolnoslaskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
-  {name:"Stara Kopalnia w Wałbrzychu",woj:"dolnoslaskie",region:"zachod",acts:["zwiedzanie"],pxq:"Stara Kopalnia cave Poland",short:"Stara Kopalnia w Wałbrzychu — podziemia i jaskinie w województwie dolnoslaskie.",km:66,lat:50.77237,lng:16.25994,kids:true,desc:"Stara Kopalnia w Wałbrzychu — podziemia i jaskinie w województwie dolnoslaskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
+  {name:"Stara Kopalnia w Wałbrzychu",woj:"dolnoslaskie",region:"zachod",acts:["zwiedzanie"],pxq:"Stara Kopalnia cave Poland",short:"Centrum Nauki i Sztuki w dawnej kopalni węgla Julia w Wałbrzychu — jeden z najciekawszych …",km:66,lat:50.77237,lng:16.25994,kids:true,desc:"Centrum Nauki i Sztuki w dawnej kopalni węgla Julia w Wałbrzychu — jeden z najciekawszych zabytków poprzemysłowych w Polsce, wpisany na listę Pomników Historii. Na zrewitalizowanym terenie kopalni można zwiedzać autentyczne budynki, maszyny wyciągowe, łaźnię i podziemia, a także prześledzić ciężką pracę górników. Mieści się tu również Muzeum Przemysłu i Techniki oraz Centrum Ceramiki Unikatowej. Atrakcyjne i edukacyjne miejsce dla całej rodziny, łączące historię przemysłu z nowoczesną ekspozycją."},
   {name:"Kopalnia Węgla Nowa Ruda",woj:"dolnoslaskie",region:"zachod",acts:["zwiedzanie"],pxq:"Kopalnia Wegla cave Poland",short:"Kopalnia Węgla Nowa Ruda — podziemia i jaskinie w województwie dolnoslaskie.",km:68,lat:50.59058,lng:16.51269,kids:true,desc:"Kopalnia Węgla Nowa Ruda — podziemia i jaskinie w województwie dolnoslaskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
   {name:"Kopalnia Złota Aurelia w Złotoryi",woj:"dolnoslaskie",region:"zachod",acts:["zwiedzanie"],pxq:"Kopalnia Zlota cave Poland",short:"Kopalnia Złota Aurelia w Złotoryi — podziemia i jaskinie w województwie dolnoslaskie.",km:78,lat:51.13045,lng:15.9215,kids:true,desc:"Kopalnia Złota Aurelia w Złotoryi — podziemia i jaskinie w województwie dolnoslaskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
   {name:"Podziemna trasa turystyczna „Arado” w Kamiennej Górze",woj:"dolnoslaskie",region:"zachod",acts:["zwiedzanie"],pxq:"Podziemna trasa cave Poland",short:"Podziemna trasa turystyczna „Arado” w Kamiennej Górze — podziemia i jaskinie w województwi…",km:80,lat:50.77985,lng:16.02972,kids:true,desc:"Podziemna trasa turystyczna „Arado” w Kamiennej Górze — podziemia i jaskinie w województwie dolnoslaskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
-  {name:"Stara Kopalnia Kolorowe Jeziorka w Rudawach Janowickich",woj:"dolnoslaskie",region:"zachod",acts:["zwiedzanie"],pxq:"Stara Kopalnia cave Poland",short:"Stara Kopalnia Kolorowe Jeziorka w Rudawach Janowickich — podziemia i jaskinie w województ…",km:81,lat:50.82404,lng:15.97291,kids:true,desc:"Stara Kopalnia Kolorowe Jeziorka w Rudawach Janowickich — podziemia i jaskinie w województwie dolnoslaskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
   {name:"Kopalnie Uranu Kowary - Kopalnia Liczyrzepa Sztolnie Uranowe Kowary",woj:"dolnoslaskie",region:"zachod",acts:["zwiedzanie"],pxq:"Kopalnie Uranu cave Poland",short:"Kopalnie Uranu Kowary - Kopalnia Liczyrzepa Sztolnie Uranowe Kowary — podziemia i jaskinie…",km:92,lat:50.75908,lng:15.84755,kids:true,desc:"Kopalnie Uranu Kowary - Kopalnia Liczyrzepa Sztolnie Uranowe Kowary — podziemia i jaskinie w województwie dolnoslaskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
   {name:"Kopalnia Uranu w Kletnie",woj:"dolnoslaskie",region:"zachod",acts:["zwiedzanie"],pxq:"Kopalnia Uranu cave Poland",short:"Kopalnia Uranu w Kletnie — podziemia i jaskinie w województwie dolnoslaskie.",km:97,lat:50.24844,lng:16.84453,kids:true,desc:"Kopalnia Uranu w Kletnie — podziemia i jaskinie w województwie dolnoslaskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
   {name:"Kopalnia Kwarcu Stanisław",woj:"dolnoslaskie",region:"zachod",acts:["zwiedzanie"],pxq:"Kopalnia Kwarcu cave Poland",short:"Kopalnia Kwarcu Stanisław — podziemia i jaskinie w województwie dolnoslaskie.",km:115,lat:50.85094,lng:15.44388,kids:true,desc:"Kopalnia Kwarcu Stanisław — podziemia i jaskinie w województwie dolnoslaskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
@@ -1663,7 +1677,7 @@ const DATA = [
   {name:"Brodnica - zespół staromiejski",woj:"kujawsko-pomorskie",region:"polnoc",acts:["spacer"],pxq:"Brodnica old town Poland",short:"Wiedza na temat dziejów Brodnicy, ze względu na bardzo małą ilość zachowanych informacji ź…",km:288,lat:53.25589,lng:19.40248,kids:true,desc:"Wiedza na temat dziejów Brodnicy, ze względu na bardzo małą ilość zachowanych informacji źródłowych, oparta jest głównie na hipotezach czy też przypuszczeniach. W dodatku nawet dostępne źródła są jedynie przekazami pośrednimi oraz wnioskami wysnutymi na podstawie analizy sytuacji na ziemiach chełmińskiej i michałowskiej w XIII wieku. Data i okoliczności założenia Brodnicy oparte są na przesłankach, a – jak zaznaczają historycy – by uzyskać pewność, co do nierozstrzygniętych do końca problemów w tej kwestii, trzeba by było dokonać badań archeologicznych. Nie da się zaprzeczyć, iż dzieje miasta były bardzo burzliwe. Wpływ na to miały dwa graniczące z sobą środowiska: polskie i niemieckie."},
   {name:"Grudziądz - zespół spichrzów nad Wisłą",woj:"kujawsko-pomorskie",region:"polnoc",acts:["spacer"],pxq:"Grudziadz old town Poland",short:"Po krzyżackiej lokacji Grudziądza w 1291 r., w początkach XIV w.",km:290,lat:53.49376,lng:18.74864,kids:true,desc:"Po krzyżackiej lokacji Grudziądza w 1291 r., w początkach XIV w. przystąpiono do budowy murów obronnych, opasujących miasto. Pierwotnie pojedyncza linia znajdowała się również na wysokiej skarpie od strony Wisły. Już jednak w latach 1346-1351 zbudowano od tamtej strony murowany spichrz Bornwalda, przez niektórych identyfikowanym z nr 9 (narożny przy Bramie Wodnej). Następne spichrze postawiono około 1364 r., a w 1504 r. wzdłuż dzisiejszej ul. Spichrzowej stało ich 14, w większości murowanych, co świadczyło o doniosłej roli Grudziądza w handlu rzecznym regionu. 100 lat później było ich 16."},
   {name:"Tarnów - Stare Miasto",woj:"malopolskie",region:"poludnie",acts:["spacer"],pxq:"Tarnow old town Poland",short:"Tarnowska starówka, zwana 'perłą polskiego renesansu', jest jednym z najpiękniejszych przy…",km:304,lat:50.01246,lng:20.98838,kids:true,desc:"Tarnowska starówka, zwana 'perłą polskiego renesansu', jest jednym z najpiękniejszych przykładów renesansowego układu architektonicznego polskich miast. Położony w centrum lokowanego miasta od początku stanowił miejsce koncentrowania się życia publicznego i handlowego. Zlokalizowany w centralnej części wzgórza miejskiego na terenie lekko obniżającym się w kierunku południowym, co ułatwiało odpływ wody deszczowej. Proporcje tarnowskiego rynku na tle innych miast można uznać za typowe, a powierzchnia sięgająca sześćdziesięciu sześciu arów lokowała go w grupie rynków mniejszych."},
-  {name:"Szczecin Bazylika Archikatedralna pw. św. Jakuba",woj:"zachodniopomorskie",region:"polnoc",acts:["spacer","zwiedzanie"],pxq:"Szczecin Archikatedralna old town Poland",short:"Kościół św.",km:308,lat:53.42469,lng:14.55611,kids:true,desc:"Kościół św. Jakuba Apostoła w Szczecinie ufundowany został przez bogatego mieszczanina Beringera z Bambergu i wzniesiony poza obwarowaniami miasta, na wzgórzu, na wzór znajdującego się w Bambergu klasztornego kościoła Benedyktynów pw. św. Michała Archanioła. Wiadomo o tym z dokumentu, z r. 1187, który dotyczył dokonanej przez bpa Zygfryda konsekracji kościoła św. Jakuba Apostoła w Szczecinie, oraz przywilejów nadanych z tej okazji klasztorowi w Bambergu przez tegoż bpa i wdowę po Bogusławie I Anastazję, córkę Mieszka III. Benedyktyni z Bambergu duszpasterzowali przy kościele św. Jakuba Apostoła od początku do 1525 roku,, czyli do przejęcia go przez protestantow."},
+  {name:"Szczecin Bazylika Archikatedralna pw. św. Jakuba",woj:"zachodniopomorskie",region:"polnoc",acts:["spacer","zwiedzanie"],pxq:"Szczecin Archikatedralna old town Poland",short:"Kościół św.",km:308,lat:53.42469,lng:14.55611,kids:true,desc:"Kościół św. Jakuba Apostoła w Szczecinie ufundowany został przez bogatego mieszczanina Beringera z Bambergu i wzniesiony poza obwarowaniami miasta, na wzgórzu, na wzór znajdującego się w Bambergu klasztornego kościoła Benedyktynów pw. św. Michała Archanioła. Wiadomo o tym z dokumentu, z r. 1187, który dotyczył dokonanej przez bpa Zygfryda konsekracji kościoła św. Jakuba Apostoła w Szczecinie, oraz przywilejów nadanych z tej okazji klasztorowi w Bambergu przez tegoż bpa i wdowę po Bogusławie I Anastazję, córkę Mieszka III. Benedyktyni z Bambergu duszpasterzowali przy kościele św. Jakuba Apostoła od początku do 1525 roku, czyli do przejęcia go przez protestantow."},
   {name:"Ustronie Morskie",woj:"zachodniopomorskie",region:"polnoc",acts:["spacer","zwiedzanie"],pxq:"Ustronie Morskie old town Poland",short:"Ustronie Morskie — miasta i starówki w województwie zachodniopomorskie.",km:356,lat:54.21436,lng:15.75508,kids:true,desc:"Ustronie Morskie — miasta i starówki w województwie zachodniopomorskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
   {name:"Mrzeżyno",woj:"zachodniopomorskie",region:"polnoc",acts:["spacer","zwiedzanie"],pxq:"Mrzezyno old town Poland",short:"Mrzeżyno — miasta i starówki w województwie zachodniopomorskie.",km:358,lat:54.14394,lng:15.29022,kids:true,desc:"Mrzeżyno — miasta i starówki w województwie zachodniopomorskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
   {name:"Dziwnów",woj:"zachodniopomorskie",region:"polnoc",acts:["spacer","zwiedzanie"],pxq:"Dziwnow old town Poland",short:"Dziwnów — miasta i starówki w województwie zachodniopomorskie.",km:359,lat:54.02202,lng:14.74378,kids:true,desc:"Dziwnów — miasta i starówki w województwie zachodniopomorskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
@@ -1995,6 +2009,16 @@ const DATA = [
   {name:"Halicz i Rozsypaniec w Bieszczadach",woj:"podkarpackie",region:"poludnie",acts:["spacer"],pxq:"Halicz i town Poland",short:"Dwa malownicze szczyty na najpiękniejszej pętli bieszczadzkiej z Wołosatego.",km:467,lat:49.0715,lng:22.76878,desc:"Dwa malownicze szczyty na najpiękniejszej pętli bieszczadzkiej z Wołosatego. Rozsypaniec (1280 m n.p.m.) zawdzięcza nazwę rozrzuconym na zboczu głazom, a Halicz (1333 m n.p.m.) — zaledwie 14 m niższy od Tarnicy — to rozległa, trawiasta połonina z widokami na cztery strony świata, w tym na ukraińskie Bieszczady. Trasa przez Przełęcz Bukowską wiedzie ponad granicą lasu wśród połonin; po drodze pozostałości okopów z I wojny światowej. Jeden z najbardziej widokowych szlaków w polskich górach."},
   {name:"Kruszyniany - meczet",woj:"podlaskie",region:"wschod",acts:["spacer"],pxq:"Kruszyniany town Poland",short:"Tatarzy osiedlali się w Wielkim Księstwie Litewskim od końca XIV w.",km:516,lat:53.1778,lng:23.81377,desc:"Tatarzy osiedlali się w Wielkim Księstwie Litewskim od końca XIV w. głównie w okolicach Wilna, Trok, Grodna i Kowna, a od XVII w. także w Koronie (gł. na Wołyniu i Podolu, a u schyłku wieku na Suwalszczyźnie). Nazywano ich Lipkami lub Muślimami. Nazwa Lipki pochodziła od tureckiej nazwy Litwy. Najczęściej byli to uchodźcy polityczni należący do starszyzny tatarskiej Złotej Ordy i Krymu, przyjmowani szczególnie chętnie przez księcia Witolda i osadzani na ziemi jako ludność zobowiązana do służby wojskowej (na ogół w odrębnych chorągwiach. Tochtamysz, który uciekł na Litwę przed swoim przeciwnikiem w 1395 roku."},
   {name:"Gulbieniszki k. Suwałk - Cisowa Góra",woj:"podlaskie",region:"wschod",acts:["spacer"],pxq:"Gulbieniszki town Poland",short:"Góra Cisowa jest jednym z najbardziej charakterystycznych punktów na terenie Suwalskiego P…",km:528,lat:54.25167,lng:22.90972,desc:"Góra Cisowa jest jednym z najbardziej charakterystycznych punktów na terenie Suwalskiego Parku Krajobrazowego. Wznosi się na krawędzi zagłębienia Szeszupy na wysokość 256 m n.p.m. Należy do najwyższych wzniesień na terenie SPK i jest widoczna prawie z każdego punktu Parku. Ma kształt regularnego stożka. Pod względem geomorfologicznym góra do niedawna była uważana za kem. Nowsze badania wykazują, że jest to morena czołowa o regularnym kształcie. Nazywano ją różnie: Górą Gulbieniszkowską, Suwalską Fudżijamą, Górą Sypaną. Ostatnia nazwa wiąże się z legendą, według której góra została sztucznie usypana."}
+]},
+{cat:"🎢 Parki rozrywki i dzieci",color:"#e84393",items:[
+  {name:"Energylandia — Zator",woj:"malopolskie",region:"poludnie",acts:["rodzinne","spacer"],pxq:"Energylandia amusement park Poland",short:"Największy park rozrywki w Polsce (Zator k.",km:209,lat:50.0073,lng:19.4308,kids:true,desc:"Największy park rozrywki w Polsce (Zator k. Krakowa, 70 ha, ponad 100 atrakcji). Słynie z rekordowych rollercoasterów — Hyperion (najwyższy i najszybszy megacoaster w Europie) i drewnianej Zadry. Ma strefy dla każdego wieku: bajkową Bajkolandię dla maluchów, strefę rodzinną, ekstremalną i wodną. Co roku odwiedzają go miliony gości. Idealny na całodniową wyprawę z dziećmi."},
+  {name:"Majaland Kownaty",woj:"lubuskie",region:"zachod",acts:["rodzinne","spacer"],pxq:"Majaland Kownaty amusement park Poland",short:"Bajkowy park tematyczny inspirowany Pszczółką Mają, Heidi i Wikingiem Vikiem, w Kownatach …",km:185,lat:52.2547,lng:15.0876,kids:true,desc:"Bajkowy park tematyczny inspirowany Pszczółką Mają, Heidi i Wikingiem Vikiem, w Kownatach przy granicy z Niemcami. Skierowany zwłaszcza do rodzin z dziećmi w wieku przedszkolnym i wczesnoszkolnym — karuzele, łagodne rollercoastery, strefy zabaw. Część atrakcji w hali, więc park działa cały rok. Spokojniejsza atmosfera niż w wielkich kompleksach."},
+  {name:"Mandoria — Rzgów",woj:"lodzkie",region:"centrum",acts:["rodzinne","spacer"],pxq:"Mandoria amusement park Poland",short:"Największy w Polsce całoroczny, zadaszony park rozrywki, stylizowany na renesansowe miasto…",km:180,lat:51.6336,lng:19.4936,kids:true,desc:"Największy w Polsce całoroczny, zadaszony park rozrywki, stylizowany na renesansowe miasto handlowe, w Rzgowie pod Łodzią. Karuzele, zjeżdżalnie, interaktywne gry i spektakle teatralne przenoszące w czasy renesansu. Dzięki zadaszeniu działa niezależnie od pogody — świetny na chłodniejsze miesiące. Łączy zabawę z edukacją historyczną."},
+  {name:"Legendia — Śląskie Wesołe Miasteczko",woj:"slaskie",region:"poludnie",acts:["rodzinne","spacer"],pxq:"Legendia amusement park Poland",short:"Najstarszy duży park rozrywki w Polsce, w chorzowskim Parku Śląskim, po gruntownej moderni…",km:165,lat:50.2873,lng:18.9931,kids:true,desc:"Najstarszy duży park rozrywki w Polsce, w chorzowskim Parku Śląskim, po gruntownej modernizacji. Łączy tradycję lunaparku z nowoczesnymi atrakcjami, m.in. nagradzanym rollercoasterem Lech Coaster. Park tematyczny z atrakcjami dla różnych grup wiekowych, dobrze skomunikowany w aglomeracji śląskiej."},
+  {name:"Zatorland — Zator",woj:"malopolskie",region:"poludnie",acts:["rodzinne","spacer"],pxq:"Zatorland amusement park Poland",short:"Park ruchomych dinozaurów i rozrywki tuż obok Energylandii w Zatorze.",km:209,lat:50.0156,lng:19.4469,kids:true,desc:"Park ruchomych dinozaurów i rozrywki tuż obok Energylandii w Zatorze. Park Dinozaurów z naturalnej wielkości modelami, Park Mitologii, lunapark i strefy edukacyjne. Idealny dla młodszych dzieci i miłośników prehistorii, dobrze łączyć z sąsiednią Energylandią."},
+  {name:"Suntago — Park of Poland, Wręcza",woj:"mazowieckie",region:"centrum",acts:["rodzinne","spacer"],pxq:"Suntago amusement park Poland",short:"Największy kryty park wodny w Europie, we Wręczy pod Warszawą (Park of Poland).",km:258,lat:51.8847,lng:20.5478,kids:true,desc:"Największy kryty park wodny w Europie, we Wręczy pod Warszawą (Park of Poland). Trzy strefy — tropikalna Jamango z dżunglą, relaksacyjna Saunaria i Wellness — dziesiątki zjeżdżalni, basenów i sztuczna rzeka. Całoroczny, pod przeszklonym dachem z palmami. Atrakcja na cały dzień dla rodzin i miłośników wodnej adrenaliny."},
+  {name:"Rabkoland — Rabka-Zdrój",woj:"malopolskie",region:"poludnie",acts:["rodzinne","spacer"],pxq:"Rabkoland amusement park Poland",short:"Rodzinny park rozrywki w uzdrowisku Rabka-Zdrój, z myślą o młodszych dzieciach.",km:266,lat:49.6089,lng:19.9656,kids:true,desc:"Rodzinny park rozrywki w uzdrowisku Rabka-Zdrój, z myślą o młodszych dzieciach. Kolejki, karuzele, łagodne rollercoastery i atrakcje w górskiej scenerii Beskidów. Dobre uzupełnienie pobytu w Rabce, bez tłumów wielkich kompleksów."},
+  {name:"Łeba Park — dinozaury",woj:"pomorskie",region:"polnoc",acts:["rodzinne","spacer"],pxq:"Łeba Park amusement park Poland",short:"Park dinozaurów nad morzem koło Łeby, z ponad setką naturalnej wielkości ruchomych modeli …",km:403,lat:54.7167,lng:17.5061,kids:true,desc:"Park dinozaurów nad morzem koło Łeby, z ponad setką naturalnej wielkości ruchomych modeli prehistorycznych gadów. Ścieżki edukacyjne, kino 5D, plac zabaw i atrakcje dla całej rodziny. Świetny pomysł na deszczowy dzień podczas wakacji nad Bałtykiem."}
 ]}
 ];
 
@@ -2818,6 +2842,13 @@ function ticketLink(item){
   return item.biletUrl||`https://www.google.com/search?q=${encodeURIComponent(item.name+' bilety cennik godziny otwarcia')}`;
 }
 
+// link do miejsca w Google Maps (z prawdziwymi opiniami i oceną)
+function googleMapsLink(item){
+  if(item.lat&&item.lng)
+    return `https://www.google.com/maps/search/${encodeURIComponent(item.name)}/@${item.lat},${item.lng},15z`;
+  return `https://www.google.com/maps/search/${encodeURIComponent(item.name+' '+(item.woj||'Polska'))}`;
+}
+
 // preferencje z Twoich ocen (4–5★) — te same co w rekomendacjach statystyk
 function getPrefScores(){
   const catScores={},actScores={};
@@ -3614,6 +3645,7 @@ window.openModal=function(ci,ii,key){
     ?`<a class="modal-nav-btn" href="https://maps.google.com/?q=${item.lat},${item.lng}" target="_blank">🗺️ Google Maps</a>
        <a class="modal-nav-btn" style="background:var(--sky);" href="https://www.openstreetmap.org/?mlat=${item.lat}&mlon=${item.lng}#map=14/${item.lat}/${item.lng}" target="_blank">📍 OSM</a>`:'';
   document.getElementById('modal-desc').textContent=item.desc||'';
+  document.getElementById('modal-gmaps').href=googleMapsLink(item);
   if(item.lat) loadWeather(item.lat,item.lng); else document.getElementById('modal-weather').style.display='none';
   updateModalFuel();
   renderNearby();
@@ -3810,6 +3842,7 @@ function renderPlannerNearby(){
       <span class="pn-name" style="cursor:pointer" onclick="openModal(${ci},${ii},'${key}')">${it.name}</span>
       <span class="pn-cat">${it.short?.slice(0,25)||''}</span>
       <span class="pn-dist">${d} km ${label}</span>
+      <button class="planner-info-btn" title="Opis" onclick="openModal(${ci},${ii},'${key}')">📖</button>
       <button class="planner-nearby-add" onclick="addToPlanner('${key}',this)">+ Dodaj</button>
     </div>`).join('');
 }
@@ -3881,31 +3914,61 @@ window.mapFilter=function(mode,btn){
   updateMapMarkers();
 };
 
+// kategorie aktywne na mapie (puste = wszystkie widoczne)
+let mapActiveCats=new Set();
+window.toggleMapCat=function(ci){
+  ci=parseInt(ci);
+  if(mapActiveCats.has(ci))mapActiveCats.delete(ci);
+  else mapActiveCats.add(ci);
+  renderMapLegend();
+  updateMapMarkers();
+};
+window.mapCatsAll=function(){
+  mapActiveCats.clear();
+  renderMapLegend();
+  updateMapMarkers();
+};
+function renderMapLegend(){
+  const leg=document.getElementById('map-legend');
+  if(!leg)return;
+  const allActive=mapActiveCats.size===0;
+  let html=`<button class="legend-chip legend-all${allActive?' on':''}" onclick="mapCatsAll()">🗂️ Wszystkie</button>`;
+  html+=DATA.map((cat,ci)=>{
+    const on=allActive||mapActiveCats.has(ci);
+    return `<button class="legend-chip${on?' on':''}" onclick="toggleMapCat(${ci})" title="${cat.cat}">
+      <span class="legend-dot" style="background:${on?cat.color:'transparent'};border-color:${cat.color};"></span>${cat.cat}</button>`;
+  }).join('');
+  leg.innerHTML=html;
+}
+
 function initLeafletMap(){
   if(!window.L)return;
   if(leafletMap){leafletMap.invalidateSize();updateMapMarkers();return;}
   leafletMap=L.map('leaflet-map',{center:[52.0,19.5],zoom:6});
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(leafletMap);
-  const leg=document.getElementById('map-legend');
-  leg.innerHTML=DATA.map(cat=>`<div style="display:flex;align-items:center;gap:4px;"><div style="width:9px;height:9px;border-radius:50%;background:${cat.color};flex-shrink:0;"></div><span>${cat.cat}</span></div>`).join('');
+  renderMapLegend();
   updateMapMarkers();
 }
 
 function updateMapMarkers(){
   if(!leafletMap||!window.L)return;
   mapMarkers.forEach(m=>m.remove());mapMarkers=[];
-  DATA.forEach((cat,ci)=>cat.items.forEach((item,ii)=>{
-    if(!item.lat||!item.lng)return;
-    const key=getKey(ci,ii);
-    const done=!!checked[key];
-    if(mapFilterMode==='done'&&!done)return;
-    if(mapFilterMode==='todo'&&done)return;
-    const col=done?'#4a6741':cat.color;
-    const icon=L.divIcon({html:`<div style="width:11px;height:11px;border-radius:50%;background:${col};border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.4);"></div>`,className:'',iconSize:[11,11]});
-    const m=L.marker([item.lat,item.lng],{icon}).addTo(leafletMap);
-    m.bindPopup(`<strong style="font-size:12px">${item.name}</strong><br><small style="color:#666">${item.short||''}</small><br><button onclick="switchTab('lista');setTimeout(()=>openModal(${ci},${ii},'${key}'),300)" style="margin-top:4px;padding:2px 8px;font-size:11px;background:#e8753a;color:white;border:none;border-radius:3px;cursor:pointer;">📖 Szczegóły</button>`);
-    mapMarkers.push(m);
-  }));
+  const allCats=mapActiveCats.size===0;
+  DATA.forEach((cat,ci)=>{
+    if(!allCats&&!mapActiveCats.has(ci))return;       // filtr kategorii z legendy
+    cat.items.forEach((item,ii)=>{
+      if(!item.lat||!item.lng)return;
+      const key=getKey(ci,ii);
+      const done=!!checked[key];
+      if(mapFilterMode==='done'&&!done)return;
+      if(mapFilterMode==='todo'&&done)return;
+      const col=done?'#4a6741':cat.color;
+      const icon=L.divIcon({html:`<div style="width:11px;height:11px;border-radius:50%;background:${col};border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.4);"></div>`,className:'',iconSize:[11,11]});
+      const m=L.marker([item.lat,item.lng],{icon}).addTo(leafletMap);
+      m.bindPopup(`<strong style="font-size:12px">${item.name}</strong><br><small style="color:#666">${item.short||''}</small><br><button onclick="switchTab('lista');setTimeout(()=>openModal(${ci},${ii},'${key}'),300)" style="margin-top:4px;padding:2px 8px;font-size:11px;background:#e8753a;color:white;border:none;border-radius:3px;cursor:pointer;">📖 Szczegóły</button>`);
+      mapMarkers.push(m);
+    });
+  });
 }
 
 // ═══════════════════════════════════════════════════════

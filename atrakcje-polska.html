@@ -235,8 +235,8 @@ body.dark .cat-progress-wrap{background:rgba(255,255,255,.12);}
 @media(min-width:600px){.modal-overlay{align-items:center;}.modal{border-radius:14px;max-height:84vh;}.modal-img-area{height:240px;}}
 @media(max-width:420px){.items-list.list-view{grid-template-columns:1fr;}.items-list.card-view{grid-template-columns:repeat(2,1fr);}}
 /* MAP */
-#map-panel{padding:.45rem;}
-#leaflet-map{height:calc(100vh - 185px);min-height:340px;border-radius:8px;overflow:hidden;}
+#map-panel{padding:.45rem .45rem calc(var(--tab-h) + env(safe-area-inset-bottom) + .45rem);}
+#leaflet-map{height:calc(100dvh - 185px - var(--tab-h) - env(safe-area-inset-bottom));min-height:300px;border-radius:8px;overflow:hidden;}
 .map-ctrl-btn{font-size:.65rem;padding:.28rem .65rem;}
 .map-ctrl-btn.active{background:var(--ink);color:var(--paper);}
 /* PLANNER */
@@ -589,6 +589,7 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
     <button id="fb-priority" onclick="togglePriority()" title="Pokaż tylko priorytety (długie przytrzymanie atrakcji = ⭐)">⭐ <span class="btn-label">Priorytety</span></button>
     <button onclick="toggleActivityFilter()" id="btn-activity" title="Filtr aktywności">🎯 <span class="btn-label">Aktywność</span></button>
     <button id="btn-fuel" onclick="toggleFuelBar()" title="Kalkulator kosztów paliwa">⛽ <span class="btn-label">Paliwo</span></button>
+    <button id="btn-addplace" onclick="openAddPlace()" title="Dodaj własne miejsce">➕ <span class="btn-label">Dodaj</span></button>
   </div>
   <div class="controls-row search-row">
     <input type="text" id="search-input" placeholder="🔍 szukaj atrakcji…" oninput="applyFilters()">
@@ -759,6 +760,47 @@ footer{text-align:center;padding:1rem;font-size:.68rem;color:var(--muted);border
   <div class="stats-title">Twoje statystyki</div>
   <div id="stats-content"></div>
 </div>
+</div>
+
+<!-- ⭐ OKNO: DODAJ / EDYTUJ WŁASNE MIEJSCE -->
+<div class="modal-overlay" id="ap-overlay" onclick="if(event.target===this)closeAddPlace()">
+  <div class="modal" style="max-height:94vh;">
+    <div style="padding:1rem 1.15rem 1.4rem;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.7rem;">
+        <strong id="ap-title" style="font-family:'Playfair Display',serif;font-size:1.2rem;">➕ Dodaj miejsce</strong>
+        <button onclick="closeAddPlace()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#999;line-height:1;">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.55rem;font-size:.82rem;">
+        <label style="font-weight:700;">Nazwa *
+          <input id="ap-name" type="text" placeholder="np. Wieża widokowa na Wzgórzu" style="width:100%;margin-top:.2rem;padding:.5rem;border:1px solid #ccc;border-radius:7px;font-size:.85rem;box-sizing:border-box;"></label>
+        <div style="display:flex;gap:.5rem;">
+          <label style="flex:1;font-weight:700;">Typ
+            <select id="ap-type" style="width:100%;margin-top:.2rem;padding:.5rem;border:1px solid #ccc;border-radius:7px;font-size:.85rem;box-sizing:border-box;"></select></label>
+          <label style="flex:1;font-weight:700;">Województwo
+            <select id="ap-woj" style="width:100%;margin-top:.2rem;padding:.5rem;border:1px solid #ccc;border-radius:7px;font-size:.85rem;box-sizing:border-box;"></select></label>
+        </div>
+        <label style="font-weight:700;">Krótki opis
+          <input id="ap-short" type="text" placeholder="jedno zdanie na liście" style="width:100%;margin-top:.2rem;padding:.5rem;border:1px solid #ccc;border-radius:7px;font-size:.85rem;box-sizing:border-box;"></label>
+        <label style="font-weight:700;">Opis
+          <textarea id="ap-desc" rows="3" placeholder="pełny opis w szczegółach miejsca" style="width:100%;margin-top:.2rem;padding:.5rem;border:1px solid #ccc;border-radius:7px;font-size:.85rem;box-sizing:border-box;resize:vertical;"></textarea></label>
+        <label style="font-weight:700;">Zdjęcie — link do zdjęcia albo fraza do wyszukania
+          <input id="ap-photo" type="text" placeholder="https://…  albo:  zamek Książ" style="width:100%;margin-top:.2rem;padding:.5rem;border:1px solid #ccc;border-radius:7px;font-size:.85rem;box-sizing:border-box;"></label>
+        <label style="font-weight:700;">Tagi / aktywności (po przecinku)
+          <input id="ap-acts" type="text" placeholder="zwiedzanie, widoki" style="width:100%;margin-top:.2rem;padding:.5rem;border:1px solid #ccc;border-radius:7px;font-size:.85rem;box-sizing:border-box;"></label>
+        <label style="display:flex;gap:.45rem;align-items:center;font-weight:700;"><input type="checkbox" id="ap-kids" style="width:16px;height:16px;"> Atrakcja rodzinna 👶</label>
+        <div style="font-weight:700;margin-top:.2rem;">Lokalizacja — dotknij mapy, aby postawić pinezkę</div>
+        <div id="ap-map" style="height:200px;border-radius:8px;overflow:hidden;border:1px solid #ccc;"></div>
+        <div style="display:flex;gap:.5rem;align-items:center;">
+          <button type="button" onclick="apUseMyLocation()" style="padding:.4rem .7rem;border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:7px;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;">📍 Moja lokalizacja</button>
+          <span id="ap-coords" style="font-size:.74rem;color:#777;">brak lokalizacji</span>
+        </div>
+        <div style="display:flex;gap:.6rem;margin-top:.9rem;">
+          <button onclick="submitCustomPlace()" style="flex:1;padding:.65rem;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:.9rem;font-weight:700;cursor:pointer;">💾 Zapisz</button>
+          <button onclick="closeAddPlace()" style="padding:.65rem 1rem;background:#eee;color:#444;border:none;border-radius:8px;font-size:.9rem;font-weight:700;cursor:pointer;">Anuluj</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <nav class="tab-bar">
@@ -1384,7 +1426,8 @@ const DATA = [
   {name:"Jaskinia Mroźna",woj:"malopolskie",region:"poludnie",acts:["zwiedzanie"],pxq:"Mrozna cave Poland",short:"askinia Mroźna to jedna z 6 jaskiń udostępnionych do zwiedzania w Tatrzańskim Parku Narodo…",km:289,lat:49.25141,lng:19.87021,kids:true,desc:"askinia Mroźna to jedna z 6 jaskiń udostępnionych do zwiedzania w Tatrzańskim Parku Narodowym i jedyna z oświetleniem elektrycznym. Wejście do jaskini znajduje się w Dolinie Kościeliskiej w masywie Organów ok 120 m nad dnem doliny. Swoją nazwę zawdzięcza niskiej temperaturze panującej w środku, powiewom zimnego powietrza jak i białym naciekom na ścianach, które przypominają szron. Jaskinia ta powstała na skutek przepływu wód podziemnego Potoku Kościeliskiego."},
   {name:"Podziemna Trasa Tursytyczna w Opatowie",woj:"swietokrzyskie",region:"poludnie",acts:["zwiedzanie"],pxq:"Podziemna Trasa cave Poland",short:"Podziemna Trasa Tursytyczna w Opatowie — podziemia i jaskinie w województwie swietokrzyskie.",km:309,lat:50.80131,lng:21.42302,kids:true,desc:"Podziemna Trasa Tursytyczna w Opatowie — podziemia i jaskinie w województwie swietokrzyskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
   {name:"Podziemna Trasa Turystyczna w Sandomierzu",woj:"swietokrzyskie",region:"poludnie",acts:["zwiedzanie"],pxq:"Podziemna Trasa cave Poland",short:"Podziemna Trasa Turystyczna w Sandomierzu — podziemia i jaskinie w województwie swietokrzy…",km:334,lat:50.6798,lng:21.74859,kids:true,desc:"Podziemna Trasa Turystyczna w Sandomierzu — podziemia i jaskinie w województwie swietokrzyskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
-  {name:"Chełm - podziemia kredowe",woj:"lubelskie",region:"wschod",acts:["zwiedzanie"],pxq:"Chelm cave Poland",short:"A najbardziej niesamowite jest to, że skała na której leży miasto, jest wewnątrz tak dziur…",km:449,lat:51.13303,lng:23.4713,kids:true,desc:"A najbardziej niesamowite jest to, że skała na której leży miasto, jest wewnątrz tak dziurawa jak ser szwajcarski. Jedyny sposób aby się o tym przekonać to odwiedzenie jedynej w Europie kopalni kredy piszącej, czyli Chełmskich Podziemi Kredowych. Podziemia te znajdują się pod centralną częścią starej części Chełma. Dawniej były tu mury obronne miasta i otaczająca je fosa. Najdłuższy chodnik chełmskich podziemi kończy się szybem wentylacyjnym dokładnie w miejscu dawnego, nieistniejącego już ratusza. Tak naprawdę to ta podziemna kopalnia kredy nigdy nie była prawdziwą kopalnią. Dlaczego? Bo już od XIII w. górnikami-amatorami byli niemal wszyscy mieszkańcy Chełma."}
+  {name:"Chełm - podziemia kredowe",woj:"lubelskie",region:"wschod",acts:["zwiedzanie"],pxq:"Chelm cave Poland",short:"A najbardziej niesamowite jest to, że skała na której leży miasto, jest wewnątrz tak dziur…",km:449,lat:51.13303,lng:23.4713,kids:true,desc:"A najbardziej niesamowite jest to, że skała na której leży miasto, jest wewnątrz tak dziurawa jak ser szwajcarski. Jedyny sposób aby się o tym przekonać to odwiedzenie jedynej w Europie kopalni kredy piszącej, czyli Chełmskich Podziemi Kredowych. Podziemia te znajdują się pod centralną częścią starej części Chełma. Dawniej były tu mury obronne miasta i otaczająca je fosa. Najdłuższy chodnik chełmskich podziemi kończy się szybem wentylacyjnym dokładnie w miejscu dawnego, nieistniejącego już ratusza. Tak naprawdę to ta podziemna kopalnia kredy nigdy nie była prawdziwą kopalnią. Dlaczego? Bo już od XIII w. górnikami-amatorami byli niemal wszyscy mieszkańcy Chełma."},
+  {name:"Time Gates — Bramy Czasu (Jelenia Góra)",woj:"dolnoslaskie",region:"zachod",acts:["zwiedzanie","historia"],pxq:"Jelenia Gora underground tunnel cave",short:"Najdłuższe udostępnione podziemia Karkonoszy — trasa historyczna i naukowa (cewka Tesli)",km:120,lat:50.8969,lng:15.7390,kids:true,desc:"Time Gates – Bramy Czasu to ponad kilometr podziemnych tras pod Wzgórzem Kościuszki w Jeleniej Górze (ul. Chełmońskiego 3) — najdłuższe udostępnione podziemia w Karkonoszach. Trasa historyczna prowadzi przez korytarze z czasów II wojny światowej, legendy Karkonoszy i historię Dolnego Śląska, a trasa naukowa to pokaz Szalonego Naukowca z największą cewką Tesli w Polsce i eksperymentami z ciekłym azotem. Zwiedzanie z przewodnikiem (ok. 45 min), atrakcja przede wszystkim dla rodzin z dziećmi. Czynne codziennie."}
 ]},
 { cat:"🏞️ Parki narodowe", color:"#3a7a3a", items:[
   {name:"Tatrzański Park Narodowy",woj:"malopolskie",region:"poludnie",acts:["trekking","przyroda","widoki"],pxq:"Tatra National Park Morskie Oko marmots chamois",short:"Tatry, Morskie Oko, kozice, świstaki",km:350,lat:49.2725,lng:19.9817,kids:true,desc:"Perła polskich gór. Morskie Oko, Dolina Pięciu Stawów, Rysy. Kozice i świstaki. Rezerwuj parking w Palenicy!"},
@@ -1497,7 +1540,8 @@ const DATA = [
   {name:"Zatoka Pucka",woj:"pomorskie",region:"polnoc",acts:["spacer","przyroda"],pxq:"Zatoka Pucka sea coast Poland",short:"Zatoka Pucka — wybrzeże i morze w województwie pomorskie.",km:413,lat:54.71827,lng:18.48038,desc:"Zatoka Pucka — wybrzeże i morze w województwie pomorskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
   {name:"Jastarnia Molo",woj:"pomorskie",region:"polnoc",acts:["spacer","przyroda"],pxq:"Jastarnia Molo sea coast Poland",short:"Jastarnia Molo — wybrzeże i morze w województwie pomorskie.",km:414,lat:54.69713,lng:18.6689,desc:"Jastarnia Molo — wybrzeże i morze w województwie pomorskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
   {name:"Plaża we Władysławowie",woj:"pomorskie",region:"polnoc",acts:["spacer","przyroda"],pxq:"Plaza we sea coast Poland",short:"Plaża we Władysławowie — wybrzeże i morze w województwie pomorskie.",km:421,lat:54.80148,lng:18.40416,desc:"Plaża we Władysławowie — wybrzeże i morze w województwie pomorskie. Obiekt z Kanonu Krajoznawczego PTTK / bazy Turystyka Aktywna."},
-  {name:"Rozewie k. Władysławowa – latarnia morska",woj:"pomorskie",region:"polnoc",acts:["spacer","przyroda"],pxq:"Rozewie sea coast Poland",short:"Najstarsza latarnia morska na świecie powstała w latach 300-285 p.n.e.",km:423,lat:54.83035,lng:18.33629,desc:"Najstarsza latarnia morska na świecie powstała w latach 300-285 p.n.e. na wyspie Faros, wg projektu greckiego architekta Sostratosa z Knidos. Chociaż znikła całkowicie, choć nie ma po niej śladu i niektórzy mogliby wątpić czy istniała naprawdę, to uznano ją za siódmy cud świata, a jej imię żyje do dziś. Francuzi nazywają latarnię morską - phare, Włosi - faro, Grecy - faros, angielscy poeci - pharos. Jeżeli popatrzeć na nasz ojczysty język to znajdziemy w nim słowo fara, które z dawien dawna oznacza kościół z wieżą, który wskazuje właściwą drogę. Od czasów średniowiecza na przylądku Rozewie stawiano światła nawigacyjne."}
+  {name:"Rozewie k. Władysławowa – latarnia morska",woj:"pomorskie",region:"polnoc",acts:["spacer","przyroda"],pxq:"Rozewie sea coast Poland",short:"Najstarsza latarnia morska na świecie powstała w latach 300-285 p.n.e.",km:423,lat:54.83035,lng:18.33629,desc:"Najstarsza latarnia morska na świecie powstała w latach 300-285 p.n.e. na wyspie Faros, wg projektu greckiego architekta Sostratosa z Knidos. Chociaż znikła całkowicie, choć nie ma po niej śladu i niektórzy mogliby wątpić czy istniała naprawdę, to uznano ją za siódmy cud świata, a jej imię żyje do dziś. Francuzi nazywają latarnię morską - phare, Włosi - faro, Grecy - faros, angielscy poeci - pharos. Jeżeli popatrzeć na nasz ojczysty język to znajdziemy w nim słowo fara, które z dawien dawna oznacza kościół z wieżą, który wskazuje właściwą drogę. Od czasów średniowiecza na przylądku Rozewie stawiano światła nawigacyjne."},
+  {name:"Rewal — nadmorski kurort",woj:"zachodniopomorskie",region:"polnoc",acts:["spacer","rodzinne","widoki"],pxq:"Rewal Baltic Sea beach cliff Poland",short:"Kurort na Wybrzeżu Rewalskim — plaża pod klifami i zabytkowa kolej wąskotorowa",km:430,lat:54.0761,lng:15.0167,kids:true,desc:"Rewal to popularny kurort nad Bałtykiem na Wybrzeżu Rewalskim (woj. zachodniopomorskie), znany z szerokiej, piaszczystej plaży u podnóża wysokich klifów i pięknych zachodów słońca. Kursuje stąd zabytkowa Nadmorska Kolej Wąskotorowa „Ciuchcia Retro”, łącząca nadmorskie miejscowości; w pobliżu warto zobaczyć ruiny kościoła na klifie w Trzęsaczu oraz latarnię morską w Niechorzu. Dobre miejsce na rodzinny wypoczynek nad morzem."}
 ]},
 { cat:"🌊 Jeziora i Mazury", color:"#3a6f95", items:[
   {name:"Wielkie Jeziora Mazurskie",woj:"warminsko-mazurskie",region:"polnoc",acts:["kajaki","spacer","przyroda"],pxq:"Mazury Great Masurian Lakes sailing kayaking",short:"Tysiąc jezior, żeglarstwo, Mikołajki",km:340,lat:53.8833,lng:21.7000,kids:true,desc:"Największy kompleks jezior w Polsce połączonych kanałami. Mikołajki, Giżycko. Żeglarstwo i kajakarstwo."},
@@ -2102,6 +2146,10 @@ const DATA = [
 ]}
 ];
 
+// ⭐ Kategoria użytkownika „Moje miejsca" — zawsze ostatnia, wypełniana z localStorage
+DATA.push({cat:"📍 Moje miejsca", color:"#e8753a", items:[]});
+const MOJE_CI = DATA.length - 1;
+
 // ═══════════════════════════════════════════════════════
 // KONFIGURACJA I STAN
 // ═══════════════════════════════════════════════════════
@@ -2272,7 +2320,7 @@ function buildItemEl(item,ci,ii,key,done,ud,idx){
   if(currentView==='card'){
     el.innerHTML=`
       <div class="card-chk" onclick="event.stopPropagation();toggle('${key}',this.closest('.item'))">${done?'✓':''}</div>
-      <div class="modal-img-area card-view-img" id="cthumb-${key}" style="height:110px;font-size:2.2rem;cursor:pointer;" onclick="openModal(${ci},${ii},'${key}')">${DATA[ci].cat.split(' ')[0]}</div>
+      <div class="modal-img-area card-view-img" id="cthumb-${key}" style="height:110px;font-size:2.2rem;cursor:pointer;" onclick="openModal(${ci},${ii},'${key}')">${item.icon||DATA[ci].cat.split(' ')[0]}</div>
       <div class="card-body">
         <div class="item-name" onclick="openModal(${ci},${ii},'${key}')">${item.name}</div>
         <div class="item-short">${item.short||''}</div>
@@ -2288,7 +2336,7 @@ function buildItemEl(item,ci,ii,key,done,ud,idx){
     // zdjęcie ładowane leniwie przez photoObserver (tylko widoczne karty)
   } else {
     el.innerHTML=`
-      <div class="item-thumb" id="thumb-${key}" onclick="openModal(${ci},${ii},'${key}')" style="cursor:pointer;">${DATA[ci].cat.split(' ')[0]}</div>
+      <div class="item-thumb" id="thumb-${key}" onclick="openModal(${ci},${ii},'${key}')" style="cursor:pointer;">${item.icon||DATA[ci].cat.split(' ')[0]}</div>
       <span class="item-idx">${String(idx).padStart(3,'0')}</span>
       <span class="checkbox" onclick="event.stopPropagation();toggle('${key}',this.closest('.item'))">${done?'✓':''}</span>
       <div class="item-body">
@@ -2320,6 +2368,7 @@ function render(){
   const app=document.getElementById('app');
   app.innerHTML='';
   DATA.forEach((cat,ci)=>{
+    if(!cat.items.length)return; // nie pokazuj pustych kategorii (np. „Moje miejsca" zanim coś dodasz)
     const sec=document.createElement('div'); sec.className='category-section';
     const hdr=document.createElement('div'); hdr.className='category-header';
     const icon=cat.cat.split(' ')[0];
@@ -2765,8 +2814,8 @@ function injectWeatherDot(el,code){
 // LAZY LOADING ZDJĘĆ — tylko widoczne pozycje
 // ═══════════════════════════════════════════════════════
 let photoObserver=null;
+function imgUrlFor(item){ return (item&&item.img) ? Promise.resolve(item.img) : getPhotoUrl(item&&item.pxq); }
 function setupPhotoLazyLoad(){
-  if(!pixabayKey)return;
   if(photoObserver)photoObserver.disconnect();
   photoObserver=new IntersectionObserver(entries=>{
     entries.forEach(en=>{
@@ -2777,9 +2826,10 @@ function setupPhotoLazyLoad(){
       if(!key)return;
       const [ci,ii]=key.split('_').map(Number);
       const item=DATA[ci]?.items[ii];
-      if(!item?.pxq)return;
-      if(el.querySelector('.card-body'))loadCardPhoto(key,item.pxq,ci);
-      else loadThumbPhoto(key,item.pxq);
+      if(!item)return;
+      if(!item.img && (!pixabayKey || !item.pxq))return; // nic do pobrania
+      if(el.querySelector('.card-body'))loadCardPhoto(key,item,ci);
+      else loadThumbPhoto(key,item);
     });
   },{rootMargin:'250px'});
   document.querySelectorAll('.item').forEach(el=>photoObserver.observe(el));
@@ -3787,10 +3837,10 @@ async function getPhotoUrl(pxq){
   }catch(e){return null;}
 }
 
-async function loadThumbPhoto(key,pxq){
+async function loadThumbPhoto(key,item){
   const el=document.getElementById('thumb-'+key);
   if(!el||el.querySelector('img'))return;
-  const url=await getPhotoUrl(pxq);
+  const url=await imgUrlFor(item);
   if(!url)return;
   const icon=el.textContent;
   const img=document.createElement('img');
@@ -3800,10 +3850,10 @@ async function loadThumbPhoto(key,pxq){
   el.innerHTML=''; el.appendChild(img);
 }
 
-async function loadCardPhoto(key,pxq,ci){
+async function loadCardPhoto(key,item,ci){
   const el=document.getElementById('cthumb-'+key);
   if(!el||el.querySelector('img'))return;
-  const url=await getPhotoUrl(pxq);
+  const url=await imgUrlFor(item);
   if(!url)return;
   const icon=el.textContent;
   const img=document.createElement('img');
@@ -3813,9 +3863,9 @@ async function loadCardPhoto(key,pxq,ci){
   el.innerHTML=''; el.appendChild(img);
 }
 
-async function loadModalPhoto(pxq){
+async function loadModalPhoto(item){
   const wrap=document.getElementById('modal-img-area');
-  const url=await getPhotoUrl(pxq);
+  const url=await imgUrlFor(item);
   if(!url||!wrap)return;
   const icon=wrap.textContent;
   const img=document.createElement('img');
@@ -3915,9 +3965,9 @@ window.openModal=function(ci,ii,key){
   document.getElementById('modal-title').textContent=item.name;
   const wrap=document.getElementById('modal-img-area');
   wrap.innerHTML=''; wrap.style.fontSize='3.5rem';
-  const em=document.createElement('span'); em.textContent=DATA[ci].cat.split(' ')[0];
+  const em=document.createElement('span'); em.textContent=item.icon||DATA[ci].cat.split(' ')[0];
   wrap.appendChild(em);
-  if(item.pxq) loadModalPhoto(item.pxq);
+  if(item.img||item.pxq) loadModalPhoto(item);
   const km=distItem(item);
   document.getElementById('modal-badges').innerHTML=`
     <span class="modal-badge" style="background:rgba(232,117,58,.15);color:#8b3500;">${item.woj||''}</span>
@@ -3929,6 +3979,7 @@ window.openModal=function(ci,ii,key){
   btnRow.innerHTML=item.lat
     ?`<a class="modal-nav-btn" href="https://maps.google.com/?q=${item.lat},${item.lng}" target="_blank">🗺️ Google Maps</a>
        <a class="modal-nav-btn" style="background:var(--sky);" href="https://www.openstreetmap.org/?mlat=${item.lat}&mlon=${item.lng}#map=14/${item.lat}/${item.lng}" target="_blank">📍 OSM</a>`:'';
+  if(item.custom){ btnRow.innerHTML += `<button class="modal-nav-btn" style="background:#7a5520;border:none;cursor:pointer;" onclick="openAddPlace('${item.cid}')">✏️ Edytuj</button><button class="modal-nav-btn" style="background:#8b2c2c;border:none;cursor:pointer;" onclick="deleteCustomPlace('${item.cid}')">🗑 Usuń</button>`; }
   document.getElementById('modal-desc').textContent=item.desc||'';
   document.getElementById('modal-gmaps').href=googleMapsLink(item);
   if(item.lat) loadWeather(item.lat,item.lng); else document.getElementById('modal-weather').style.display='none';
@@ -4274,7 +4325,7 @@ function buildNamesForExport(){
 }
 
 function exportData(){
-  const data={version:3,app:APP_ID,owner:'Atrakcje Polski',checked,userData,planner:plannerItems,priorities:[...priorities],names:buildNamesForExport(),exported:new Date().toISOString()};
+  const data={version:3,app:APP_ID,owner:'Atrakcje Polski',checked,userData,planner:plannerItems,priorities:[...priorities],custom:customPlaces,names:buildNamesForExport(),exported:new Date().toISOString()};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download=`atrakcje-polski-${new Date().toISOString().slice(0,10)}.json`;a.click();
@@ -4359,9 +4410,11 @@ function importData(event){
         // ten sam format (Atrakcje Polski) — zastąp jak dotychczas
         checked=data.checked||{};userData=data.userData||{};plannerItems=data.planner||[];
         if(data.priorities){priorities=new Set(data.priorities);savePrio();}
+        if(data.custom){customPlaces=data.custom;saveCustom();loadCustomPlaces();} // przenieś też „Moje miejsca"
         save();saveUDL();savePl();
         hideDataPanel();render();updatePlannerBadge();
-        alert('Dane wczytane pomyślnie!');
+        const extra=(data.custom&&data.custom.length)?`\n• wczytano też ${data.custom.length} Twoich miejsc`:'';
+        alert('Dane wczytane pomyślnie!'+extra);
       }
     }catch(err){alert('Błąd wczytywania: '+err.message);}
     event.target.value='';
@@ -4499,8 +4552,135 @@ async function printJournal(){
 }
 
 // ═══════════════════════════════════════════════════════
+// ⭐ MOJE MIEJSCA — własne punkty użytkownika
+// ═══════════════════════════════════════════════════════
+let customPlaces = JSON.parse(localStorage.getItem('pl-custom') || '[]');
+let apMap=null, apMarker=null, apLat=null, apLng=null, apEditId=null;
+
+function saveCustom(){ localStorage.setItem('pl-custom', JSON.stringify(customPlaces)); }
+
+function wojToRegion(woj){ for(const r in REGION_WOJ){ if(REGION_WOJ[r].includes(woj))return r; } return ''; }
+
+function loadCustomPlaces(){
+  DATA[MOJE_CI].items = customPlaces.map(p=>({
+    name:p.name, icon:p.icon||'📍', woj:p.woj||'', region:wojToRegion(p.woj||''),
+    acts:p.acts||[], short:p.short||'', desc:p.desc||'',
+    km:p.km||0, lat:p.lat||null, lng:p.lng||null, kids:!!p.kids,
+    img:p.img||undefined, pxq:p.pxq||undefined, custom:true, cid:p.id
+  }));
+}
+
+const TYPE_OPTIONS=[
+  {icon:'📍',name:'Moje miejsce'},{icon:'🏰',name:'Zamek / twierdza'},
+  {icon:'🏛️',name:'Muzeum / historia'},{icon:'🕌',name:'Kościół / klasztor'},
+  {icon:'⛰️',name:'Góra / szczyt'},{icon:'🪨',name:'Skały / formacja'},
+  {icon:'⛏️',name:'Podziemia / jaskinia'},{icon:'🏞️',name:'Park / przyroda'},
+  {icon:'🏖️',name:'Woda / plaża'},{icon:'🗼',name:'Wieża widokowa'},
+  {icon:'🌆',name:'Miasto'},{icon:'🎡',name:'Rozrywka / ciekawostka'}
+];
+
+function updateApCoords(){
+  document.getElementById('ap-coords').textContent=(apLat&&apLng)?`📍 ${apLat.toFixed(4)}, ${apLng.toFixed(4)}`:'brak lokalizacji (dotknij mapy)';
+}
+function apSetPoint(lat,lng){
+  apLat=lat; apLng=lng;
+  if(apMap){ if(apMarker)apMarker.setLatLng([lat,lng]); else apMarker=L.marker([lat,lng]).addTo(apMap); }
+  updateApCoords();
+}
+function initApMap(){
+  if(!window.L)return;
+  const c=(apLat&&apLng)?[apLat,apLng]:[WROCLAW.lat,WROCLAW.lng];
+  if(!apMap){
+    apMap=L.map('ap-map',{center:c,zoom:apLat?12:7});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(apMap);
+    apMap.on('click',e=>apSetPoint(e.latlng.lat,e.latlng.lng));
+  } else { apMap.setView(c,apLat?12:7); }
+  if(apMarker){apMap.removeLayer(apMarker);apMarker=null;}
+  if(apLat&&apLng)apMarker=L.marker([apLat,apLng]).addTo(apMap);
+  setTimeout(()=>apMap.invalidateSize(),120);
+}
+window.openAddPlace=function(id){
+  if(window.closeModal)closeModal();
+  apEditId=(typeof id==='string')?id:null;
+  const typeSel=document.getElementById('ap-type');
+  typeSel.innerHTML=TYPE_OPTIONS.map(t=>`<option value="${t.icon}">${t.icon} ${t.name}</option>`).join('');
+  const wojSel=document.getElementById('ap-woj');
+  wojSel.innerHTML='<option value="">— nie określono —</option>'+Object.keys(WOJ_NAMES).map(w=>`<option value="${w}">${WOJ_NAMES[w]}</option>`).join('');
+  const p=apEditId?customPlaces.find(x=>x.id===apEditId):null;
+  document.getElementById('ap-title').textContent=p?'✏️ Edytuj miejsce':'➕ Dodaj miejsce';
+  document.getElementById('ap-name').value=p?p.name:'';
+  typeSel.value=p?(p.icon||'📍'):'📍';
+  wojSel.value=p?(p.woj||''):'';
+  document.getElementById('ap-short').value=p?(p.short||''):'';
+  document.getElementById('ap-desc').value=p?(p.desc||''):'';
+  document.getElementById('ap-photo').value=p?(p.img||p.pxq||''):'';
+  document.getElementById('ap-acts').value=p?((p.acts||[]).join(', ')):'';
+  document.getElementById('ap-kids').checked=p?!!p.kids:false;
+  apLat=p?p.lat:null; apLng=p?p.lng:null;
+  updateApCoords();
+  document.getElementById('ap-overlay').classList.add('open');
+  setTimeout(initApMap,260);
+};
+window.closeAddPlace=function(){ document.getElementById('ap-overlay').classList.remove('open'); };
+window.apUseMyLocation=function(){
+  if(!navigator.geolocation){showMiniToast('Brak dostępu do lokalizacji');return;}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    apSetPoint(pos.coords.latitude,pos.coords.longitude);
+    if(apMap)apMap.setView([apLat,apLng],13);
+  },()=>showMiniToast('Nie udało się pobrać lokalizacji'));
+};
+window.submitCustomPlace=function(){
+  const name=document.getElementById('ap-name').value.trim();
+  if(!name){showMiniToast('Podaj nazwę miejsca');return;}
+  const photo=document.getElementById('ap-photo').value.trim();
+  const isUrl=/^https?:\/\//i.test(photo);
+  const base={
+    name, icon:document.getElementById('ap-type').value||'⭐',
+    woj:document.getElementById('ap-woj').value||'',
+    short:document.getElementById('ap-short').value.trim(),
+    desc:document.getElementById('ap-desc').value.trim(),
+    acts:document.getElementById('ap-acts').value.split(',').map(s=>s.trim()).filter(Boolean),
+    kids:document.getElementById('ap-kids').checked,
+    lat:apLat||null, lng:apLng||null,
+    img:isUrl?photo:undefined, pxq:(!isUrl&&photo)?photo:undefined
+  };
+  if(apEditId){
+    const i=customPlaces.findIndex(x=>x.id===apEditId);
+    if(i>=0)customPlaces[i]={...customPlaces[i],...base};
+  } else {
+    base.id='c'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+    customPlaces.push(base);
+  }
+  saveCustom(); loadCustomPlaces(); closeAddPlace();
+  if(typeof checkBadges==='function')checkBadges();
+  render(); if(leafletMap)updateMapMarkers();
+  showMiniToast(apEditId?'✓ Zapisano zmiany':'✓ Dodano miejsce');
+};
+function remapMojeKeys(oldIds,newIds){
+  const oc={},ou={};
+  oldIds.forEach((id,oi)=>{const k=MOJE_CI+'_'+oi;
+    if(checked[k]!==undefined)oc[id]=checked[k];
+    if(userData[k]!==undefined)ou[id]=userData[k];
+    delete checked[k]; delete userData[k];});
+  newIds.forEach((id,ni)=>{const k=MOJE_CI+'_'+ni;
+    if(oc[id]!==undefined)checked[k]=oc[id];
+    if(ou[id]!==undefined)userData[k]=ou[id];});
+}
+window.deleteCustomPlace=function(cid){
+  if(!confirm('Usunąć to miejsce?'))return;
+  const oldIds=customPlaces.map(p=>p.id);
+  customPlaces=customPlaces.filter(x=>x.id!==cid);
+  remapMojeKeys(oldIds,customPlaces.map(p=>p.id));
+  saveCustom(); loadCustomPlaces(); save(); saveUDL();
+  if(window.closeModal)closeModal();
+  render(); if(leafletMap)updateMapMarkers();
+  showMiniToast('🗑 Usunięto miejsce');
+};
+
+// ═══════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════
+loadCustomPlaces();
 render();
 updatePlannerBadge();
 initWeekendDate();

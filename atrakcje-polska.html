@@ -76,7 +76,8 @@ body.dark #dark-toggle{background:rgba(255,255,255,.13);}
 .controls-row-btns{display:flex;gap:.3rem;flex-wrap:wrap;align-items:center;}
 .search-row{margin-top:0;}
 @media(max-width:640px){
-  .controls-row-btns{gap:.22rem;}
+  .controls-row-btns{gap:.22rem;flex-wrap:nowrap;}
+  .controls-row-btns button{flex:1;min-width:0;padding-left:0;padding-right:0;}
   .btn-label{display:none;}
   .controls-row.search-row{flex-wrap:nowrap;}
   .search-row select{min-width:0;flex-shrink:1;max-width:34vw;}

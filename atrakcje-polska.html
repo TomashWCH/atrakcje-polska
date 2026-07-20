@@ -916,6 +916,16 @@ function getKey(ci,ii){
   if(it&&it.id)return it.id;     // pozycja z katalogu — stały id zaszyty w danych
   return `${ci}_${ii}`;          // awaryjnie (nie powinno wystąpić)
 }
+// ═══ Indeks klucz → {ci,ii,item} — jedyne miejsce, które "wie" jak klucz odpowiada pozycji w DATA.
+// Zastępuje niebezpieczne odgadywanie ci/ii przez rozbicie stringa klucza (działało tylko,
+// gdy każdy klucz miał kształt "ci_ii" — własne miejsca mają teraz klucz w innym formacie).
+let KEY_INDEX={};
+function buildKeyIndex(){
+  KEY_INDEX={};
+  DATA.forEach((cat,ci)=>cat.items.forEach((item,ii)=>{KEY_INDEX[getKey(ci,ii)]={ci,ii,item};}));
+}
+function keyToItem(key){return KEY_INDEX[key]?.item;}
+function keyToPos(key){const e=KEY_INDEX[key];return e?[e.ci,e.ii]:[NaN,NaN];}
 function save()   {if(!guestMode)localStorage.setItem('pl-checked',JSON.stringify(checked));}
 function saveUDL(){if(!guestMode)localStorage.setItem('pl-userdata',JSON.stringify(userData));}
 function savePl() {localStorage.setItem('pl-planner',JSON.stringify(plannerItems));}
@@ -995,7 +1005,7 @@ function applyFilters(){
   let any=false;
   document.querySelectorAll('.item').forEach(el=>{
     const k=el.dataset.key;
-    const [ci,ii]=k.split('_').map(Number);
+    const [ci,ii]=keyToPos(k);
     const item=DATA[ci].items[ii];
     const done=!!checked[k];
     const pf=currentFilter==='all'||(currentFilter==='done'&&done)||(currentFilter==='todo'&&!done);
@@ -1199,7 +1209,7 @@ function toggle(key,el){
     if(navigator.vibrate)navigator.vibrate(20);
   }
 
-  updateCatProgress(parseInt(key.split('_')[0]));
+  updateCatProgress(keyToPos(key)[0]);
   updateStats();
   checkBadges();
   if(currentFilter!=='all')applyFilters();
@@ -1516,7 +1526,7 @@ function loadWeatherDots(){
       const el=entry.target;
       const key=el.dataset.key;
       if(!key)return;
-      const [ci,ii]=key.split('_').map(Number);
+      const [ci,ii]=keyToPos(key);
       const item=DATA[ci]?.items[ii];
       if(!item?.lat)return;
       weatherDotObserver.unobserve(el);
@@ -1558,7 +1568,7 @@ function setupPhotoLazyLoad(){
       photoObserver.unobserve(el);
       const key=el.dataset.key;
       if(!key)return;
-      const [ci,ii]=key.split('_').map(Number);
+      const [ci,ii]=keyToPos(key);
       const item=DATA[ci]?.items[ii];
       if(!item)return;
       if(!item.img && (!pixabayKey || !item.pxq))return; // nic do pobrania
@@ -2686,7 +2696,7 @@ function renderNearby(){
     pool.sort((a,b)=>a.d-b.d);
     pool=pool.slice(0,8);
   } else {
-    const stops=plannerItems.map(k=>{const [ci,ii]=k.split('_').map(Number);return DATA[ci]?.items[ii];}).filter(it=>it?.lat);
+    const stops=plannerItems.map(k=>keyToItem(k)).filter(it=>it?.lat);
     if(!stops.length){el.innerHTML='<div style="font-size:.72rem;color:var(--muted);">Brak atrakcji w planerze</div>';return;}
     DATA.forEach((cat,ci)=>cat.items.forEach((it,ii)=>{
       if(ci===currentModalCi&&ii===currentModalIi)return;
@@ -2761,7 +2771,7 @@ window.closeModalOverlay=function(e){if(e.target===document.getElementById('moda
 
 window.clearProgress=function(key){
   if(!confirm('Usunąć zaliczenie, notatkę, zdjęcia i ocenę tego miejsca?\n(przydatne, jeśli błędnie zaimportowały się tu dane innego miejsca)'))return;
-  const [ci]=key.split('_').map(Number);
+  const [ci]=keyToPos(key);
   delete checked[key];
   delete userData[key];
   save(); saveUDL();
@@ -2849,7 +2859,6 @@ function updatePlannerBadge(){
   b.style.display=plannerItems.length>0?'block':'none';
 }
 
-function keyToItem(key){const [ci,ii]=key.split('_').map(Number);return DATA[ci]?.items[ii];}
 
 function solveTSP(stops){
   if(stops.length<=1)return{order:[0]};
@@ -2870,7 +2879,7 @@ function solveTSP(stops){
 function renderPlanner(){
   const el=document.getElementById('planner-content');
   if(!plannerItems.length){el.innerHTML='<div class="planner-hint">Brak atrakcji. Dodaj przez „+ Plan" na liście.</div>';return;}
-  const stops=plannerItems.map(key=>{const[ci,ii]=key.split('_').map(Number);return{key,ci,ii,item:keyToItem(key)};}).filter(s=>s.item?.lat);
+  const stops=plannerItems.map(key=>{const[ci,ii]=keyToPos(key);return{key,ci,ii,item:keyToItem(key)};}).filter(s=>s.item?.lat);
   if(!stops.length){el.innerHTML='<div class="planner-hint">Atrakcje bez GPS — brak trasy.</div>';return;}
   const{order}=solveTSP(stops);
   const ord=order.map(i=>stops[i]);
@@ -3398,7 +3407,7 @@ function loadCustomList(listKey){
     img:p.img||undefined, pxq:p.pxq||undefined, custom:true, cid:p.id, listType:listKey
   }));
 }
-function loadCustomPlaces(){ loadCustomList('moje'); loadCustomList('wakacje'); }
+function loadCustomPlaces(){ loadCustomList('moje'); loadCustomList('wakacje'); buildKeyIndex(); }
 
 const TYPE_OPTIONS=[
   {icon:'📍',name:'Moje miejsce'},{icon:'🏰',name:'Zamek / twierdza'},
